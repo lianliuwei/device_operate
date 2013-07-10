@@ -1,0 +1,24 @@
+.svn/
+*.pyc
+.gclient_entries
+#generation folder
+/build/Debug/
+/build/Release/
+/build/osd/
+#visual studio files
+*.user
+*.vcproj
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.ncb
+*.aps
+*.suo
+*.log
+*.opensdf
+*.sdf
+*.filters
+/tools/gyp/
+third_party/chromium/testing/gmock
+third_party/chromium/testing/gtest
+third_party/chromium/
