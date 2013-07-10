@@ -1,0 +1,8 @@
+third_party/chromium/
+chromium_base_bin@d0eefee948605f53e854fd0f31e528d3bf887ec4
+branch pure
+
+build/
+chromium_base_bin@d0eefee948605f53e854fd0f31e528d3bf887ec4
+branch pure
+subdir build/
