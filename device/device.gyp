@@ -37,6 +37,9 @@
       'sources': [
         'bool_bind.h',
         'bool_bind_unittest.cc',
+        'register_memory.h',
+        'register_memory.cc',
+        'register_memory_unittest.cc',
       ],
       'include_dirs': [
         '..',
