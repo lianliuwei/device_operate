@@ -5,7 +5,7 @@
   'targets': [
     {
       'target_name': 'device',
-      'type': 'executable',
+      'type': 'static_library',
       'variables': {
         'mfc_target': 1,
       },
@@ -18,6 +18,7 @@
       ], 
       'sources': [
         'bool_bind.h',
+        'uint8_bind.h',
         'canscope_device.h',
         'canscope_device_constants.h',
         'canscope_osc_device.h',
@@ -37,6 +38,8 @@
       'sources': [
         'bool_bind.h',
         'bool_bind_unittest.cc',
+        'uint8_bind.h',
+        'uint8_bind_unittest.cc',
         'register_memory.h',
         'register_memory.cc',
         'register_memory_unittest.cc',
