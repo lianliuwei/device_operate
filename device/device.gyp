@@ -20,7 +20,6 @@
         'bool_bind.h',
         'uint8_bind.h',
         'canscope_device.h',
-        'canscope_device_constants.h',
         'canscope_osc_device.h',
         'canscope_osc_device2.h',
         'device_errors.h',
