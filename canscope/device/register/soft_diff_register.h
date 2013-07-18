@@ -1,0 +1,22 @@
+#pragma once
+
+#include "device/bool_bind.h"
+#include "device/register_memory.h"
+
+class SoftDiffRegister {
+public:
+  device::RegisterMemory memory;
+
+  Uint8Bind ch_sens_canh;
+  Uint8Bind ch_sens_canl;
+  Uint8Bind ch_sens_candiff;
+
+  Uint16SplitBind ch_zero_canh;
+  Uint16SplitBind ch_zero_canl;
+  Uint16SplitBind ch_zero_candiff;
+
+  BoolBind diff_ctrl;
+
+  SoftDiffRegister();
+  ~SoftDiffRegister();
+};
