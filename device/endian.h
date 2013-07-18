@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef NET_BASE_BIG_ENDIAN_H_
-#define NET_BASE_BIG_ENDIAN_H_
+#pragma once
 
 #include "base/basictypes.h"
 
@@ -73,6 +72,3 @@ template<>
 inline void WriteLittleEndian<uint8>(char buf[], uint8 val) {
   buf[0] = static_cast<char>(val);
 }
-
-#endif  // NET_BASE_BIG_ENDIAN_H_
-

@@ -6,3 +6,5 @@ build/
 chromium_base_bin@d0eefee948605f53e854fd0f31e528d3bf887ec4
 branch pure
 subdir build/
+
+device/endian.h copy change from chromium net/base/big_endian.h
