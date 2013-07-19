@@ -19,6 +19,7 @@
       'sources': [
         'bool_bind.h',
         'uint8_bind.h',
+        'uint16_split_bind.h',
         'canscope_device.h',
         'canscope_osc_device.h',
         'canscope_osc_device2.h',
@@ -39,6 +40,9 @@
         'bool_bind_unittest.cc',
         'uint8_bind.h',
         'uint8_bind_unittest.cc',
+        'uint16_split_bind.h',
+        'uint16_split_bind.cc',
+        'uint16_split_bind_unittest.cc',
         'register_memory.h',
         'register_memory.cc',
         'register_memory_unittest.cc',
