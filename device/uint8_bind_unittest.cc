@@ -1,7 +1,9 @@
+#include <vector>
+
+#include "testing/gtest/include/gtest/gtest.h"
+
 #include "device/uint8_bind.h"
 
-#include <vector>
-#include "testing/gtest/include/gtest/gtest.h"
 
 using namespace std;
 

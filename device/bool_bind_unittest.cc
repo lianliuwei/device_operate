@@ -1,6 +1,6 @@
-#include "device/bool_bind.h"
-
 #include "testing/gtest/include/gtest/gtest.h"
+
+#include "device/bool_bind.h"
 
 TEST(BoolBindTest, TestBoolBind0) {
   uint8 memory = 0x0;
