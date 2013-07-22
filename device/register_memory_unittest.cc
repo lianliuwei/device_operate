@@ -1,6 +1,6 @@
-#include "device/register_memory.h"
-
 #include "testing/gtest/include/gtest/gtest.h"
+
+#include "device/register_memory.h"
 
 using namespace device;
 
