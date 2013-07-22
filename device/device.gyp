@@ -20,6 +20,7 @@
         'bool_bind.h',
         'uint8_bind.h',
         'uint16_split_bind.h',
+        'uint16_split_bind.cc',
         'canscope_device.h',
         'canscope_osc_device.h',
         'canscope_osc_device2.h',
@@ -36,15 +37,9 @@
       'target_name': 'device_unittests',
       'type': '<(gtest_target_type)',
       'sources': [
-        'bool_bind.h',
         'bool_bind_unittest.cc',
-        'uint8_bind.h',
         'uint8_bind_unittest.cc',
-        'uint16_split_bind.h',
-        'uint16_split_bind.cc',
         'uint16_split_bind_unittest.cc',
-        'register_memory.h',
-        'register_memory.cc',
         'register_memory_unittest.cc',
       ],
       'include_dirs': [
@@ -62,6 +57,7 @@
         '../third_party/chromium/testing/gtest.gyp:gtest',
         '../third_party/chromium/third_party/icu_bin.gyp:icui18n_bin',
         '../third_party/chromium/third_party/icu_bin.gyp:icuuc_bin',
+        'device'
       ],
     },
   ],
