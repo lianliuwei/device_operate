@@ -35,7 +35,7 @@ static const uint32 kTrigPreOffset = 0x0;
 static const uint32 kTrigPostOffset = 0x4;
 static const uint32 kAutoTimeOffset = 0x8;
 static const uint32 kSdivCoeOffset = 0xC;
-static const int kTrigger2Size = kSdivCoeOffset + 0x4;
+static const int kTrigger1Size = kSdivCoeOffset + 0x4;
 // trigger state
 static const uint32 kTriggerStateAddr = kBaseAddr + 0x190;
 static const uint32 kTrigStateOffset = 0x0;
@@ -49,7 +49,7 @@ static const uint32 kTrigSourceOffset = 0x0;
 static const uint32 kCmpVolOffset = 0x4;
 static const uint32 kTrigTypeOffset = 0x8;
 static const uint32 kTrigTimeOffset = 0xC;
-static const int kTrigger2Addr = kTrigTimeOffset + 0x4;
+static const int kTrigger2Size = kTrigTimeOffset + 0x4;
 // scope ctrl register
 static const uint32 kScopeCtrlAddr = kBaseAddr + 0x210;
 static const uint32 kScopeCtrlOffset = 0x0;
