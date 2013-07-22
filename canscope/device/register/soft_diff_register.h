@@ -1,8 +1,11 @@
 #pragma once
 
 #include "device/bool_bind.h"
+#include "device/uint8_bind.h"
+#include "device/uint16_split_bind.h"
 #include "device/register_memory.h"
 
+namespace canscope {
 class SoftDiffRegister {
 public:
   device::RegisterMemory memory;
@@ -18,5 +21,10 @@ public:
   BoolBind diff_ctrl;
 
   SoftDiffRegister();
-  ~SoftDiffRegister();
+  ~SoftDiffRegister() {}
+
+private:
+  DISALLOW_COPY_AND_ASSIGN(SoftDiffRegister);
 };
+
+} // namespace canscope
