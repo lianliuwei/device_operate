@@ -18,7 +18,8 @@
       ], 
       'sources': [
         'bool_bind.h',
-        'uint8_bind.h',
+        'one_byte_type_bind.h',
+        'simple_type_bind.h',
         'uint16_split_bind.h',
         'uint16_split_bind.cc',
         'canscope_device.h',
@@ -31,6 +32,7 @@
         'register_memory.h',
         'register_memory.cc',
         'register_property.h',
+        'simple_type_bind.h',
       ], 
     },
     {
@@ -41,6 +43,7 @@
         'uint8_bind_unittest.cc',
         'uint16_split_bind_unittest.cc',
         'register_memory_unittest.cc',
+        'simple_type_bind_unittest.cc',
       ],
       'include_dirs': [
         '..',
@@ -57,7 +60,7 @@
         '../third_party/chromium/testing/gtest.gyp:gtest',
         '../third_party/chromium/third_party/icu_bin.gyp:icui18n_bin',
         '../third_party/chromium/third_party/icu_bin.gyp:icuuc_bin',
-        'device'
+        'device',
       ],
     },
   ],

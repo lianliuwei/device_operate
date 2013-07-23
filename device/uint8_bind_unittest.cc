@@ -2,7 +2,7 @@
 
 #include "testing/gtest/include/gtest/gtest.h"
 
-#include "device/uint8_bind.h"
+#include "device/one_byte_type_bind.h"
 
 
 using namespace std;

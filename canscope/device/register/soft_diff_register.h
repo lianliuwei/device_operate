@@ -1,7 +1,7 @@
 #pragma once
 
 #include "device/bool_bind.h"
-#include "device/uint8_bind.h"
+#include "device/simple_type_bind.h"
 #include "device/uint16_split_bind.h"
 #include "device/register_memory.h"
 
