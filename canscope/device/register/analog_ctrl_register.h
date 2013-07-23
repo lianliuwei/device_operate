@@ -15,7 +15,7 @@ public:
   Uint32Bind can_h_offset;
 
   AnalogCtrlRegister();
-  ~AnalogCtrlRegister();
+  ~AnalogCtrlRegister() {}
 
 private:
   DISALLOW_COPY_AND_ASSIGN(AnalogCtrlRegister);
