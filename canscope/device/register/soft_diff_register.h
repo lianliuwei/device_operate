@@ -17,7 +17,8 @@ public:
   Uint16SplitBind ch_zero_canh;
   Uint16SplitBind ch_zero_canl;
   Uint16SplitBind ch_zero_candiff;
-
+  
+  Uint8Bind filtering;
   BoolBind diff_ctrl;
 
   SoftDiffRegister();

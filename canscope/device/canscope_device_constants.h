@@ -14,6 +14,7 @@ static const uint32 kChZerolCanhOffset = 0xC;
 static const uint32 kChZerolCanlOffset = 0xD;
 static const uint32 kChZerolCandiffOffset = 0xE;
 static const uint32 kDiffCtrlOffset = 0x10;
+static const uint32 kFilteringOffset = 0x14;
 static const uint32 kChZerohCanhOffset = 0x18;
 static const uint32 kChZerohCanlOffset = 0x19;
 static const uint32 kChZerohCandiffOffset = 0x1A;

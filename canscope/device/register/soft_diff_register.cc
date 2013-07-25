@@ -19,7 +19,8 @@ SoftDiffRegister::SoftDiffRegister()
     , ch_zero_candiff(memory.PtrByRelative(0), 
           static_cast<int>(kChZerolCandiffOffset), 
           static_cast<int>(kChZerohCandiffOffset), false)
-    , diff_ctrl(memory.PtrByRelative(kDiffCtrlOffset), 0, true) {
+    , diff_ctrl(memory.PtrByRelative(kDiffCtrlOffset), 0, true)
+    , filtering(memory.PtrByRelative(kFilteringOffset)) {
 
 }
 

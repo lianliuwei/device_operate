@@ -18,7 +18,9 @@ TEST(SoftDiffRegisterTest, SetContentAndCheckProperty) {
          0x6, // CAN-DIFF zero l
          0, // reserve
          1, // diff-ctrl
-         2, 3, 4, 5, 6, 7, 8,// reserve
+         2, 3, 4,  // reserve
+         5, // filtering
+         6, 7, 8,// reserve
          0x1, // CAN-H zero h
          0x3, // CAN-L zero h
          0x5, // CAN-DIFF zero h
@@ -35,5 +37,6 @@ TEST(SoftDiffRegisterTest, SetContentAndCheckProperty) {
   EXPECT_EQ(0x0304, soft_diff.ch_zero_canl.value());
   EXPECT_EQ(0x0506, soft_diff.ch_zero_candiff.value());
   EXPECT_EQ(true, soft_diff.diff_ctrl.value());
+  EXPECT_EQ(5, soft_diff.filtering.value());
 
 }
