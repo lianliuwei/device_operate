@@ -35,8 +35,8 @@ static const uint32 kTrigger1Addr = kBaseAddr + 0x180;
 static const uint32 kTrigPreOffset = 0x0;
 static const uint32 kTrigPostOffset = 0x4;
 static const uint32 kAutoTimeOffset = 0x8;
-static const uint32 kSdivCoeOffset = 0xC;
-static const int kTrigger1Size = kSdivCoeOffset + 0x4;
+static const uint32 kDivCoeOffset = 0xC;
+static const int kTrigger1Size = kDivCoeOffset + 0x4;
 // trigger state
 static const uint32 kTriggerStateAddr = kBaseAddr + 0x190;
 static const uint32 kTrigStateOffset = 0x0;

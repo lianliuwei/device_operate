@@ -8,10 +8,10 @@ class Trigger1Register {
 public:
   device::RegisterMemory memory;
 
-  Uint32Bind TrigPre;
-  Uint32Bind TrigPost;
-  Uint32Bind AutoTime;
-  Uint32Bind SdivCoe;
+  Uint32Bind trig_pre;
+  Uint32Bind trig_post;
+  Uint32Bind auto_time;
+  Uint32Bind div_coe;
 
   Trigger1Register();
   ~Trigger1Register() {}

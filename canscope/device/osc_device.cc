@@ -183,19 +183,19 @@ void OscDevice::SetAnalogSwitch(Chnl chnl) {
 }
 
 void OscDevice::SetTrigger1(DeviceType device_type) {
-  trigger1_.SdivCoe.set_value(kCOE[time_base]);
+  trigger1_.div_coe.set_value(kCOE[time_base]);
   uint32 base_value = kTimeBaseValue[time_base];
-  uint32 samet = SAMET(trigger1_.SdivCoe.value());
+  uint32 samet = SAMET(trigger1_.div_coe.value());
   uint32 temp;
   uint32 k = DeviceK(device_type);
   temp = static_cast<uint32>(((time_base*5*k + time_offset) /samet) * 2);
   temp &= 0xFFFFFFFC; // div by 4
-  trigger1_.TrigPre.set_value(temp);
+  trigger1_.trig_pre.set_value(temp);
   temp = std::max(8U, 
       static_cast<uint32>(((time_base*5*k - time_offset)/samet) * 2));
   temp &= 0xFFFFFFFC; // div by 4
-  trigger1_.TrigPost.set_value(temp);
-  trigger1_.AutoTime.set_value(static_cast<uint32>(auto_time * 1000000 / 10));
+  trigger1_.trig_post.set_value(temp);
+  trigger1_.auto_time.set_value(static_cast<uint32>(auto_time * 1000000 / 10));
 }
 
 void OscDevice::SetTrigger2() {
