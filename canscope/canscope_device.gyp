@@ -23,6 +23,13 @@
         'device/register/soft_diff_register.cc',
         'device/register/analog_ctrl_register.h',
         'device/register/analog_ctrl_register.cc',
+        'device/register/analog_switch_register.h',
+        'device/register/trigger1_register.h',
+        'device/register/trigger_state_register.h',
+        'device/register/trigger2_register.h',
+        'device/register/eye_register.h',
+        'device/osc_device.h',
+        'device/osc_device.cc',
       ], 
     },
     {
