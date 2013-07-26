@@ -30,6 +30,8 @@
         'device/register/eye_register.h',
         'device/osc_device.h',
         'device/osc_device.cc',
+        'device/osc_device_handle.h',
+        'device/osc_device_handle.cc',
       ], 
     },
     {
@@ -43,6 +45,9 @@
         'device/register/analog_ctrl_register.h',
         'device/register/analog_ctrl_register.cc',
         'device/register/analog_ctrl_register_unittest.cc',
+        'device/register/analog_switch_register.h',
+        'device/register/analog_switch_register.cc',
+        'device/register/analog_switch_register_unittest.cc',
         
       ],
       'include_dirs': [
