@@ -30,6 +30,7 @@
         'device/register/trigger2_register.h',
         'device/register/trigger2_register.cc',
         'device/register/trigger_state_register.h',
+        'device/register/trigger_state_register.cc',
         'device/register/eye_register.h',
         'device/osc_device.h',
         'device/osc_device.cc',
@@ -57,7 +58,9 @@
         'device/register/trigger2_register.h',
         'device/register/trigger2_register.cc',
         'device/register/trigger2_register_unittest.cc',
-        
+        'device/register/trigger_state_register.h',
+        'device/register/trigger_state_register.cc',
+        'device/register/trigger_state_register_unittest.cc',
       ],
       'include_dirs': [
         '..',
