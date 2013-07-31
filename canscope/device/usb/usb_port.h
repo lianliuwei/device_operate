@@ -45,8 +45,6 @@ public:
 
   bool WriteI2C(uint8 addr, uint32* buffer, int size);
 
-  bool WriteI2C();
-
 private:
   enum Port {
     kPort1,

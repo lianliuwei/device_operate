@@ -27,11 +27,11 @@ int CmdToPipeIndex(uint32 cmd) {
 }
 
 int WriteHandleIndex(int port) {
-   return (port - 1) * 2 + 1;
+   return port * 2 + 1;
 }
 
 int ReadHandleIndex(int port) {
-  return (port - 1) * 2;
+  return port * 2;
 }
 
 bool UsbModel2Memory(UsbMode mode) {
@@ -40,9 +40,7 @@ bool UsbModel2Memory(UsbMode mode) {
 
 }
 
-namespace canscope {
-
-  
+namespace canscope {  
 bool EnumDevices(std::vector<string16>* devices) {
   DCHECK(devices);
 
@@ -54,7 +52,7 @@ bool EnumDevices(std::vector<string16>* devices) {
   for(int i = 0;  i< kMaxDevice; ++i) {
     if (!SetupDiEnumDeviceInterfaces(hardwareDeviceInfo, NULL, 
             &GUID_CLASS_CANSCOPE, i, &infData)) {
-        return false;
+        return GetLastError() == ERROR_NO_MORE_ITEMS;
     }
     DWORD len;
     if(!SetupDiGetDeviceInterfaceDetail(hardwareDeviceInfo, 
@@ -85,6 +83,10 @@ UsbPort::UsbPort() {
   for (int i = 0; i < arraysize(pipes); ++i) {
     pipes[i] = INVALID_HANDLE_VALUE;
   }
+}
+
+UsbPort::~UsbPort() {
+  CloseDevice();
 }
 
 bool UsbPort::GetDeviceInfo(uint8* buffer, int size) {
@@ -149,7 +151,7 @@ bool UsbPort::DownloadFPGA(uint8* buffer, int size) {
 bool UsbPort::OpenDevice(string16 device_name) {
   for (int i = 0; i < arraysize(pipes); ++i) {
     string16 file_path = 
-        StringPrintf(_T("%s\\PIPE%02d"), device_name.c_str(), i);
+        StringPrintf(_T("%ls\\PIPE%02d"), device_name.c_str(), i);
     HANDLE temp = CreateFile(file_path.c_str(),
                       GENERIC_WRITE | GENERIC_READ,
                       0,
@@ -158,11 +160,10 @@ bool UsbPort::OpenDevice(string16 device_name) {
                       FILE_FLAG_OVERLAPPED,
                       NULL);
     if (temp == INVALID_HANDLE_VALUE) {
-      bool ret = CloseDevice();
-      CHECK(ret);
       // TODO find out this state is, see CANScope BaseCommCmd.cpp
       return i >= 3;
     }
+    pipes[i] = temp;
   }
   return true;
 }
@@ -229,8 +230,7 @@ bool UsbPort::WritePort(Port port, int* written, uint8* buffer, int size) {
   *written = 0;
   BOOL result = TRUE;
   DWORD written_unsigned;
-  if (!::WriteFile(port_handle, buffer, size, &written_unsigned, &os))
-  {
+  if (!::WriteFile(port_handle, buffer, size, &written_unsigned, &os)) {
     DWORD dwErrCode = GetLastError();
     if (dwErrCode == ERROR_IO_PENDING) {	
       switch(WaitForSingleObject(os.hEvent, kTimeout)) {
@@ -248,8 +248,7 @@ bool UsbPort::WritePort(Port port, int* written, uint8* buffer, int size) {
         result=FALSE;
         break;
       };
-    }
-    else {
+    } else {
       // TODO add logging
       result = FALSE;
     }
@@ -283,7 +282,7 @@ bool UsbPort::SendCmd() {
   }
   rsp_buffer.reset();
   if (!ReadPort(kPort1, &size, rsp_buffer.memory.buffer(), rsp_buffer.size()) ||
-      size != rsp_buffer.size()) {
+      size <= 0) {
     return false;
   }
   return cmd_buffer.cmd_id.value() == rsp_buffer.cmd_id.value();
