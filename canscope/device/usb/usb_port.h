@@ -26,9 +26,9 @@ public:
   bool CloseDevice();
 
   // command
-  bool GetDeviceInfo(uint32* buffer, int size);
+  bool GetDeviceInfo(uint8* buffer, int size);
 
-  bool DownloadFPGA(uint32* buffer, int size);
+  bool DownloadFPGA(uint8* buffer, int size);
 
   bool ReadEP1(uint32 addr, UsbMode mode, uint8* buffer, int size);
 
@@ -61,6 +61,7 @@ private:
   // raw operate
   bool ReadPort(Port port, int* readed, uint8* buffer, int size);
   bool WritePort(Port port, int* written, uint8* buffer, int size);
+  bool WritePort2Raw(uint8* buffer, int size);
 
   UsbCommand cmd_buffer;
   UsbCommand rsp_buffer;

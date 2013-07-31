@@ -87,7 +87,7 @@ UsbPort::UsbPort() {
   }
 }
 
-bool UsbPort::GetDeviceInfo(uint32* buffer, int size) {
+bool UsbPort::GetDeviceInfo(uint8* buffer, int size) {
   DCHECK(size == kDeviceInfoSize);
   SetCmd(SSTQ, 0, kUsbModelNormal, NULL, 0);
   if (!SendCmd()) {
@@ -95,6 +95,55 @@ bool UsbPort::GetDeviceInfo(uint32* buffer, int size) {
   }
   memcpy(buffer, rsp_buffer.memory.buffer(), size);
   return true;
+}
+
+bool UsbPort::WritePort2Raw(uint8* buffer, int size) {
+  
+  int write_num = 0;
+  while (true) {
+    int need_write = (size - write_num) > DATA_MAX_LEN ?
+        DATA_MAX_LEN : (size - write_num);
+    int current_write;
+    if (need_write%4) {
+      // align to 4
+      int len = (need_write/4 + 1) * 4;
+      scoped_ptr<uint8[]> temp_buffer(new uint8[len]);
+      memset(temp_buffer.get(), 0x00, len);
+      memcpy(temp_buffer.get(), buffer + write_num, need_write);
+      if (!WritePort(kPort2, &current_write, temp_buffer.get(), len)) {
+        return false;
+      }
+    } else {
+      if (!WritePort(kPort2, &current_write, buffer + write_num, need_write)) {
+        return false;
+      }
+    }
+    if (current_write != need_write) {
+      return false;
+    }
+    write_num += current_write;
+    if (write_num == current_write)
+      break;
+    CHECK(write_num <= current_write);
+  }
+  int read_size = 0;
+  rsp_buffer.reset();
+  if (!ReadPort(kPort1, &read_size, rsp_buffer.memory.buffer(), rsp_buffer.size()) ||
+      size != rsp_buffer.size()) {
+    return false;
+  }
+  return rsp_buffer.cmd_id.value() == WRITE_SUCCESS;
+
+}
+
+bool UsbPort::DownloadFPGA(uint8* buffer, int size) {
+  DCHECK(buffer);
+  DCHECK(size > 0);
+  SetCmd(DOWNLOAD_FPGA, 0, kUsbModelNormal, NULL, size);
+  if (!SendCmd())
+    return false;
+  
+  return WritePort2Raw(buffer, size);
 }
 
 bool UsbPort::OpenDevice(string16 device_name) {
@@ -259,6 +308,7 @@ bool UsbPort::WriteEP1(uint32 addr, UsbMode mode, uint8* buffer, int size) {
 }
 
 bool UsbPort::ReadEP2(uint32 addr, UsbMode mode, uint8* buffer, int size) {
+  DCHECK(size%4 == 0); // TODO check read write EP2 need align to 4
   DCHECK(buffer);
   DCHECK(size > 0);
   SetCmd(RDEP2, addr, mode, NULL, size);
@@ -285,35 +335,14 @@ bool UsbPort::ReadEP2(uint32 addr, UsbMode mode, uint8* buffer, int size) {
 }
 
 bool UsbPort::WriteEP2(uint32 addr, UsbMode mode, uint8* buffer, int size) {
+  DCHECK(size%4 == 0); // TODO check read write EP2 need align to 4
   DCHECK(buffer);
   DCHECK(size > 0);
   SetCmd(WREP2, addr, mode, NULL, size);
   if (!SendCmd())
     return false;
-  
-  int write_num = 0;
-  while (true) {
-    int need_write = (size - write_num) > DATA_MAX_LEN ?
-        DATA_MAX_LEN : (size - write_num);
-    int current_write;
-    if (!WritePort(kPort2, &current_write, buffer + write_num, need_write)) {
-      return false;
-    }
-    if (current_write != need_write) {
-      return false;
-    }
-    write_num += current_write;
-    if (write_num == current_write)
-      break;
-    CHECK(write_num <= current_write);
-  }
-  int read_size = 0;
-  rsp_buffer.reset();
-  if (!ReadPort(kPort1, &read_size, rsp_buffer.memory.buffer(), rsp_buffer.size()) ||
-      size != rsp_buffer.size()) {
-    return false;
-  }
-  return rsp_buffer.cmd_id.value() == WRITE_SUCCESS;
+
+  return WritePort2Raw(buffer, size);
 }
 
 bool UsbPort::ReadEP3(uint32 addr, UsbMode mode, uint8* buffer, int size) {
