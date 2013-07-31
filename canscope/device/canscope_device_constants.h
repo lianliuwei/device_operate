@@ -3,7 +3,7 @@
 #include "base/basictypes.h"
 
 namespace canscope {
-
+// EP1
 static const uint32 kBaseAddr = 0x82000000;
 // soft diff register
 static const uint32 kSoftDiffAddr = kBaseAddr + 0xC0;
@@ -56,6 +56,9 @@ static const uint32 kScopeCtrlAddr = kBaseAddr + 0x210;
 static const uint32 kScopeCtrlOffset = 0x0;
 static const int kScopeCtrlSize = kScopeCtrlOffset + 0x4;
 
+// EP2
+
+// EP3
 // scope data read addr
 static const uint32 kScopeReadAddr = kBaseAddr + 0x138;
 // size dependent on canscope type.

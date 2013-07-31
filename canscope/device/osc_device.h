@@ -136,6 +136,8 @@ public:
 
   void SetVoltBase(Chnl chnl);
   void SetVoltOffset(Chnl chnl);
+
+  // set register according to property
   void SetAnalogCtrl(Chnl chnl);
   void SetSoftDiff(Chnl chnl);
   void SetAnalogSwitch(Chnl chnl);
@@ -145,6 +147,7 @@ public:
 
   void TriggerVolt(uint8* cmp_high, uint8* cmp_low);
 
+  // Osc Device Property
   // volt
   ChnlConfig chnl_configs[kChnlSize];
   DiffCtrl diff_ctrl;
@@ -162,6 +165,7 @@ public:
   double trigger_volt;
   // unit ns
   double time_param;
+
 private:
   AnalogCtrlRegister analog_ctrl_;
   SoftDiffRegister soft_diff_;
