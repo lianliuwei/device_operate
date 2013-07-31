@@ -281,6 +281,8 @@ bool UsbPort::SendCmd() {
     return false;
   }
   rsp_buffer.reset();
+  // read response no limit return size to rsp_buffer size 
+  // (hardware property, like GetDeviceInfo return 52 no 64)
   if (!ReadPort(kPort1, &size, rsp_buffer.memory.buffer(), rsp_buffer.size()) ||
       size <= 0) {
     return false;
