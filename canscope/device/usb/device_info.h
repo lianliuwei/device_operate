@@ -16,7 +16,7 @@ public:
   Uint32Bind device_serial_num;
   Uint32Bind produce_data;
   Uint16Bind usb_speed;
-  Uint16Bind firmware_updat_flag;
+  Uint16Bind firmware_update_flag;
   Uint16Bind voltage_12;
   Uint16Bind voltage_1p2;
   Uint16Bind voltage_3p3;
