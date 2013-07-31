@@ -5,7 +5,7 @@
 using namespace device;
 
 namespace canscope {
-  Trigger2Register::Trigger2Register()
+Trigger2Register::Trigger2Register()
     : memory(kTrigger2Addr, kTrigger2Size)
     , trig_source(memory.PtrByRelative(kTrigSourceOffset), false, 0, 2)
     , cmp_high(memory.PtrByRelative(kTrigAddrOffset + 1))
