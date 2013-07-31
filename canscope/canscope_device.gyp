@@ -6,9 +6,6 @@
     {
       'target_name': 'canscope_device',
       'type': 'executable',
-      'variables': {
-        'mfc_target': 1,
-      },
       'dependencies': [
         '../third_party/chromium/base/base_bin.gyp:base_bin',
         '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
@@ -36,6 +33,25 @@
         'device/osc_device.cc',
         'device/osc_device_handle.h',
         'device/osc_device_handle.cc',
+      ], 
+    },
+    {
+      'target_name': 'canscope_usb_port',
+      'type': 'static_library',
+      'dependencies': [
+        '../third_party/chromium/base/base_bin.gyp:base_bin',
+      ],
+      'include_dirs': [
+        '..',
+      ], 
+      'sources': [
+        'device/usb/usb_port.h',
+        'device/usb/usb_port.cc',
+        'device/usb/usb_command.h',
+        'device/usb/usb_command.cc',
+        'device/usb/device_info.h',
+        'device/usb/device_info.cc',
+        'device/usb/usb_constants.h',
       ], 
     },
     {
