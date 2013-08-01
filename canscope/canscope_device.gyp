@@ -128,7 +128,27 @@
         '../third_party/chromium/third_party/icu_bin.gyp:icuuc_bin',
         '../device/device.gyp:device',
         'canscope_usb_port',
+        'fpga',
       ],
+    },
+    {
+      'target_name': 'fpga',
+      'type': 'none',
+
+      'copies': [
+        {
+          'destination': '<(PRODUCT_DIR)/../Release/',
+          'files': [
+            'fpga/Release/CANScope.dll',
+          ],
+        },
+        {
+          'destination': '<(PRODUCT_DIR)/../Debug/',
+          'files': [
+            'fpga/Debug/CANScope.dll',
+          ],
+        },
+      ],   
     },
   ],
 }
