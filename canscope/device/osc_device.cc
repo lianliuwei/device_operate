@@ -1,5 +1,7 @@
 #include "canscope/device/osc_device.h"
 
+using namespace device;
+
 namespace {
 // match to VoltRange
 static const uint8 kSensCoeff[] = {4,8,16,32,80,200};
@@ -119,21 +121,8 @@ canscope::Chnl TriggerSource2Chnl(TriggerSource trigger_source) {
   }
 }
 
-void OscDevice::SetVoltBase(Chnl chnl) {
-  ChnlConfig config = GetChnlConfig(chnl);
-  CalibrateInfo info = GetCalibrateInfo(chnl, config.range);
-  if (chnl == CAN_H) {
-    analog_ctrl_.can_h_gain.set_value(info.Gain());
-    soft_diff_.ch_sens_canh.set_value(kSensCoeff[config.range]);
-    soft_diff_.ch_zero_canh.set_value(CH_ZERO(config.range, config.offset));
-    analog_switch_.attenuation_canh.set_value(Attenuation(config.range));
-  } else {
-    soft_diff_.ch_sens_canl.set_value(kSensCoeff[config.range]);
-    analog_ctrl_.can_l_gain.set_value(info.Gain());
-    soft_diff_.ch_zero_canl.set_value(CH_ZERO(config.range, config.offset));
-    analog_switch_.attenuation_canl.set_value(Attenuation(config.range));
-  }
-}
+OscDevice::OscDevice(DeviceDelegate* device_delegate)
+    : device_delegate_(device_delegate) {}
 
 void OscDevice::SetAnalogCtrl(Chnl chnl) {
   ChnlConfig config = GetChnlConfig(chnl);
@@ -241,6 +230,114 @@ void OscDevice::TriggerVolt(uint8* cmp_high, uint8* cmp_low) {
     *cmp_high = high;
   if (cmp_low)
     *cmp_low = low;
+}
+
+void OscDevice::WriteDevice(RegisterMemory* memory, bool* state) {
+  DCHECK(state);
+  DCHECK(memory);
+  if (state == false || device_delegate_ == NULL)
+    return;
+  *state = device_delegate_->WriteDevice(
+        memory->start_addr(), memory->buffer(), memory->size());
+}
+
+void OscDevice::ReadDevice(RegisterMemory* memory, bool* state) {
+  DCHECK(state);
+  DCHECK(memory);
+  if (state == false || device_delegate_ == NULL)
+    return;
+  *state = device_delegate_->ReadDevice(
+        memory->start_addr(), memory->buffer(), memory->size());
+}
+
+void OscDevice::SetVoltRange(Chnl chnl) {
+  if (chnl != CAN_DIFF) {
+    SetAnalogCtrl(chnl);
+    SetAnalogSwitch(chnl);
+  }
+  SetSoftDiff(chnl);
+  SetTrigger2();
+
+  bool state = true;
+  if (chnl != CAN_DIFF) {
+    WriteDevice(&(analog_ctrl_.memory), &state);
+    WriteDevice(&(analog_switch_.memory), &state);
+  }
+  WriteDevice(&(soft_diff_.memory), &state);
+  WriteDevice(&(trigger2_.memory), &state);
+}
+
+void OscDevice::SetVoltOffset(Chnl chnl) {
+  // same register as SetVoltOffset
+  SetVoltRange(chnl);
+}
+
+void OscDevice::SetCoupling(Chnl chnl) {
+  // CAN-DIFF no Coupling
+  DCHECK(chnl != CAN_DIFF);
+  SetAnalogSwitch(chnl);
+  bool state = true;
+  WriteDevice(&(analog_switch_.memory), &state);
+}
+
+void OscDevice::SetDiffCtrl() {
+  // just set diff_ctrl
+  SetSoftDiff(CAN_DIFF);
+  bool state = true;
+  WriteDevice(&(soft_diff_.memory), &state);
+}
+
+void OscDevice::SetTimeBase() {
+  // TODO device add Device Type obtain.
+  SetTrigger1(DT_CS1202);
+  bool state = true;
+  WriteDevice(&(trigger1_.memory), &state);
+}
+
+void OscDevice::SetTimeOffset() {
+  // same register as SetTimeBase()
+  SetTimeBase();
+}
+
+void OscDevice::SetAutoTime() {
+  // same register as SetTimeBase()
+  SetTimeBase();
+}
+
+void OscDevice::SetTriggerSource() {
+  SetTrigger2();
+  bool state = true;
+  WriteDevice(&(trigger2_.memory), &state);
+}
+
+void OscDevice::SetTriggerType() {
+  // same register as SetTriggerSource()
+  SetTriggerSource();
+}
+
+void OscDevice::SetTriggerMode() {
+  // same register as SetTriggerSource()
+  SetTriggerSource();
+}
+
+void OscDevice::SetTriggerSens() {
+  // same register as SetTriggerSource()
+  SetTriggerSource();
+}
+
+void OscDevice::SetCompare() {
+  // same register as SetTriggerSource()
+  SetTriggerSource();
+}
+
+void OscDevice::SetTriggerVolt() {
+  // same register as SetTriggerSource()
+  SetTriggerSource();
+}
+
+void OscDevice::SetTimeParam() {
+  // same register as SetTriggerSource()
+  SetTriggerSource();
 }
 
 

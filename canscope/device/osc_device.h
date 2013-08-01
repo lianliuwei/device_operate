@@ -5,6 +5,8 @@
 #include "canscope/device/register/analog_switch_register.h"
 #include "canscope/device/register/trigger1_register.h"
 #include "canscope/device/register/trigger2_register.h"
+#include "canscope/device/register/trigger_state_register.h"
+#include "canscope/device/device_delegate.h"
 
 namespace canscope {
 enum DeviceType {
@@ -131,11 +133,11 @@ struct ChnlConfig {
 
 class OscDevice {
 public:
+  OscDevice(DeviceDelegate* device_delegate);
+  ~OscDevice();
+
   CalibrateInfo GetCalibrateInfo(Chnl chnl, VoltRange range);
   ChnlConfig GetChnlConfig(Chnl chnl);
-
-  void SetVoltBase(Chnl chnl);
-  void SetVoltOffset(Chnl chnl);
 
   // set register according to property
   void SetAnalogCtrl(Chnl chnl);
@@ -144,6 +146,24 @@ public:
   void SetTrigger1(DeviceType device_type);
   void SetTrigger2();
   void SetEye();
+
+  // property result in set register to hardware
+  void SetVoltRange(Chnl chnl);
+  void SetVoltOffset(Chnl chnl);
+  void SetCoupling(Chnl chnl);
+  void SetDiffCtrl();
+  void SetTimeBase();
+  void SetTimeOffset();
+  void SetAutoTime();
+  void SetTriggerSource();
+  void SetTriggerType();
+  void SetTriggerMode();
+  void SetTriggerSens();
+  void SetCompare();
+  void SetTriggerVolt();
+  void SetTimeParam();
+
+  void UpdateTriggerState();
 
   void TriggerVolt(uint8* cmp_high, uint8* cmp_low);
 
@@ -167,11 +187,17 @@ public:
   double time_param;
 
 private:
+  void WriteDevice(device::RegisterMemory* memory, bool* state);
+  void ReadDevice(device::RegisterMemory* memory, bool* state);
+
   AnalogCtrlRegister analog_ctrl_;
   SoftDiffRegister soft_diff_;
   AnalogSwitchRegister analog_switch_;
   Trigger1Register trigger1_;
   Trigger2Register trigger2_;
+  TriggerStateRegister trigger_state_;
+
+  DeviceDelegate* device_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(OscDevice);
 };
