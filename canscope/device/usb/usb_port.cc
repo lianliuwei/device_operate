@@ -5,6 +5,7 @@
 
 #include "base/logging.h"
 #include "base/stringprintf.h"
+#include "base/threading/platform_thread.h"
 
 using namespace base;
 using namespace canscope;
@@ -124,14 +125,17 @@ bool UsbPort::WritePort2Raw(uint8* buffer, int size) {
       return false;
     }
     write_num += current_write;
-    if (write_num == current_write)
+    if (write_num == size)
       break;
-    CHECK(write_num <= current_write);
+    CHECK(write_num <= size);
   }
+  
+  PlatformThread::Sleep(TimeDelta::FromMilliseconds(100));
+
   int read_size = 0;
   rsp_buffer.reset();
   if (!ReadPort(kPort1, &read_size, rsp_buffer.memory.buffer(), rsp_buffer.size()) ||
-      size != rsp_buffer.size()) {
+      read_size <= 0) {
     return false;
   }
   return rsp_buffer.cmd_id.value() == WRITE_SUCCESS;
@@ -149,6 +153,7 @@ bool UsbPort::DownloadFPGA(uint8* buffer, int size) {
 }
 
 bool UsbPort::OpenDevice(string16 device_name) {
+  DCHECK(!device_name.empty());
   for (int i = 0; i < arraysize(pipes); ++i) {
     string16 file_path = 
         StringPrintf(_T("%ls\\PIPE%02d"), device_name.c_str(), i);
@@ -328,9 +333,9 @@ bool UsbPort::ReadEP2(uint32 addr, UsbMode mode, uint8* buffer, int size) {
       return false;
     }
     read_num += current_read;
-    if (read_num == current_read)
+    if (read_num == size)
       break;
-    CHECK(read_num <= current_read);
+    CHECK(read_num <= size);
   }
   return true;
 }
@@ -365,9 +370,9 @@ bool UsbPort::ReadEP3(uint32 addr, UsbMode mode, uint8* buffer, int size) {
       return false;
     }
     read_num += current_read;
-    if (read_num == current_read)
+    if (read_num == size)
       break;
-    CHECK(read_num <= current_read);
+    CHECK(read_num <= size);
   }
   return true;
 }
