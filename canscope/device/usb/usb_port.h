@@ -28,6 +28,7 @@ public:
   // command
   bool GetDeviceInfo(uint8* buffer, int size);
 
+  // FPGA can only download once when device power up.
   bool DownloadFPGA(uint8* buffer, int size);
 
   bool ReadEP1(uint32 addr, UsbMode mode, uint8* buffer, int size);
@@ -65,6 +66,7 @@ private:
   UsbCommand rsp_buffer;
 
   // device port handle
+  // 3 EndPoint * 2 read write channel.
   HANDLE pipes[6];
 };
 
