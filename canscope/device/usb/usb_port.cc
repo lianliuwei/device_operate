@@ -275,6 +275,7 @@ void UsbPort::SetCmd(uint16 cmd, uint32 addr, UsbMode mode,
   // always set data size, used to get other port data
   cmd_buffer.data_size.set_value(static_cast<uint32>(size));
   if (buffer) {
+    CHECK(size <= UsbCommand::write_data_max_size());
     memcpy(cmd_buffer.write_data_ptr(), buffer, static_cast<uint32>(size));
   }
 }
