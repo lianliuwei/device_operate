@@ -17,6 +17,7 @@ class RegisterMemory {
   
   int size() const;
   const uint8* buffer() const;
+  uint32 start_addr() const;
   uint8* buffer();
 
 private:

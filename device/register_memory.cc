@@ -34,6 +34,10 @@ uint8* RegisterMemory::buffer() {
   return &memory_[0];
 }
 
+uint32 RegisterMemory::start_addr() const {
+  return start_addr_;
+}
+
 
 MemoryContent::MemoryContent() 
     : size_(0) {}
