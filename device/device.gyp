@@ -6,9 +6,6 @@
     {
       'target_name': 'device',
       'type': 'static_library',
-      'variables': {
-        'mfc_target': 1,
-      },
       'dependencies': [
         '../third_party/chromium/base/base_bin.gyp:base_bin',
         '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
