@@ -11,10 +11,6 @@
 
 namespace canscope {
 
-struct UsbCmd {
-
-};
-
 bool EnumDevices(std::vector<string16>* devices);
 
 class UsbPort {
