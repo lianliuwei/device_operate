@@ -1,10 +1,25 @@
 #include "canscope/device/osc_device.h"
 
+#include <cmath>
+
 using namespace device;
 
 namespace {
 // match to VoltRange
 static const uint8 kSensCoeff[] = {4,8,16,32,80,200};
+
+static const double OP07 = -1.96;
+
+// march VlotRange
+static const canscope::CalibrateInfo kDefaultCalibrateInfo[] = {
+  {0x0000D164, OP07/0.2, -0.102040816,},
+  {0x000092CD, OP07/0.2, -0.204081633,},
+  {0x00005436, OP07/0.2, -0.408163265,},
+  {0x0000E58B, OP07/0.02, -0.081632653,},
+  {0x000092CD, OP07/0.02, -0.204081633,},
+  {0x00004010, OP07/0.02, -0.510204082,},
+};
+
 
 // map to time_base
 static const uint32 kTimeBaseValue[] = {
@@ -83,7 +98,6 @@ uint8 CMP_LOW(VoltRange range, double trig_volt, double offset_volt) {
   return static_cast<uint8>((trig_volt + offset_volt)/div_volt * 31.25 + 127);
 }
 
-
 double Volt(VoltRange range) {
   switch (range) {
   case k1V: return 1; break;
@@ -112,7 +126,7 @@ bool IsTriggerSourceChnl(TriggerSource trigger_source) {
 }
 
 
-canscope::Chnl TriggerSource2Chnl(TriggerSource trigger_source) {
+Chnl TriggerSource2Chnl(TriggerSource trigger_source) {
   switch (trigger_source) {
   case kTriggerSourceCANH: return CAN_H;
   case kTriggerSourceCANL: return CAN_L;
@@ -121,8 +135,27 @@ canscope::Chnl TriggerSource2Chnl(TriggerSource trigger_source) {
   }
 }
 
+double CalibrateInfo::Voffset(double offset) {
+  return VCal_base + (offset) / Kcal;
+}
+
+uint32 CalibrateInfo::CH_OFFSET(double offset) {
+  return static_cast<uint32>(
+      (Voffset(offset) + 2.67) * pow(2.0, 16) / 4.2 / 1.25);
+}
+
 OscDevice::OscDevice(DeviceDelegate* device_delegate)
     : device_delegate_(device_delegate) {}
+
+
+CalibrateInfo OscDevice::GetCalibrateInfo(Chnl chnl, VoltRange range) {
+  // TODO get real Calibrate Info from hardware
+  return kDefaultCalibrateInfo[range];
+}
+
+ChnlConfig OscDevice::GetChnlConfig(Chnl chnl) {
+  return chnl_configs[chnl];
+}
 
 void OscDevice::SetAnalogCtrl(Chnl chnl) {
   ChnlConfig config = GetChnlConfig(chnl);
@@ -340,5 +373,29 @@ void OscDevice::SetTimeParam() {
   SetTriggerSource();
 }
 
+void OscDevice::UpdateTriggerState() {
+  bool state;
+  ReadDevice(&(trigger_state_.memory), &state);
+}
+
+void OscDevice::SetAll() {
+  SetAnalogCtrl(CAN_H);
+  SetAnalogCtrl(CAN_L);
+  SetSoftDiff(CAN_H);
+  SetSoftDiff(CAN_L);
+  SetSoftDiff(CAN_DIFF);
+  SetAnalogSwitch(CAN_H);
+  SetAnalogSwitch(CAN_L);
+  // TODO device add Device Type obtain.
+  SetTrigger1(DT_CS1202);
+  SetTrigger2();
+
+  bool state;
+  WriteDevice(&(analog_ctrl_.memory), &state);
+  WriteDevice(&(soft_diff_.memory), &state);
+  WriteDevice(&(analog_switch_.memory), &state);
+  WriteDevice(&(trigger1_.memory), &state);
+  WriteDevice(&(trigger2_.memory), &state);
+}
 
 } // namespace canscope

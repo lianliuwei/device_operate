@@ -121,7 +121,7 @@ struct CalibrateInfo {
   double Voffset(double offset);
 
   // set to hardware
-  uint32 Gain();
+  uint32 Gain() { return N1; }
   uint32 CH_OFFSET(double offset);
 };
 
@@ -134,7 +134,7 @@ struct ChnlConfig {
 class OscDevice {
 public:
   OscDevice(DeviceDelegate* device_delegate);
-  ~OscDevice();
+  ~OscDevice() {}
 
   CalibrateInfo GetCalibrateInfo(Chnl chnl, VoltRange range);
   ChnlConfig GetChnlConfig(Chnl chnl);
@@ -162,7 +162,8 @@ public:
   void SetCompare();
   void SetTriggerVolt();
   void SetTimeParam();
-
+  void SetAll();
+  // update property.
   void UpdateTriggerState();
 
   void TriggerVolt(uint8* cmp_high, uint8* cmp_low);
