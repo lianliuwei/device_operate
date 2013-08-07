@@ -1,7 +1,5 @@
 #include "device/uint32_sub_bind.h"
 
-#include "device/bitfield_helpers.h"
-
 Uint32SubBind::Uint32SubBind(uint8* ptr, 
                              bool big_endian,
                              int start_index, 
