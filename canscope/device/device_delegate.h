@@ -1,5 +1,7 @@
 #pragma once
 
+#include "base/basictypes.h"
+
 // set to hardware
 class DeviceDelegate {
 public:
@@ -10,6 +12,6 @@ public:
   // I2C
 
 protected:
-  DeviceDelegate();
-  virtual ~DeviceDelegate();
+  DeviceDelegate() {}
+  virtual ~DeviceDelegate() {}
 };
