@@ -8,7 +8,9 @@ using namespace canscope;
 
 TEST(SoftDiffRegisterTest, SetContentAndCheckProperty) {
   uint8 soft_diff_content[0x1C] 
-      = {0x0, 0X1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 
+      = {0x0, 0X1, 0x2, // reserve
+         0x80, // sys_cfg
+         0x4, 0x5, 0x6, 0x7, // reserve
          4, // CAN-H sens
          16, // CAN-L sens
          80, // CAN-diff sens
@@ -29,7 +31,8 @@ TEST(SoftDiffRegisterTest, SetContentAndCheckProperty) {
   SoftDiffRegister soft_diff;
   memcpy(soft_diff.memory.buffer(), soft_diff_content, 
       arraysize(soft_diff_content));
-  
+
+  EXPECT_EQ(true, soft_diff.sys_cfg.value());
   EXPECT_EQ(4, soft_diff.ch_sens_canh.value());
   EXPECT_EQ(16, soft_diff.ch_sens_canl.value());
   EXPECT_EQ(80, soft_diff.ch_sens_candiff.value());

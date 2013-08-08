@@ -38,24 +38,4 @@ static const uint32 kUsbCommandFucAddrOffset = 0xC;
 static const uint32 kUsbCommandSize = kUsbCommandFucAddrOffset + 0x4;
 static const uint32 kUsbCommandReadOffset = 0x4;
 
-// DeviceInfo struct
-static const uint32 kDeviceInfoAddr = 0x00;
-static const uint32 kDeviceInfoIDOffset = 0x00;
-static const uint32 kDeviceInfoLoaderVersionOffset = 0x04;
-static const uint32 kDeviceInfoDeviceTypeOffset = 0x08;
-static const uint32 kDeviceInfofirmwareVersionOffset = 0x0C;
-static const uint32 kDeviceInfoFpgaVersionOffset = 0x10;
-static const uint32 kDeviceInfoDeviceSerialNumOffset = 0x14;
-static const uint32 kDeviceInfoProduceDateOffset = 0x18;
-static const uint32 kDeviceInfoUsbSpeedOffset = 0x1C;
-static const uint32 kDeviceInfoFirmwareUpdateFlagOffset = 0x1E;
-static const uint32 kDeviceInfoVoltage12Offset = 0x20;
-static const uint32 kDeviceInfoVoltage1p2Offset = 0x22;
-static const uint32 kDeviceInfoVoltage3p3Offset = 0x24;
-static const uint32 kDeviceInfoVoltage2p5Offset = 0x26;
-static const uint32 kDeviceInfoVoltage5Offset = 0x28;
-static const uint32 kDeviceInfoFpgaCoreTempOffset = 0x2A;
-static const uint32 kDeviceInfoEnvTempOffset = 0x2C;
-static const uint32 kDeviceInfoSize = kDeviceInfoEnvTempOffset + 0x2 + 0x12;
-
 } // namespace canscope

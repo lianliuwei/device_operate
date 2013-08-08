@@ -7,6 +7,7 @@ using namespace device;
 namespace canscope {
 SoftDiffRegister::SoftDiffRegister()
     : memory(kSoftDiffAddr, kSoftDiffSize)
+    , sys_cfg(memory.PtrByRelative(kSysCfgOffset), 7, true)
     , ch_sens_canh(memory.PtrByRelative(kChSensCanhOffset))
     , ch_sens_canl(memory.PtrByRelative(kChSensCanlOffset)) 
     , ch_sens_candiff(memory.PtrByRelative(kChSensCandiffOffset))

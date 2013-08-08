@@ -10,6 +10,7 @@ class SoftDiffRegister {
 public:
   device::RegisterMemory memory;
 
+  BoolBind  sys_cfg;
   Uint8Bind ch_sens_canh;
   Uint8Bind ch_sens_canl;
   Uint8Bind ch_sens_candiff;

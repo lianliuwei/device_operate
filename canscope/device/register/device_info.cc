@@ -1,6 +1,6 @@
-#include "canscope/device/usb/device_info.h"
+#include "canscope/device/register/device_info.h"
 
-#include "canscope/device/usb/usb_constants.h"
+#include "canscope/device/canscope_device_constants.h"
 
 namespace canscope {
 DeviceInfo::DeviceInfo()
