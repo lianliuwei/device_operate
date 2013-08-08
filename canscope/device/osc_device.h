@@ -139,15 +139,7 @@ public:
   CalibrateInfo GetCalibrateInfo(Chnl chnl, VoltRange range);
   ChnlConfig GetChnlConfig(Chnl chnl);
 
-  // set register according to property
-  void SetAnalogCtrl(Chnl chnl);
-  void SetSoftDiff(Chnl chnl);
-  void SetAnalogSwitch(Chnl chnl);
-  void SetTrigger1(DeviceType device_type);
-  void SetTrigger2();
-  void SetEye();
-
-  // property result in set register to hardware
+   // property result in set register to hardware
   void SetVoltRange(Chnl chnl);
   void SetVoltOffset(Chnl chnl);
   void SetCoupling(Chnl chnl);
@@ -163,10 +155,14 @@ public:
   void SetTriggerVolt();
   void SetTimeParam();
   void SetAll();
+  
   // update property.
   void UpdateTriggerState();
+  
+  bool IsCollected();
 
-  void TriggerVolt(uint8* cmp_high, uint8* cmp_low);
+  // start scope
+  bool Start();
 
   // Osc Device Property
   // volt
@@ -188,6 +184,16 @@ public:
   double time_param;
 
 private:
+  // set register according to property
+  void SetAnalogCtrl(Chnl chnl);
+  void SetSoftDiff(Chnl chnl);
+  void SetAnalogSwitch(Chnl chnl);
+  void SetTrigger1(DeviceType device_type);
+  void SetTrigger2();
+  void SetEye();
+
+  void TriggerVolt(uint8* cmp_high, uint8* cmp_low);
+
   void WriteDevice(device::RegisterMemory* memory, bool* state);
   void ReadDevice(device::RegisterMemory* memory, bool* state);
 

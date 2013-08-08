@@ -1,5 +1,7 @@
 #include "canscope/device/osc_device.h"
 
+#include "canscope/device/register/scope_ctrl_register.h"
+
 #include <cmath>
 
 using namespace device;
@@ -396,6 +398,18 @@ void OscDevice::SetAll() {
   WriteDevice(&(analog_switch_.memory), &state);
   WriteDevice(&(trigger1_.memory), &state);
   WriteDevice(&(trigger2_.memory), &state);
+}
+
+bool OscDevice::Start() {
+  ScopeCtrlRegister scope_ctrl;
+  scope_ctrl.scope_ctrl.set_value(true);
+  bool state;
+  WriteDevice(&(scope_ctrl.memory), &state);
+  return state;
+}
+
+bool OscDevice::IsCollected() {
+  return trigger_state_.clet_bit.value();
 }
 
 } // namespace canscope
