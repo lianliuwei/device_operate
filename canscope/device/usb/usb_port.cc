@@ -7,11 +7,14 @@
 #include "base/stringprintf.h"
 #include "base/threading/platform_thread.h"
 
+// need kDeviceInfoSize
+#include "canscope/device/canscope_device_constants.h"
+
 using namespace base;
 using namespace canscope;
 
 namespace {
-static const uint32 kTimeout = 1000;
+static const uint32 kTimeout = 10000;
 static const uint32 kBufferSize = kUsbCommandSize + CMD_MAX_LEN;
 static const int kMaxDevice = 20;
 
@@ -176,8 +179,12 @@ bool UsbPort::OpenDevice(string16 device_name) {
 bool UsbPort::CloseDevice() {
   int fault_num = 0;
   for (int i = 0; i < arraysize(pipes); ++i) {
-    if (pipes[i] != INVALID_HANDLE_VALUE && !CloseHandle(pipes[i])) {
-      ++fault_num;
+    if (pipes[i] != INVALID_HANDLE_VALUE) {
+      if (CloseHandle(pipes[i])) {
+        pipes[i] = INVALID_HANDLE_VALUE;
+      } else {
+        ++fault_num;
+      }
     }
   }
   return fault_num == 0;
@@ -356,7 +363,7 @@ bool UsbPort::ReadEP3(uint32 addr, UsbMode mode, uint8* buffer, int size) {
   DCHECK(buffer);
   DCHECK(size > 0);
   SetCmd(RDEP3, addr, mode, NULL, size);
-  if (SendCmd())
+  if (!SendCmd())
     return false;
 
   int read_num = 0;
@@ -364,7 +371,7 @@ bool UsbPort::ReadEP3(uint32 addr, UsbMode mode, uint8* buffer, int size) {
     int need_read = (size - read_num) > DATA_MAX_LEN ? 
         DATA_MAX_LEN : (size - read_num);
     int current_read = 0;
-    if (!ReadPort(kPort2, &current_read, buffer + read_num, need_read)) {
+    if (!ReadPort(kPort3, &current_read, buffer + read_num, need_read)) {
       return false;
     }
     if (current_read != need_read) {
