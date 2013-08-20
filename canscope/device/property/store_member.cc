@@ -59,6 +59,7 @@ void StoreMemberBase::UpdateValueFromPref(const base::Closure& callback) const {
   VerifyValuePrefName();
   DCHECK(prefs_->HasPrefPath(pref_name_));
   CheckOnCorrectThread();
+  base::ScopedClosureRunner closure_runner(callback);
   const base::Value* value = NULL; 
   bool rv = prefs_->GetValue(pref_name_, &value);
   DCHECK(rv && value != NULL);

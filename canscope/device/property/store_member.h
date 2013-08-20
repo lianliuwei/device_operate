@@ -15,6 +15,7 @@
 #include "canscope/device/property/device_property_store.h"
 
 // modify from base/prefs/pref_member.h
+// NOTICE NamedChangeCallback are no call when setting for current StoreMember
 namespace canscope {
 
 namespace subtle {
