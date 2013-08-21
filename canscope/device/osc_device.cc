@@ -24,29 +24,6 @@ static const canscope::CalibrateInfo kDefaultCalibrateInfo[] = {
 
 
 // map to time_base
-static const uint32 kTimeBaseValue[] = {
-  1000,
-  2000,
-  5000,
-  10000,
-  20000,
-  50000,
-  100000,
-  200000,
-  500000,
-  1000000,
-  2000000,
-  5000000,
-  10000000,
-  20000000,
-  50000000,
-  100000000,
-  200000000,
-  500000000,
-  1000000000,
-};
-
-// map to time_base
 static const uint32 kCOE[] = {
   0,
   1,
@@ -100,41 +77,8 @@ uint8 CMP_LOW(VoltRange range, double trig_volt, double offset_volt) {
   return static_cast<uint8>((trig_volt + offset_volt)/div_volt * 31.25 + 127);
 }
 
-double Volt(VoltRange range) {
-  switch (range) {
-  case k1V: return 1; break;
-  case k2V: return 2; break;
-  case k4V: return 4; break;
-  case k8V: return 8; break;
-  case k20V: return 20; break;
-  case k50V: return 50; break;
-  default: NOTREACHED(); return 0; break;
-  }
-}
-
 int DeviceK(DeviceType device_type) {
   return device_type == DT_CS1203 ? 8 : 2;
-}
-
-
-uint32 TimeBaseValue(TimeBase time_base) {
-  return kTimeBaseValue[time_base];
-}
-
-bool IsTriggerSourceChnl(TriggerSource trigger_source) {
-  return trigger_source == kTriggerSourceCANH 
-      || trigger_source == kTriggerSourceCANL 
-      || trigger_source == kTriggerSourceCANDIFF;
-}
-
-
-Chnl TriggerSource2Chnl(TriggerSource trigger_source) {
-  switch (trigger_source) {
-  case kTriggerSourceCANH: return CAN_H;
-  case kTriggerSourceCANL: return CAN_L;
-  case kTriggerSourceCANDIFF: return CAN_DIFF;
-  default: NOTREACHED(); return CAN_H;
-  }
 }
 
 double CalibrateInfo::Voffset(double offset) {
@@ -156,7 +100,21 @@ CalibrateInfo OscDevice::GetCalibrateInfo(Chnl chnl, VoltRange range) {
 }
 
 ChnlConfig OscDevice::GetChnlConfig(Chnl chnl) {
-  return chnl_configs[chnl];
+  ChnlConfig config;
+  if (chnl == CAN_H) {
+    config.range = range_can_h.value();
+    config.offset = offset_can_h.value();
+    config.coupling = coupling_can_h.value();
+  } else if (chnl == CAN_L) {
+    config.range = range_can_l.value();
+    config.offset = offset_can_l.value();
+    config.coupling = coupling_can_l.value();
+  } else if (chnl == CAN_DIFF) {
+    config.range = range_can_diff.value();
+    config.offset = offset_can_diff.value();
+    config.coupling = kDC; // no meaning
+  } 
+  return config;
 }
 
 void OscDevice::SetAnalogCtrl(Chnl chnl) {
@@ -189,7 +147,7 @@ void OscDevice::SetSoftDiff(Chnl chnl) {
     NOTREACHED();
   }
   soft_diff_.filtering.set_value(5);
-  soft_diff_.diff_ctrl.set_value(GetDiffCtrl(diff_ctrl));
+  soft_diff_.diff_ctrl.set_value(GetDiffCtrl(diff_ctrl.value()));
 }
 
 void OscDevice::SetAnalogSwitch(Chnl chnl) {
@@ -207,30 +165,34 @@ void OscDevice::SetAnalogSwitch(Chnl chnl) {
 }
 
 void OscDevice::SetTrigger1(DeviceType device_type) {
-  trigger1_.div_coe.set_value(kCOE[time_base]);
-  uint32 base_value = kTimeBaseValue[time_base];
+  TimeBase time_base_value = time_base.value();
+  double time_offset_value = time_offset.value();
+  trigger1_.div_coe.set_value(kCOE[time_base_value]);
+  uint32 base_value = TimeBaseValue(time_base_value);
   uint32 samet = SAMET(trigger1_.div_coe.value());
   uint32 temp;
   uint32 k = DeviceK(device_type);
-  temp = static_cast<uint32>(((time_base*5*k + time_offset) /samet) * 2);
+  temp = static_cast<uint32>(
+      ((time_base_value*5*k + time_offset_value) /samet) * 2);
   temp &= 0xFFFFFFFC; // div by 4
   trigger1_.trig_pre.set_value(temp);
-  temp = std::max(8U, 
-      static_cast<uint32>(((time_base*5*k - time_offset)/samet) * 2));
+  temp = std::max(8U, static_cast<uint32>(
+            ((time_base_value*5*k - time_offset_value)/samet) * 2));
   temp &= 0xFFFFFFFC; // div by 4
   trigger1_.trig_post.set_value(temp);
-  trigger1_.auto_time.set_value(static_cast<uint32>(auto_time * 1000000 / 10));
+  trigger1_.auto_time.set_value(static_cast<uint32>(
+      auto_time.value() * 1000000 / 10));
 }
 
 void OscDevice::SetTrigger2() {
-  trigger2_.trig_source.set_value(trigger_source);
-  trigger2_.trig_type.set_value(trigger_type);
-  trigger2_.trig_mode.set_value(GetTrigMode(trigger_mode));
-  trigger2_.compare.set_value(compare);
-  trigger2_.trig_time.set_value((static_cast<uint32>(time_param)/10 - 1) 
+  trigger2_.trig_source.set_value(trigger_source.value());
+  trigger2_.trig_type.set_value(trigger_type.value());
+  trigger2_.trig_mode.set_value(GetTrigMode(trigger_mode.value()));
+  trigger2_.compare.set_value(compare.value());
+  trigger2_.trig_time.set_value((static_cast<uint32>(time_param.value())/10 - 1) 
       & 0x3FFFFFFF);
   
-  if (!IsTriggerSourceChnl(trigger_source)) {
+  if (!IsTriggerSourceChnl(trigger_source.value())) {
     return;
   }
   //CMP_VOL
@@ -246,12 +208,12 @@ void OscDevice::SetTrigger2() {
 void OscDevice::TriggerVolt(uint8* cmp_high, uint8* cmp_low) {
   uint8 high = 0x00;
   uint8 low = 0x00;
-  ChnlConfig config = GetChnlConfig(TriggerSource2Chnl(trigger_source));
-  low = CMP_LOW(config.range, trigger_volt, config.offset);
+  ChnlConfig config = GetChnlConfig(TriggerSource2Chnl(trigger_source.value()));
+  low = CMP_LOW(config.range, trigger_volt.value(), config.offset);
 
-  if (trigger_sens == kDefault) {
+  if (trigger_sens.value() == kDefault) {
     high = low + 3;
-  } else if (trigger_sens == kStrengthen) {
+  } else if (trigger_sens.value() == kStrengthen) {
     high = low + 15;
   }
 
