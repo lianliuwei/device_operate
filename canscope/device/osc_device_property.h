@@ -113,6 +113,11 @@ DECLARE_ENUM_STORE_MEMBER(CompareType);
 
 class OscDeviceProperty {
 public:
+  OscDeviceProperty() {}
+  ~OscDeviceProperty() {}
+
+  void Init();
+
   ValueMapDevicePropertyStore prefs_;
 
   // CAN-H
@@ -151,6 +156,6 @@ public:
 protected:
 
 private:
-
+  DISALLOW_COPY_AND_ASSIGN(OscDeviceProperty);
 };
 } // namespace canscope

@@ -1,5 +1,7 @@
 #include "canscope/device/osc_device_property.h"
 
+#include "canscope/device/canscope_device_property_constants.h"
+
 namespace {
 // map to time_base
 static const uint32 kTimeBaseValue[] = {
@@ -55,6 +57,29 @@ Chnl TriggerSource2Chnl(TriggerSource trigger_source) {
   case kTriggerSourceCANDIFF: return CAN_DIFF;
   default: NOTREACHED(); return CAN_H;
   }
+}
+
+
+void OscDeviceProperty::Init() {
+  range_can_h.Init(kRangeCANHItem, &prefs_);
+  offset_can_h.Init(kOffsetCANHItem, &prefs_);
+  coupling_can_h.Init(kCouplingCANHItem, &prefs_);
+  range_can_l.Init(kRangeCANLItem, &prefs_);
+  offset_can_l.Init(kOffsetCANLItem, &prefs_);
+  coupling_can_l.Init(kCouplingCANLItem, &prefs_);
+  range_can_diff.Init(kRangeCANDIFFItem, &prefs_);
+  offset_can_diff.Init(kOffsetCANDIFFItem, &prefs_);
+  diff_ctrl.Init(kDiffCtrlItem, &prefs_);
+  time_base.Init(kTimeBaseItem, &prefs_);
+  time_offset.Init(kTimeOffsetItem, &prefs_);
+  auto_time.Init(kAutoTimeItem, &prefs_);
+  trigger_source.Init(kTriggerSourceItem, &prefs_);
+  trigger_type.Init(kTriggerTypeItem, &prefs_);
+  trigger_mode.Init(kTriggerModeItem, &prefs_);
+  trigger_sens.Init(kTriggerSensItem, &prefs_);
+  compare.Init(kCompareItem, &prefs_);
+  trigger_volt.Init(kTriggerVoltItem, &prefs_);
+  time_param.Init(kTimeParamItem, &prefs_);
 }
 
 } // namespace canscope
