@@ -1,6 +1,6 @@
 #include "canscope/device/register/scope_ctrl_register.h"
 
-#include "canscope/device/canscope_device_constants.h"
+#include "canscope/device/register/canscope_device_register_constants.h"
 
 using namespace device;
 

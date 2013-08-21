@@ -8,7 +8,7 @@
 #include "base/threading/platform_thread.h"
 
 // need kDeviceInfoSize
-#include "canscope/device/canscope_device_constants.h"
+#include "canscope/device/register/canscope_device_register_constants.h"
 
 using namespace base;
 using namespace canscope;

@@ -8,7 +8,7 @@
 #include "canscope/device/osc_device.h"
 #include "canscope/device/usb_port_device_delegate.h"
 #include "canscope/device/register/device_info.h"
-#include "canscope/device/canscope_device_constants.h"
+#include "canscope/device/register/canscope_device_register_constants.h"
 
 using namespace canscope;
 
