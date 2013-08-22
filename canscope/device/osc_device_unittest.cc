@@ -1,9 +1,13 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
+#include <string>
 #include <tchar.h>
 
 #include "base/file_util.h"
+#include "base/values.h"
 #include "base/threading/platform_thread.h"
+#include "base/json/json_string_value_serializer.h"
+#include "base/json/json_reader.h"
 
 #include "canscope/device/osc_device.h"
 #include "canscope/device/usb_port_device_delegate.h"
@@ -11,6 +15,8 @@
 #include "canscope/device/register/canscope_device_register_constants.h"
 
 using namespace canscope;
+using namespace std;
+using namespace base;
 
 #define EXPECT_TRUE_OR_RET(ret) \
   { \
@@ -79,6 +85,31 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(ScopeOpenDevice);
 };
+namespace {
+static const char kOscConfig [] =  {" \
+{ \
+  \"CANH.Range\" : 3, \
+  \"CANH.Offset\" : 0.0, \
+  \"CANH.Coupling\" : 1, \
+  \"CANL.RangeCANH\" : 3, \
+  \"CANL.OffsetCANH\" : 0.0, \
+  \"CANL.Coupling\" : 1, \
+  \"CANDIFF.Range\" : 3, \
+  \"CANDIFF.Offset\" : 0.0, \
+  \"DiffCtrl\" : 0, \
+  \"Time.Base\" : 4, \
+  \"Time.Offset\" : 0.0, \
+  \"Trigger.AutoTime\" : 100.0, \
+  \"Trigger.Source\" : 2, \
+  \"Trigger.Type\" : 0, \
+  \"Trigger.Mode\" : 0, \
+  \"Trigger.Sens\" : 0, \
+  \"Trigger.Compare\" : 0, \
+  \"Trigger.Volt\" : 0.0, \
+  \"Trigger.Param\" : 1.0 \
+} \
+"};
+}
 TEST(OscDeviceTest, WriteChnlConfig) {
   UsbPortDeviceDelegate device_delegate;
   ScopeOpenDevice open_device(&(device_delegate));
@@ -86,31 +117,17 @@ TEST(OscDeviceTest, WriteChnlConfig) {
   OscDevice osc_device(&device_delegate);
 
   // config osc_device
-  osc_device.chnl_configs[CAN_H].range = k8V;
-  osc_device.chnl_configs[CAN_H].offset = 0;
-  osc_device.chnl_configs[CAN_H].offset = kAC;
-
-  osc_device.chnl_configs[CAN_L].range = k8V;
-  osc_device.chnl_configs[CAN_L].offset = 0;
-  osc_device.chnl_configs[CAN_L].offset = kAC;
-
-  osc_device.chnl_configs[CAN_DIFF].range = k8V;
-  osc_device.chnl_configs[CAN_DIFF].offset = 0;
-  osc_device.chnl_configs[CAN_DIFF].offset = kAC;
-
-  osc_device.diff_ctrl = kSub;
-
-  osc_device.time_base = k20us;
-  osc_device.time_offset = 0.0;
-
-  osc_device.trigger_source = kTriggerSourceCANDIFF;
-  osc_device.trigger_type = kRisingEdge;
-  osc_device.trigger_volt = 0;
-  osc_device.compare = kGreater;
-  osc_device.trigger_mode = kAuto;
-  osc_device.auto_time = 100.0;
-  osc_device.trigger_sens = kDefault;
-  osc_device.time_param = 1;
+  string content(kOscConfig);
+  JSONStringValueSerializer serializer(content);
+  int error;
+  string error_msg;
+  Value* value = serializer.Deserialize(&error, &error_msg);
+  EXPECT_TRUE(NULL != value);
+  EXPECT_TRUE(value->IsType(Value::TYPE_DICTIONARY));
+  ValueMapDevicePropertyStore prefs;
+  DictionaryValue* dict_value;
+  value->GetAsDictionary(&dict_value);
+  osc_device.Init(dict_value);
 
   osc_device.SetVoltRange(CAN_H);
 
