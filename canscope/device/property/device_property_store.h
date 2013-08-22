@@ -48,13 +48,9 @@ public:
   // Removes the value for |key|.
   virtual void RemoveValue(const std::string& key) = 0;
 
-  // Marks that the |key| with empty ListValue/DictionaryValue needs to be
-  // persisted.
-  virtual void MarkNeedsEmptyValue(const std::string& key) = 0;
-
 protected:
   DevicePropertyStore() {}
   virtual ~DevicePropertyStore() {}
 };
 
-} // namespace
+} // namespace canscope

@@ -3,6 +3,9 @@
 #include <string>
 
 #include "base/values.h"
+#include "base/file_util.h"
+#include "base/json/json_string_value_serializer.h"
+#include "base/json/json_reader.h"
 
 #include "canscope/device/property/value_map_device_property_store.h"
 
@@ -65,5 +68,43 @@ TEST(ValueMapDevicePropertyStoreTest, Observer) {
   EXPECT_TRUE(ptr->GetAsBoolean(&temp));
   EXPECT_EQ(true, temp);
   prefs.RemovePrefObserver(pref_name, &stub);
+}
+namespace {
+static const char kTestConfig [] = { " \
+{ \
+  \"test.1.2.3\" : 10, \
+  \"test.NoNotify\" : true \
+} \
+"};
 
+}
+
+TEST(ValueMapDevicePropertyStoreTest, ReadWriteConfigFile) {
+  string config(kTestConfig);
+  JSONStringValueSerializer serializer(config);
+  int error;
+  string error_msg;
+  Value* value = serializer.Deserialize(&error, &error_msg);
+  EXPECT_TRUE(NULL != value);
+  EXPECT_TRUE(value->IsType(Value::TYPE_DICTIONARY));
+  ValueMapDevicePropertyStore prefs;
+  DictionaryValue* dict_value;
+  value->GetAsDictionary(&dict_value);
+  prefs.Reset(dict_value);
+  string pref_name = "test.1.2.3";
+  const Value* value_out;
+  prefs.GetValue(pref_name, &value_out);
+  EXPECT_TRUE(value_out->IsType(Value::TYPE_INTEGER));
+  int int_out;
+  bool ret = value_out->GetAsInteger(&int_out);
+  EXPECT_TRUE(ret);
+  EXPECT_EQ(10, int_out);
+ 
+  string pref_name2 = "test.NoNotify";
+  prefs.GetValue(pref_name2, &value_out);
+  EXPECT_TRUE(value_out->IsType(Value::TYPE_BOOLEAN));
+  bool bool_out;
+  ret = value_out->GetAsBoolean(&bool_out);
+  EXPECT_TRUE(ret);
+  EXPECT_EQ(true, bool_out);
 }

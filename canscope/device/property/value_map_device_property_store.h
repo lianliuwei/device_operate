@@ -26,13 +26,15 @@ public:
   virtual void SetValue(const std::string& key, base::Value* value);
   virtual void SetValueSilently(const std::string& key, base::Value* value);
   virtual void RemoveValue(const std::string& key);
-  virtual void MarkNeedsEmptyValue(const std::string& key);
+
+  void Reset(DictionaryValue* value_owned);
+  DictionaryValue* Serialize();
 
 private:
   PropertyNotifiter notifier_;
   PrefValueMap prefs_;
 
-  std::set<std::string> keys_need_empty_value_;
+  DISALLOW_COPY_AND_ASSIGN(ValueMapDevicePropertyStore);
 };
 
 } // namespace

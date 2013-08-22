@@ -82,3 +82,4 @@ void PropertyNotifiter::FireObservers(const std::string& path) {
                     *(observer_iterator->second),
                     OnPreferenceChanged(path));
 }
+
