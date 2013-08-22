@@ -59,8 +59,20 @@ Chnl TriggerSource2Chnl(TriggerSource trigger_source) {
   }
 }
 
+IMPLEMENT_ENUM_STORE_MEMBER_INT(Chnl);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(VoltRange);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TimeBase);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(Coupling);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(DiffCtrl);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerSource);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerType);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerMode);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerSens);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(CompareType);
 
-void OscDeviceProperty::Init() {
+void OscDeviceProperty::Init(base::DictionaryValue* dict) {
+  prefs_.Reset(dict);
+
   range_can_h.Init(kRangeCANHItem, &prefs_);
   offset_can_h.Init(kOffsetCANHItem, &prefs_);
   coupling_can_h.Init(kCouplingCANHItem, &prefs_);

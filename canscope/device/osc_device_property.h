@@ -1,5 +1,7 @@
 #pragma once
 
+#include "base/values.h"
+
 #include "canscope/device/property/enum_store_member.h"
 #include "canscope/device/property/value_map_device_property_store.h"
 
@@ -116,7 +118,8 @@ public:
   OscDeviceProperty() {}
   ~OscDeviceProperty() {}
 
-  void Init();
+  // take owned of dict, and use it to init the prefs_
+  void Init(base::DictionaryValue* dict);
 
   ValueMapDevicePropertyStore prefs_;
 
