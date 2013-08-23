@@ -1,18 +1,6 @@
 #pragma once
 
 namespace canscope {
-
-class CANScopeDevice {
- public:
-  RegisterMemory osc_register_;
-  // BoolBind0 osc_start_;
-  BoolProperty osc_start_property;
- protected:
-  
- private:
-  
-};
-
 // notify On HardwareProperty change.
 template <typename type>
 class HardwareProperty {
@@ -21,7 +9,7 @@ class HardwareProperty {
     OnPrefChanged();
   }
   void set(type& value) {
-    set_value(name_, ConvertToValue(Value));
+    set_value(name_, ConvertToValue(value));
     
     SetBind(value);
     NotifyPropertyChange();
@@ -157,4 +145,4 @@ class HandleDoubleProperty {
   double Get();
 };
 
-}
+} // namespace

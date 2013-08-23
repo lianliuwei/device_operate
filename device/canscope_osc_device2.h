@@ -43,6 +43,7 @@ class OscDeviceHandle {
 };
 
 {
+  // sync set property and check error
   handle->osc_start_.Set(false);
   if (handle->GetLastError())
     do something;
@@ -72,11 +73,6 @@ class OscDeviceHandle {
     device->SetDevice();  
 }
 
-{
-
-
-}
-
 class PropertyDelegate {
   void WriteMemory(uint8* addr, uint32 length);
   PrefStore* GetPrefStore();
@@ -87,7 +83,7 @@ class Property : public PrefStore::Observer {
 public:
   Property(PropertyDelegate* delegate, string name, uint8* addr);
   // need getter setter
-  Type Get() const {
+  Type Get() const {  
     bind_.get_value();
   }
   void Set(Type& value) {
