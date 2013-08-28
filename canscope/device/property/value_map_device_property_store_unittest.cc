@@ -69,6 +69,7 @@ TEST(ValueMapDevicePropertyStoreTest, Observer) {
   EXPECT_EQ(true, temp);
   prefs.RemovePrefObserver(pref_name, &stub);
 }
+
 namespace {
 static const char kTestConfig [] = { " \
 { \

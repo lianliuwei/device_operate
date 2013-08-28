@@ -86,4 +86,4 @@ static const uint32 kScopeReadAddr = kBaseAddr + 0x138;
 // size dependent on canscope type.
 // static const int kScopeReadSize = 4000;
 
-};
+}; // namespace canscope
