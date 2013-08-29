@@ -30,6 +30,9 @@ public:
   void Reset(DictionaryValue* value_owned);
   DictionaryValue* Serialize();
 
+  // can only be access on the thread call AttachThread()
+  void AttachThread();
+
 private:
   PropertyNotifiter notifier_;
   PrefValueMap prefs_;
@@ -37,4 +40,4 @@ private:
   DISALLOW_COPY_AND_ASSIGN(ValueMapDevicePropertyStore);
 };
 
-} // namespace
+} // namespace canscope

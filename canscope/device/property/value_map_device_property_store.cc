@@ -85,4 +85,9 @@ DictionaryValue* ValueMapDevicePropertyStore::Serialize() {
   return dict;
 }
 
-} // namespace
+void ValueMapDevicePropertyStore::AttachThread() {
+  notifier_.AttachThread();
+}
+
+
+} // namespace canscope
