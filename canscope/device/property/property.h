@@ -80,11 +80,13 @@ private:
           base::Bind(&Property::SetValueImplSync, 
               base::Unretained(this), value));
       WaitForCallFinish();
-      FetchNewPref();
+      delegate_->FetchNewPref();
       return;
     } else {
       // same thread set_value() no need to wait. or will Death Lock
       device_member_.set_value(value);
+      delegate_->FetchNewPref();
+
       CallCallback();
 
       return;
@@ -119,10 +121,6 @@ private:
 
   void SignalFinish() {
     event_.Signal();
-  }
-
-  void FetchNewPref() {
-
   }
 
   PropertyDelegate* delegate_;

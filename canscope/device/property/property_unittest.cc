@@ -16,6 +16,11 @@ static const char* kBoolMember = "test.bool_member";
 static const char* kIntMember = "test.int_member";
 }
 
+namespace canscope {
+bool IsDeviceThread() {
+  return true;
+}
+}
 class Device {
 public:
   Device() {}
@@ -80,6 +85,10 @@ public:
     NOTIMPLEMENTED();
   }
 
+  virtual void FetchNewPref() {
+    prefs_.Reset(device_.prefs_.Serialize());
+  }
+
   canscope::BooleanProperty bool_property;
   canscope::IntegerProperty int_property;
 
@@ -116,13 +125,10 @@ TEST(PropertyTest, OneThread) {
   EXPECT_EQ(3, handle.int_property.value());
   // set from handle
   handle.bool_property.set_value(true);
+  EXPECT_EQ(true, handle.bool_property.value());
   EXPECT_EQ(true, device.bool_member.value());
   handle.int_property.set_value(44);
+  EXPECT_EQ(44, handle.int_property.value());
   EXPECT_EQ(44, device.int_member.value());
 }
 
-namespace canscope {
-bool IsDeviceThread() {
-  return true;
-}
-}

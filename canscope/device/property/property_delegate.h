@@ -15,7 +15,7 @@ public:
   virtual bool IsBathMode() = 0;
   virtual std::string device_name() = 0;
   virtual void PostDeviceTask(const base::Closure& task) = 0;
-
+  virtual void FetchNewPref() = 0;
 protected:
   PropertyDelegate() {}
   virtual ~PropertyDelegate() {}
