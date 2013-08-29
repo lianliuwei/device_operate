@@ -4,6 +4,7 @@
 #include "base/bind.h"
 #include "base/json/json_string_value_serializer.h"
 #include "base/json/json_reader.h"
+#include "base/threading/thread.h"
 
 #include "canscope/device/property/property.h"
 #include "canscope/device/property/property_delegate.h"
@@ -13,6 +14,7 @@
 using namespace base;
 using testing::_;
 using testing::Return;
+using testing::DoAll;
 
 namespace {
 static const char* kBoolMember = "test.bool_member";
@@ -169,3 +171,61 @@ TEST(PropertyTest, OneThread) {
   EXPECT_EQ(44, device.int_member.value());
 }
 
+ACTION_P2(CheckDeviceThread, device_thread, no_revert) {
+  bool ret = MessageLoop::current() == device_thread->message_loop();
+  EXPECT_EQ(true, no_revert ? ret : !ret);
+}
+
+ACTION_P(ReturnIsDeviceThread, device_thread) {
+  bool ret = MessageLoop::current() == device_thread->message_loop();
+  return ret;
+}
+
+ACTION_P(PostDeviceTaskAction, device_thread) {
+   device_thread->message_loop()->PostTask(FROM_HERE, arg0);
+}
+
+void AttachThread(canscope::ValueMapDevicePropertyStore* prefs) {
+  prefs->AttachThread();
+}
+
+TEST(PropertyTest, CrossThread) {
+  Device device;
+  device.Init(GetDefaultConfig());
+  DeviceHandle handle(device);
+
+  Thread device_thread("device");
+  
+  device_thread.Start();
+  device_thread.message_loop()->
+      PostTask(FROM_HERE, Bind(&AttachThread, &(device.prefs_)));
+  // mock Post and check device thread
+  EXPECT_CALL(g_DeviceThreadMock, IsDeviceThread())
+      .WillRepeatedly(ReturnIsDeviceThread(&device_thread));
+  EXPECT_CALL(handle, PostDeviceTask(_))
+      .WillRepeatedly(PostDeviceTaskAction(&device_thread));
+
+  // set from handle
+  EXPECT_CALL(device, SetBoolMember())
+      .Times(1).WillOnce(CheckDeviceThread(&device_thread, true));
+  EXPECT_CALL(device, SetIntMember())
+      .Times(1).WillOnce(CheckDeviceThread(&device_thread, true));
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
+      .Times(1).WillOnce(DoAll(CheckDeviceThread(&device_thread, false), 
+                               Return(true)));
+  EXPECT_CALL(handle, int_property_check(44, kIntMember))
+      .Times(1).WillOnce(DoAll(CheckDeviceThread(&device_thread, false), 
+                               Return(true)));
+
+  handle.bool_property.set_value(true);
+  EXPECT_EQ(true, handle.bool_property.value());
+  EXPECT_EQ(true, device.bool_member.value());
+  handle.int_property.set_value(44);
+  EXPECT_EQ(44, handle.int_property.value());
+  EXPECT_EQ(44, device.int_member.value());
+
+  // HACK delete device from this thread
+  device.prefs_.AttachThread();
+  device_thread.Stop();
+
+}
