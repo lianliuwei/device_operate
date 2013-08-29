@@ -1,4 +1,5 @@
 #include "testing/gtest/include/gtest/gtest.h"
+#include "testing/gmock/include/gmock/gmock.h"
 
 #include <string>
 
@@ -8,6 +9,7 @@
 using namespace canscope;
 using namespace base;
 using namespace std;
+using testing::_;
 
 TEST(StoreMemberTest, BoolMember) {
   ValueMapDevicePropertyStore prefs;
@@ -28,15 +30,10 @@ TEST(StoreMemberTest, BoolMember) {
 
 class ChangedCallbackStub {
 public:
-  ChangedCallbackStub() 
-      : count(0) {}
+  ChangedCallbackStub() {}
   ~ChangedCallbackStub() {}
-  void Notify(const std::string& pref_name) {
-     ++count;
-     last_pref_name = pref_name;
-  }
-  int count;
-  string last_pref_name;
+
+  MOCK_METHOD1(Notify, void(const std::string&));
 };
 
 TEST(StoreMemberTest, Callback) {
@@ -46,18 +43,12 @@ TEST(StoreMemberTest, Callback) {
   ChangedCallbackStub stub;
   BooleanStoreMember bool_pref(path.c_str(), &prefs, 
     Bind(&ChangedCallbackStub::Notify, Unretained(&stub)));
-  EXPECT_EQ(0, stub.count);
-  EXPECT_EQ("", stub.last_pref_name);
+  EXPECT_CALL(stub, Notify(_)).Times(0);
   EXPECT_EQ(true, bool_pref.value());
-  EXPECT_EQ(0, stub.count);
-  EXPECT_EQ("", stub.last_pref_name);
+  EXPECT_CALL(stub, Notify(path)).Times(1);
   prefs.SetValue(path, new FundamentalValue(false));
-  EXPECT_EQ(1, stub.count);
-  EXPECT_EQ(path, stub.last_pref_name);
+  EXPECT_CALL(stub, Notify(path)).Times(1);
   prefs.SetValue(path, new FundamentalValue(true));
-  EXPECT_EQ(2, stub.count);
-  EXPECT_EQ(path, stub.last_pref_name);
+  EXPECT_CALL(stub, Notify(_)).Times(0);
   EXPECT_EQ(true, bool_pref.value());
-  EXPECT_EQ(2, stub.count);
-  EXPECT_EQ(path, stub.last_pref_name);
 }
