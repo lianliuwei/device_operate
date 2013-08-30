@@ -92,6 +92,9 @@ public:
   virtual void FetchNewPref() {
     prefs_.ChangeContent(device_.prefs_.Serialize());
   }
+  Device* device() {
+    return &device_;
+  }
 
   canscope::BooleanProperty bool_property;
   canscope::IntegerProperty int_property;
@@ -137,6 +140,7 @@ TEST(PropertyTest, OneThread) {
   // OneThread no need Post task
   EXPECT_CALL(g_DeviceThreadMock, IsDeviceThread()).WillRepeatedly(Return(true));
   EXPECT_CALL(handle, PostDeviceTask(_)).Times(0);
+  EXPECT_CALL(handle, IsBatchMode()).WillRepeatedly(Return(false));
 
   // get value
   EXPECT_CALL(device, SetBoolMember()).Times(0);
@@ -232,6 +236,8 @@ TEST(PropertyTest, CrossThread) {
       .WillRepeatedly(ReturnIsDeviceThread(&device_thread));
   EXPECT_CALL(handle, PostDeviceTask(_))
       .WillRepeatedly(PostDeviceTaskAction(&device_thread));
+  EXPECT_CALL(handle, IsBatchMode()).WillRepeatedly(Return(false));
+
 
   // set from handle
   EXPECT_CALL(device, SetBoolMember())
@@ -278,4 +284,56 @@ TEST(PropertyTest, CrossThread) {
   device.prefs_.AttachThread();
   device_thread.Stop();
 
+}
+
+namespace {
+// use Batch mode cache property, after out range, set to device and fetch new
+// pref
+class ScopedDeviceOperate {
+public:  
+  ScopedDeviceOperate(DeviceHandle& handle)
+      : handle_(handle) {
+    EXPECT_CALL(handle_, IsBatchMode()).WillRepeatedly(Return(true));
+
+  }
+  ~ScopedDeviceOperate() {
+    EXPECT_CALL(handle_, IsBatchMode()).Times(0);
+    handle_.device()->prefs_.ChangeContent(handle_.prefs_.Serialize());
+  }
+private:
+  DeviceHandle& handle_;
+  DISALLOW_COPY_AND_ASSIGN(ScopedDeviceOperate);
+};
+  
+}
+TEST(PropertyTest, BatchOperate) {
+  Device device;
+  device.Init(GetDefaultConfig());
+  DeviceHandle handle(device);
+
+  // OneThread no need Post task
+  EXPECT_CALL(g_DeviceThreadMock, IsDeviceThread()).WillRepeatedly(Return(true));
+  EXPECT_CALL(handle, PostDeviceTask(_)).Times(0);
+
+  {
+  ScopedDeviceOperate device_operate(handle);
+  // set from handle
+  EXPECT_CALL(device, SetBoolMember()).Times(0);
+  EXPECT_CALL(device, SetIntMember()).Times(0);
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
+    .Times(1).WillOnce(Return(true));
+  EXPECT_CALL(handle, int_property_check(44, kIntMember))
+    .Times(1).WillOnce(Return(true));
+
+  handle.bool_property.set_value(true);
+  EXPECT_EQ(true, handle.bool_property.value());
+  EXPECT_EQ(false, device.bool_member.value());
+  handle.int_property.set_value(44);
+  EXPECT_EQ(44, handle.int_property.value());
+  EXPECT_EQ(3, device.int_member.value());
+  }
+  EXPECT_EQ(true, handle.bool_property.value());
+  EXPECT_EQ(true, device.bool_member.value());
+  EXPECT_EQ(44, handle.int_property.value());
+  EXPECT_EQ(44, device.int_member.value());
 }
