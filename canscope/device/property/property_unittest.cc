@@ -78,7 +78,7 @@ public:
 
   // canscope::PropertyDelegate
   virtual canscope::DevicePropertyStore* GetDevicePropertyStore() {
-    return &(device_.prefs_);
+    return &(prefs_);
   }
 
   virtual bool IsBathMode() {
@@ -92,7 +92,7 @@ public:
   MOCK_METHOD1(PostDeviceTask, void(const Closure&));
 
   virtual void FetchNewPref() {
-    prefs_.Reset(device_.prefs_.Serialize());
+    prefs_.ChangeContent(device_.prefs_.Serialize());
   }
 
   canscope::BooleanProperty bool_property;
@@ -100,6 +100,15 @@ public:
 
 private:
   Device& device_;
+};
+
+class DevicePropertyObserverMock 
+    : public canscope::DevicePropertyStore::Observer {
+public:
+  DevicePropertyObserverMock() {}
+  virtual ~DevicePropertyObserverMock() {}
+
+  MOCK_METHOD1(OnPreferenceChanged, void(const std::string&));
 };
 
 namespace {
@@ -169,6 +178,27 @@ TEST(PropertyTest, OneThread) {
   EXPECT_EQ(true, device.bool_member.value());
   EXPECT_EQ(44, handle.int_property.value());
   EXPECT_EQ(44, device.int_member.value());
+
+  // observer
+  DevicePropertyObserverMock handle_observer;
+
+  handle.bool_property.AddPrefObserver(&handle_observer);
+
+  EXPECT_CALL(device, SetBoolMember()).Times(1);
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
+      .Times(1).WillOnce(Return(true));
+  EXPECT_CALL(handle_observer, OnPreferenceChanged(_)).Times(0);
+
+  handle.bool_property.set_value(true);
+
+  EXPECT_CALL(device, SetBoolMember()).Times(1);
+  EXPECT_CALL(handle, bool_property_check(false, kBoolMember))
+      .Times(1).WillOnce(Return(true));
+  EXPECT_CALL(handle_observer, OnPreferenceChanged(kBoolMember)).Times(1);
+
+  handle.bool_property.set_value(false);
+
+  handle.bool_property.RemovePrefObserver(&handle_observer);
 }
 
 ACTION_P2(CheckDeviceThread, device_thread, no_revert) {
@@ -223,6 +253,28 @@ TEST(PropertyTest, CrossThread) {
   handle.int_property.set_value(44);
   EXPECT_EQ(44, handle.int_property.value());
   EXPECT_EQ(44, device.int_member.value());
+
+  // observer
+  DevicePropertyObserverMock handle_observer;
+
+  handle.bool_property.AddPrefObserver(&handle_observer);
+
+  EXPECT_CALL(device, SetBoolMember()).Times(1);
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
+    .Times(1).WillOnce(Return(true));
+  EXPECT_CALL(handle_observer, OnPreferenceChanged(_)).Times(0);
+
+  handle.bool_property.set_value(true);
+
+  EXPECT_CALL(device, SetBoolMember()).Times(1);
+  EXPECT_CALL(handle, bool_property_check(false, kBoolMember))
+      .Times(1).WillOnce(Return(true));
+  EXPECT_CALL(handle_observer, OnPreferenceChanged(kBoolMember))
+      .Times(1).WillOnce(CheckDeviceThread(&device_thread, false));
+
+  handle.bool_property.set_value(false);
+
+  handle.bool_property.RemovePrefObserver(&handle_observer);
 
   // HACK delete device from this thread
   device.prefs_.AttachThread();
