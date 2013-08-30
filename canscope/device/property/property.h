@@ -59,13 +59,13 @@ public:
 
   // observer
   void AddPrefObserver(DevicePropertyStore::Observer* obs) {
-    delegate_.GetDevicePropertyStore()->AddPrefObserver(name_, obs);
+    delegate_->GetDevicePropertyStore()->AddPrefObserver(name_, obs);
   }
   void RemovePrefObserver(DevicePropertyStore::Observer* obs) {
-    delegate_.GetDevicePropertyStore()->RemovePrefObserver(name_, obs);
+    delegate_->GetDevicePropertyStore()->RemovePrefObserver(name_, obs);
   }
   bool HasObserver(DevicePropertyStore::Observer* obs) const {
-    return delegate_.GetDevicePropertyStore()->HasObserver(name_, obs);
+    return delegate_->GetDevicePropertyStore()->HasObserver(name_, obs);
   }
 
 private:
