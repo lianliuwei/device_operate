@@ -12,7 +12,7 @@ class PropertyDelegate {
 public:
   virtual DevicePropertyStore* GetDevicePropertyStore() = 0;
   // bath mode config device at once
-  virtual bool IsBathMode() = 0;
+  virtual bool IsBatchMode() = 0;
   virtual std::string device_name() = 0;
   virtual void PostDeviceTask(const base::Closure& task) = 0;
   virtual void FetchNewPref() = 0;

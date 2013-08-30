@@ -70,7 +70,7 @@ public:
 
 private:
   void SetValueImpl(const Type& value) {
-    if (delegate_->IsBathMode()) {
+    if (delegate_->IsBatchMode()) {
       member_.set_value(value);
       return;
     }

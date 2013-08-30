@@ -81,9 +81,7 @@ public:
     return &(prefs_);
   }
 
-  virtual bool IsBathMode() {
-    return false;
-  }
+  MOCK_METHOD0(IsBatchMode, bool());
 
   virtual std::string device_name() {
     return "device";
@@ -102,7 +100,7 @@ private:
   Device& device_;
 };
 
-class DevicePropertyObserverMock 
+class DevicePropertyObserverMock
     : public canscope::DevicePropertyStore::Observer {
 public:
   DevicePropertyObserverMock() {}
@@ -135,11 +133,11 @@ TEST(PropertyTest, OneThread) {
   Device device;
   device.Init(GetDefaultConfig());
   DeviceHandle handle(device);
-  
+
   // OneThread no need Post task
   EXPECT_CALL(g_DeviceThreadMock, IsDeviceThread()).WillRepeatedly(Return(true));
   EXPECT_CALL(handle, PostDeviceTask(_)).Times(0);
-  
+
   // get value
   EXPECT_CALL(device, SetBoolMember()).Times(0);
   EXPECT_CALL(device, SetIntMember()).Times(0);
@@ -225,7 +223,7 @@ TEST(PropertyTest, CrossThread) {
   DeviceHandle handle(device);
 
   Thread device_thread("device");
-  
+
   device_thread.Start();
   device_thread.message_loop()->
       PostTask(FROM_HERE, Bind(&AttachThread, &(device.prefs_)));
@@ -241,10 +239,10 @@ TEST(PropertyTest, CrossThread) {
   EXPECT_CALL(device, SetIntMember())
       .Times(1).WillOnce(CheckDeviceThread(&device_thread, true));
   EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
-      .Times(1).WillOnce(DoAll(CheckDeviceThread(&device_thread, false), 
+      .Times(1).WillOnce(DoAll(CheckDeviceThread(&device_thread, false),
                                Return(true)));
   EXPECT_CALL(handle, int_property_check(44, kIntMember))
-      .Times(1).WillOnce(DoAll(CheckDeviceThread(&device_thread, false), 
+      .Times(1).WillOnce(DoAll(CheckDeviceThread(&device_thread, false),
                                Return(true)));
 
   handle.bool_property.set_value(true);
