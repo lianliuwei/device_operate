@@ -27,8 +27,14 @@ public:
   virtual void SetValueSilently(const std::string& key, base::Value* value);
   virtual void RemoveValue(const std::string& key);
 
+  // init from value_owned
+  // no FireObserver
   void Reset(DictionaryValue* value_owned);
   DictionaryValue* Serialize();
+
+  // value_owned item must be in store, no allow add item
+  // for store revert to old state.
+  void ChangeContent(DictionaryValue* value_owned);
 
   // can only be access on the thread call AttachThread()
   void AttachThread();

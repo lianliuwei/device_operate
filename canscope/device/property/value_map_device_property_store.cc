@@ -85,9 +85,18 @@ DictionaryValue* ValueMapDevicePropertyStore::Serialize() {
   return dict;
 }
 
+
+void ValueMapDevicePropertyStore::ChangeContent(DictionaryValue* value_owned) {
+ scoped_ptr<DictionaryValue> dict(value_owned);
+  for (DictionaryValue::Iterator it(*value_owned); 
+      !it.IsAtEnd(); it.Advance()) {
+    DCHECK(HasPrefPath(it.key()));
+    SetValue(it.key(), it.value().DeepCopy());
+  }
+}
+
 void ValueMapDevicePropertyStore::AttachThread() {
   notifier_.AttachThread();
 }
-
 
 } // namespace canscope
