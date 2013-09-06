@@ -1,3 +1,5 @@
+#pragma once
+
 #include "base/debug/trace_event_impl.h"
 #include "base/files/file_path.h"
 #include "base/file_util.h"
