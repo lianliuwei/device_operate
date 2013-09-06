@@ -2,6 +2,8 @@
 
 #include <string>
 #include "base/callback.h"
+#include "base/debug/trace_event.h"
+
 #include "base/synchronization/waitable_event.h"
 
 #include "canscope/device/property/property_delegate.h"
@@ -37,10 +39,15 @@ public:
   // sync call
   // call on the thread it belong
   void set_value(const Type& value) {
+    TRACE_EVENT0("Property", "SetValueSync");
+    TRACE_EVENT_FLOW_BEGIN0("Property", "SetValueSync", this);
     if (!CheckValue(value)) {
+      TRACE_EVENT_FLOW_END0("Property", "SetValueSync", this);
       return;
     }
+    TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "CheckValue");
     SetValueImpl(value);
+    TRACE_EVENT_FLOW_END0("Property", "SetValueSync", this);
   }
 
   // async set_value
@@ -80,20 +87,26 @@ private:
           base::Bind(&Property::SetValueImplSync, 
               base::Unretained(this), value));
       WaitForCallFinish();
+      TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "FetchNewPref");
       delegate_->FetchNewPref();
       return;
     } else {
+      TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "SetValueDeviceThread");
       // same thread set_value() no need to wait. or will Death Lock
       device_member_.set_value(value);
-      delegate_->FetchNewPref();
-
       CallCallback();
+
+      TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "FetchNewPref");
+      delegate_->FetchNewPref();
 
       return;
     }
   }
 
   void SetValueImplSync(Type value) {
+    TRACE_EVENT0("Property", "SetValueDeviceThread");
+    TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "SetValueDeviceThread");
+
     DCHECK(IsDeviceThread());
     device_member_.set_value(value);
     CallCallback();

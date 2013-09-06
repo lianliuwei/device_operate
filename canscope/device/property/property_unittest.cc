@@ -6,6 +6,7 @@
 #include "base/json/json_reader.h"
 #include "base/threading/thread.h"
 
+#include "canscope/scoped_trace_event.h"
 #include "canscope/device/property/property.h"
 #include "canscope/device/property/property_delegate.h"
 #include "canscope/device/property/store_member.h"
@@ -133,6 +134,8 @@ DictionaryValue* GetDefaultConfig() {
 }
 
 TEST(PropertyTest, OneThread) {
+  ScopedTraceEvent trace_event("Property", base::FilePath(L"trace_event.json"));
+
   Device device;
   device.Init(GetDefaultConfig());
   DeviceHandle handle(device);
@@ -222,6 +225,8 @@ void AttachThread(canscope::ValueMapDevicePropertyStore* prefs) {
 }
 
 TEST(PropertyTest, CrossThread) {
+  ScopedTraceEvent trace_event("Property", base::FilePath(L"trace_event.json"));
+
   Device device;
   device.Init(GetDefaultConfig());
   DeviceHandle handle(device);
@@ -296,6 +301,7 @@ public:
     EXPECT_CALL(handle_, IsBatchMode()).WillRepeatedly(Return(true));
 
   }
+  // only support one thread, no same thread need post task and WaitEvent.
   ~ScopedDeviceOperate() {
     EXPECT_CALL(handle_, IsBatchMode()).Times(0);
     handle_.device()->prefs_.ChangeContent(handle_.prefs_.Serialize());
