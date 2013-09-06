@@ -134,7 +134,8 @@
         'device/property/store_member_unittest.cc',
         'device/property/enum_store_member.h',
         'device/property/enum_store_member_unittest.cc',
-        
+        'scoped_trace_event.h',
+        'scoped_trace_event.cc',
       ],
       'include_dirs': [
         '..',
