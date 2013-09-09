@@ -16,6 +16,7 @@ using namespace base;
 using testing::_;
 using testing::Return;
 using testing::DoAll;
+using namespace canscope::device;
 
 namespace {
 static const char* kBoolMember = "test.bool_member";
@@ -68,8 +69,12 @@ public:
           Bind(&Device::SetIntMember, Unretained(&device)),
           Bind(&DeviceHandle::int_property_check, Unretained(this)))
       , device_(device) {
-    Init(device.prefs_.Serialize());
   }
+  
+  void InitFromDevice() {
+    Init(device_.prefs_.Serialize());
+  }
+
   virtual ~DeviceHandle() {
 
   }
@@ -104,6 +109,25 @@ private:
   Device& device_;
 };
 
+// use Batch mode cache property, after out range, set to device and fetch new
+// pref
+class ScopedDeviceOperate {
+public:  
+  ScopedDeviceOperate(DeviceHandle& handle)
+      : handle_(handle) {
+    EXPECT_CALL(handle_, IsBatchMode()).WillRepeatedly(Return(true));
+
+  }
+  // only support one thread, no same thread need post task and WaitEvent.
+  ~ScopedDeviceOperate() {
+    EXPECT_CALL(handle_, IsBatchMode()).Times(0);
+    handle_.device()->prefs_.ChangeContent(handle_.prefs_.Serialize());
+  }
+private:
+  DeviceHandle& handle_;
+  DISALLOW_COPY_AND_ASSIGN(ScopedDeviceOperate);
+};
+ 
 class DevicePropertyObserverMock
     : public canscope::DevicePropertyStore::Observer {
 public:
@@ -133,17 +157,109 @@ DictionaryValue* GetDefaultConfig() {
   return dict_value;
 }
 
-TEST(PropertyTest, OneThread) {
-  ScopedTraceEvent trace_event("Property", base::FilePath(L"trace_event.json"));
+ACTION(CallFuncError) {
+  SetDeviceError(ERR_READ_DEVICE);
+}
 
+ACTION(NotReached) {
+  NOTREACHED();
+}
+
+class DeviceThread : public base::Thread {
+public:
+  DeviceThread() 
+      : Thread("device") {}
+  virtual ~DeviceThread() {}
+
+protected:
+  virtual void Init() {
+    device_error_.reset(new ScopedDeviceError());
+  }
+  virtual void CleanUp() {
+    device_error_.reset(NULL);
+  }
+
+private:
+  scoped_ptr<ScopedDeviceError> device_error_;
+};
+
+ACTION_P2(CheckDeviceThread, device_thread, no_revert) {
+  bool ret = MessageLoop::current() == device_thread->message_loop();
+  EXPECT_EQ(true, no_revert ? ret : !ret);
+}
+
+ACTION_P(ReturnIsDeviceThread, device_thread) {
+  bool ret = MessageLoop::current() == device_thread->message_loop();
+  return ret;
+}
+
+ACTION_P(PostDeviceTaskAction, device_thread) {
+  device_thread->message_loop()->PostTask(FROM_HERE, arg0);
+}
+
+void AttachThread(canscope::ValueMapDevicePropertyStore* prefs) {
+  prefs->AttachThread();
+}
+
+class PropertyTest : public testing::Test {
+public:
+  PropertyTest() 
+    : handle(device)
+    , trace_event("Property", base::FilePath(L"trace_event.json"))
+    , created_thread_(false){}
+ 
+  void Verify() {
+    testing::Mock::VerifyAndClearExpectations(&handle);
+    testing::Mock::VerifyAndClearExpectations(&device);
+  }
+
+  void InitOneThread() {
+    ON_CALL(g_DeviceThreadMock, IsDeviceThread()).WillByDefault(Return(true));
+    ON_CALL(handle, PostDeviceTask(_)).WillByDefault(NotReached());
+    ON_CALL(handle, IsBatchMode()).WillByDefault(Return(false));
+  }
+
+  void InitCrossThread() {
+    created_thread_ = true;
+    device_thread.Start();
+    device_thread.message_loop()->
+        PostTask(FROM_HERE, Bind(&AttachThread, &(device.prefs_)));
+
+    // mock Post and check device thread
+    ON_CALL(g_DeviceThreadMock, IsDeviceThread())
+        .WillByDefault(ReturnIsDeviceThread(&device_thread));
+    ON_CALL(handle, PostDeviceTask(_))
+        .WillByDefault(PostDeviceTaskAction(&device_thread));
+    ON_CALL(handle, IsBatchMode()).WillByDefault(Return(false));
+  }
+
+protected:
+  virtual void SetUp() {
+    device.Init(GetDefaultConfig());
+    handle.InitFromDevice();
+  }
+
+  virtual void TearDown() {
+    if (created_thread_) {
+      // HACK delete device from this thread
+      device.prefs_.AttachThread();
+      device_thread.Stop();
+    }
+  }
+
+  ScopedTraceEvent trace_event;
+  ScopedDeviceError device_error;
   Device device;
-  device.Init(GetDefaultConfig());
-  DeviceHandle handle(device);
+  DeviceHandle handle;
+  DeviceThread device_thread;
 
-  // OneThread no need Post task
-  EXPECT_CALL(g_DeviceThreadMock, IsDeviceThread()).WillRepeatedly(Return(true));
-  EXPECT_CALL(handle, PostDeviceTask(_)).Times(0);
-  EXPECT_CALL(handle, IsBatchMode()).WillRepeatedly(Return(false));
+private:
+  bool created_thread_;
+  
+};
+
+TEST_F(PropertyTest, GetValueOneThread) {
+  InitOneThread();
 
   // get value
   EXPECT_CALL(device, SetBoolMember()).Times(0);
@@ -153,6 +269,12 @@ TEST(PropertyTest, OneThread) {
 
   EXPECT_EQ(false, handle.bool_property.value());
   EXPECT_EQ(3, handle.int_property.value());
+
+  Verify();
+}
+
+TEST_F(PropertyTest, SetHandleOneThread) {
+  InitOneThread();
 
   // set from handle
   EXPECT_CALL(device, SetBoolMember()).Times(1);
@@ -166,23 +288,38 @@ TEST(PropertyTest, OneThread) {
   EXPECT_EQ(true, handle.bool_property.value());
   EXPECT_EQ(true, device.bool_member.value());
   handle.int_property.set_value(44);
+  EXPECT_EQ(OK, LastDeviceError());
   EXPECT_EQ(44, handle.int_property.value());
   EXPECT_EQ(44, device.int_member.value());
+
+  Verify();
+}
+
+TEST_F(PropertyTest, CheckFalseOneThread) {
+  InitOneThread();
 
   // check false
   EXPECT_CALL(device, SetBoolMember()).Times(0);
   EXPECT_CALL(device, SetIntMember()).Times(0);
-  EXPECT_CALL(handle, bool_property_check(false, kBoolMember))
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
       .Times(1).WillOnce(Return(false));
   EXPECT_CALL(handle, int_property_check(10, kIntMember))
       .Times(1).WillOnce(Return(false));
 
-  handle.bool_property.set_value(false);
+  handle.bool_property.set_value(true);
+  EXPECT_EQ(ERR_INVAILD_VALUE, LastDeviceError());
+  EXPECT_EQ(false, handle.bool_property.value());
+  EXPECT_EQ(false, device.bool_member.value());
   handle.int_property.set_value(10);
-  EXPECT_EQ(true, handle.bool_property.value());
-  EXPECT_EQ(true, device.bool_member.value());
-  EXPECT_EQ(44, handle.int_property.value());
-  EXPECT_EQ(44, device.int_member.value());
+  EXPECT_EQ(ERR_INVAILD_VALUE, LastDeviceError());
+  EXPECT_EQ(3, handle.int_property.value());
+  EXPECT_EQ(3, device.int_member.value());
+
+  Verify();
+}
+
+TEST_F(PropertyTest, ObserverOneThread) {
+  InitOneThread();
 
   // observer
   DevicePropertyObserverMock handle_observer;
@@ -192,57 +329,66 @@ TEST(PropertyTest, OneThread) {
   EXPECT_CALL(device, SetBoolMember()).Times(1);
   EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
       .Times(1).WillOnce(Return(true));
-  EXPECT_CALL(handle_observer, OnPreferenceChanged(_)).Times(0);
+  EXPECT_CALL(handle_observer, OnPreferenceChanged(kBoolMember)).Times(1);
 
   handle.bool_property.set_value(true);
 
   EXPECT_CALL(device, SetBoolMember()).Times(1);
-  EXPECT_CALL(handle, bool_property_check(false, kBoolMember))
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
       .Times(1).WillOnce(Return(true));
-  EXPECT_CALL(handle_observer, OnPreferenceChanged(kBoolMember)).Times(1);
+  EXPECT_CALL(handle_observer, OnPreferenceChanged(_)).Times(0);
 
-  handle.bool_property.set_value(false);
+  handle.bool_property.set_value(true);
 
   handle.bool_property.RemovePrefObserver(&handle_observer);
+
+  Verify();
 }
 
-ACTION_P2(CheckDeviceThread, device_thread, no_revert) {
-  bool ret = MessageLoop::current() == device_thread->message_loop();
-  EXPECT_EQ(true, no_revert ? ret : !ret);
+TEST_F(PropertyTest, CallFuncErrorOneThread) {
+  InitOneThread();
+
+  // SetBoolMember return error
+  EXPECT_CALL(device, SetBoolMember()).Times(1).WillOnce(CallFuncError());
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
+      .Times(1).WillOnce(Return(true));
+  handle.bool_property.set_value(true);
+  EXPECT_EQ(ERR_READ_DEVICE, LastDeviceError());
+  EXPECT_EQ(true, handle.bool_property.value());
+  EXPECT_EQ(true, device.bool_member.value());
+
+  Verify();
 }
 
-ACTION_P(ReturnIsDeviceThread, device_thread) {
-  bool ret = MessageLoop::current() == device_thread->message_loop();
-  return ret;
+TEST_F(PropertyTest, BatchModeOneThread) {
+  InitOneThread();
+
+  EXPECT_CALL(device, SetBoolMember()).Times(0);
+  EXPECT_CALL(device, SetIntMember()).Times(0);
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
+      .Times(1).WillOnce(Return(true));
+  EXPECT_CALL(handle, int_property_check(44, kIntMember))
+      .Times(1).WillOnce(Return(true));
+  {
+  ScopedDeviceOperate device_operate(handle);
+ 
+  handle.bool_property.set_value(true);
+  EXPECT_EQ(true, handle.bool_property.value());
+  EXPECT_EQ(false, device.bool_member.value());
+  handle.int_property.set_value(44);
+  EXPECT_EQ(44, handle.int_property.value());
+  EXPECT_EQ(3, device.int_member.value());
+  }
+  EXPECT_EQ(true, handle.bool_property.value());
+  EXPECT_EQ(true, device.bool_member.value());
+  EXPECT_EQ(44, handle.int_property.value());
+  EXPECT_EQ(44, device.int_member.value());
+
+  Verify();
 }
 
-ACTION_P(PostDeviceTaskAction, device_thread) {
-   device_thread->message_loop()->PostTask(FROM_HERE, arg0);
-}
-
-void AttachThread(canscope::ValueMapDevicePropertyStore* prefs) {
-  prefs->AttachThread();
-}
-
-TEST(PropertyTest, CrossThread) {
-  ScopedTraceEvent trace_event("Property", base::FilePath(L"trace_event.json"));
-
-  Device device;
-  device.Init(GetDefaultConfig());
-  DeviceHandle handle(device);
-
-  Thread device_thread("device");
-
-  device_thread.Start();
-  device_thread.message_loop()->
-      PostTask(FROM_HERE, Bind(&AttachThread, &(device.prefs_)));
-  // mock Post and check device thread
-  EXPECT_CALL(g_DeviceThreadMock, IsDeviceThread())
-      .WillRepeatedly(ReturnIsDeviceThread(&device_thread));
-  EXPECT_CALL(handle, PostDeviceTask(_))
-      .WillRepeatedly(PostDeviceTaskAction(&device_thread));
-  EXPECT_CALL(handle, IsBatchMode()).WillRepeatedly(Return(false));
-
+TEST_F(PropertyTest, SetHandleCrossThread) {
+  InitCrossThread();
 
   // set from handle
   EXPECT_CALL(device, SetBoolMember())
@@ -257,11 +403,19 @@ TEST(PropertyTest, CrossThread) {
                                Return(true)));
 
   handle.bool_property.set_value(true);
+  EXPECT_EQ(OK, LastDeviceError());
   EXPECT_EQ(true, handle.bool_property.value());
   EXPECT_EQ(true, device.bool_member.value());
   handle.int_property.set_value(44);
+  EXPECT_EQ(OK, LastDeviceError());
   EXPECT_EQ(44, handle.int_property.value());
   EXPECT_EQ(44, device.int_member.value());
+
+  Verify();
+}
+
+TEST_F(PropertyTest, ObserverCrossThread) {
+  InitCrossThread();
 
   // observer
   DevicePropertyObserverMock handle_observer;
@@ -269,77 +423,63 @@ TEST(PropertyTest, CrossThread) {
   handle.bool_property.AddPrefObserver(&handle_observer);
 
   EXPECT_CALL(device, SetBoolMember()).Times(1);
-  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
+  EXPECT_CALL(handle, bool_property_check(false, kBoolMember))
     .Times(1).WillOnce(Return(true));
   EXPECT_CALL(handle_observer, OnPreferenceChanged(_)).Times(0);
 
-  handle.bool_property.set_value(true);
+  handle.bool_property.set_value(false);
 
   EXPECT_CALL(device, SetBoolMember()).Times(1);
-  EXPECT_CALL(handle, bool_property_check(false, kBoolMember))
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
       .Times(1).WillOnce(Return(true));
   EXPECT_CALL(handle_observer, OnPreferenceChanged(kBoolMember))
       .Times(1).WillOnce(CheckDeviceThread(&device_thread, false));
 
-  handle.bool_property.set_value(false);
+  handle.bool_property.set_value(true);
 
   handle.bool_property.RemovePrefObserver(&handle_observer);
 
-  // HACK delete device from this thread
-  device.prefs_.AttachThread();
-  device_thread.Stop();
-
+  Verify();
 }
 
-namespace {
-// use Batch mode cache property, after out range, set to device and fetch new
-// pref
-class ScopedDeviceOperate {
-public:  
-  ScopedDeviceOperate(DeviceHandle& handle)
-      : handle_(handle) {
-    EXPECT_CALL(handle_, IsBatchMode()).WillRepeatedly(Return(true));
+TEST_F(PropertyTest, CheckFalseCrossThread) {
+  InitCrossThread();
 
-  }
-  // only support one thread, no same thread need post task and WaitEvent.
-  ~ScopedDeviceOperate() {
-    EXPECT_CALL(handle_, IsBatchMode()).Times(0);
-    handle_.device()->prefs_.ChangeContent(handle_.prefs_.Serialize());
-  }
-private:
-  DeviceHandle& handle_;
-  DISALLOW_COPY_AND_ASSIGN(ScopedDeviceOperate);
-};
-  
-}
-TEST(PropertyTest, BatchOperate) {
-  Device device;
-  device.Init(GetDefaultConfig());
-  DeviceHandle handle(device);
-
-  // OneThread no need Post task
-  EXPECT_CALL(g_DeviceThreadMock, IsDeviceThread()).WillRepeatedly(Return(true));
-  EXPECT_CALL(handle, PostDeviceTask(_)).Times(0);
-
-  {
-  ScopedDeviceOperate device_operate(handle);
-  // set from handle
+  // check false
   EXPECT_CALL(device, SetBoolMember()).Times(0);
   EXPECT_CALL(device, SetIntMember()).Times(0);
   EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
-    .Times(1).WillOnce(Return(true));
-  EXPECT_CALL(handle, int_property_check(44, kIntMember))
-    .Times(1).WillOnce(Return(true));
+    .Times(1).WillOnce(Return(false));
+  EXPECT_CALL(handle, int_property_check(10, kIntMember))
+    .Times(1).WillOnce(Return(false));
 
   handle.bool_property.set_value(true);
-  EXPECT_EQ(true, handle.bool_property.value());
+  EXPECT_EQ(ERR_INVAILD_VALUE, LastDeviceError());
+  EXPECT_EQ(false, handle.bool_property.value());
   EXPECT_EQ(false, device.bool_member.value());
-  handle.int_property.set_value(44);
-  EXPECT_EQ(44, handle.int_property.value());
+  handle.int_property.set_value(10);
+  EXPECT_EQ(ERR_INVAILD_VALUE, LastDeviceError());
+  EXPECT_EQ(3, handle.int_property.value());
   EXPECT_EQ(3, device.int_member.value());
-  }
+
+  Verify();
+}
+
+TEST_F(PropertyTest, CallFuncErrorCrossThread) {
+  InitCrossThread();
+
+ // SetBoolMember return error
+  EXPECT_CALL(device, SetBoolMember()).Times(1).WillOnce(
+      DoAll(CheckDeviceThread(&device_thread, true), CallFuncError()));
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
+      .Times(1).WillOnce(
+          DoAll(CheckDeviceThread(&device_thread, false), Return(true)));
+
+  handle.bool_property.set_value(true);
+  EXPECT_EQ(ERR_READ_DEVICE, LastDeviceError());
   EXPECT_EQ(true, handle.bool_property.value());
   EXPECT_EQ(true, device.bool_member.value());
-  EXPECT_EQ(44, handle.int_property.value());
-  EXPECT_EQ(44, device.int_member.value());
+
+  
+  Verify();
 }

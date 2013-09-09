@@ -8,6 +8,7 @@
 
 #include "canscope/device/property/property_delegate.h"
 #include "canscope/device/property/store_member.h"
+#include "canscope/device_errors.h"
 
 namespace canscope {
 
@@ -41,8 +42,14 @@ public:
   void set_value(const Type& value) {
     TRACE_EVENT0("Property", "SetValueSync");
     TRACE_EVENT_FLOW_BEGIN0("Property", "SetValueSync", this);
+    
+    // clean this thread error
+    device::CleanError();
+
     if (!CheckValue(value)) {
       TRACE_EVENT_FLOW_END0("Property", "SetValueSync", this);
+      // General check error
+      SetDeviceErrorIfNoError(ERR_INVAILD_VALUE);
       return;
     }
     TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "CheckValue");
@@ -87,6 +94,10 @@ private:
           base::Bind(&Property::SetValueImplSync, 
               base::Unretained(this), value));
       WaitForCallFinish();
+      
+      // set this thread error from device thread.
+      SetDeviceError(device_error_);
+      
       TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "FetchNewPref");
       delegate_->FetchNewPref();
       return;
@@ -95,6 +106,8 @@ private:
       // same thread set_value() no need to wait. or will Death Lock
       device_member_.set_value(value);
       CallCallback();
+
+      // use device thread error
 
       TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "FetchNewPref");
       delegate_->FetchNewPref();
@@ -112,6 +125,7 @@ private:
     CallCallback();
     // TODO check and record last error
     // CheckLastError();
+    device_error_ = LastDeviceError();
     SignalFinish();
   }
 
@@ -144,6 +158,8 @@ private:
   std::string name_;
   // cache delegate_->device_name() for access on otherthread
   std::string device_name_;
+  // error happen on device
+  canscope::device::Error device_error_;
 
   // sync call
   base::WaitableEvent event_;
