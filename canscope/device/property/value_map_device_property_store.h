@@ -2,6 +2,7 @@
 
 #include <set>
 
+#include "base/debug/trace_event.h"
 #include "base/prefs/pref_value_map.h"
 
 #include "canscope/device/property/device_property_store.h"
@@ -10,7 +11,7 @@
 namespace canscope {
 class ValueMapDevicePropertyStore : public DevicePropertyStore {
 public:
-  ValueMapDevicePropertyStore() {}
+  ValueMapDevicePropertyStore();
   virtual ~ValueMapDevicePropertyStore() {}
 
   // implement DevicePropertyStore
@@ -40,8 +41,13 @@ public:
   void AttachThread();
 
 private:
+  void SetValueInner(const std::string& key, base::Value* value);
+
   PropertyNotifiter notifier_;
   PrefValueMap prefs_;
+
+  base::debug::TraceScopedTrackableObject<ValueMapDevicePropertyStore*> 
+      trace_object_;
 
   DISALLOW_COPY_AND_ASSIGN(ValueMapDevicePropertyStore);
 };
