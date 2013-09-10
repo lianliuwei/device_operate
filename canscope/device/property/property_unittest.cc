@@ -157,8 +157,10 @@ DictionaryValue* GetDefaultConfig() {
   return dict_value;
 }
 
-ACTION(CallFuncError) {
-  SetDeviceError(ERR_READ_DEVICE);
+ACTION_P(CallFuncError, device_error) {
+  // clean last error first
+  CleanError();
+  SetDeviceError(device_error);
 }
 
 ACTION(NotReached) {
@@ -205,7 +207,7 @@ class PropertyTest : public testing::Test {
 public:
   PropertyTest() 
     : handle(device)
-    , trace_event("Property", base::FilePath(L"trace_event.json"))
+    , trace_event("Property,PropertyStore", base::FilePath(L"trace_event.json"))
     , created_thread_(false){}
  
   void Verify() {
@@ -349,13 +351,26 @@ TEST_F(PropertyTest, CallFuncErrorOneThread) {
   InitOneThread();
 
   // SetBoolMember return error
-  EXPECT_CALL(device, SetBoolMember()).Times(1).WillOnce(CallFuncError());
+  EXPECT_CALL(device, SetBoolMember()).Times(1).WillOnce(
+      CallFuncError(ERR_READ_DEVICE));
   EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
       .Times(1).WillOnce(Return(true));
   handle.bool_property.set_value(true);
   EXPECT_EQ(ERR_READ_DEVICE, LastDeviceError());
   EXPECT_EQ(true, handle.bool_property.value());
   EXPECT_EQ(true, device.bool_member.value());
+
+  Verify();
+  
+  EXPECT_CALL(device, SetBoolMember()).Times(1).WillOnce(
+      CallFuncError(ERR_WRITE_DEVICE));
+  EXPECT_CALL(handle, bool_property_check(false, kBoolMember))
+      .Times(1).WillOnce(Return(true));
+
+  handle.bool_property.set_value(false);
+  EXPECT_EQ(ERR_WRITE_DEVICE, LastDeviceError());
+  EXPECT_EQ(false, handle.bool_property.value());
+  EXPECT_EQ(false, device.bool_member.value());
 
   Verify();
 }
@@ -470,7 +485,8 @@ TEST_F(PropertyTest, CallFuncErrorCrossThread) {
 
  // SetBoolMember return error
   EXPECT_CALL(device, SetBoolMember()).Times(1).WillOnce(
-      DoAll(CheckDeviceThread(&device_thread, true), CallFuncError()));
+      DoAll(CheckDeviceThread(&device_thread, true), 
+          CallFuncError(ERR_READ_DEVICE)));
   EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
       .Times(1).WillOnce(
           DoAll(CheckDeviceThread(&device_thread, false), Return(true)));
@@ -480,6 +496,19 @@ TEST_F(PropertyTest, CallFuncErrorCrossThread) {
   EXPECT_EQ(true, handle.bool_property.value());
   EXPECT_EQ(true, device.bool_member.value());
 
-  
+  Verify();
+
+  EXPECT_CALL(device, SetBoolMember()).Times(1).WillOnce(
+      DoAll(CheckDeviceThread(&device_thread, true), 
+        CallFuncError(ERR_WRITE_DEVICE)));
+  EXPECT_CALL(handle, bool_property_check(false, kBoolMember))
+      .Times(1).WillOnce(
+          DoAll(CheckDeviceThread(&device_thread, false), Return(true)));
+
+  handle.bool_property.set_value(false);
+  EXPECT_EQ(ERR_WRITE_DEVICE, LastDeviceError());
+  EXPECT_EQ(false, handle.bool_property.value());
+  EXPECT_EQ(false, device.bool_member.value());
+
   Verify();
 }
