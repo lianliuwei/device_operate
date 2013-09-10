@@ -207,7 +207,7 @@ class PropertyTest : public testing::Test {
 public:
   PropertyTest() 
     : handle(device)
-    , trace_event("Property,PropertyStore", base::FilePath(L"trace_event.json"))
+    , trace_event_("Property,PropertyStore", base::FilePath(L"trace_event.json"))
     , created_thread_(false){}
  
   void Verify() {
@@ -249,13 +249,13 @@ protected:
     }
   }
 
-  ScopedTraceEvent trace_event;
-  ScopedDeviceError device_error;
   Device device;
   DeviceHandle handle;
   DeviceThread device_thread;
 
 private:
+  ScopedDeviceError device_error_;
+  ScopedTraceEvent trace_event_;
   bool created_thread_;
   
 };
