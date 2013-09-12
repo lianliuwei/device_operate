@@ -139,6 +139,9 @@
         'device_errors.h',
         'device_errors.cc',
         'device_error_list.h',
+        'async_task.h',
+        'async_task.cc',
+        'async_task_unittest.cc',
       ],
       'include_dirs': [
         '..',
