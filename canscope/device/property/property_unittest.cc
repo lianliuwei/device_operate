@@ -5,6 +5,7 @@
 #include "base/json/json_string_value_serializer.h"
 #include "base/json/json_reader.h"
 #include "base/threading/thread.h"
+#include "base/lazy_instance.h"
 
 #include "canscope/scoped_trace_event.h"
 #include "canscope/device/property/property.h"
@@ -28,11 +29,11 @@ public:
   MOCK_METHOD0(IsDeviceThread, bool());
 };
 
-static DeviceThreadMock g_DeviceThreadMock;
+static base::LazyInstance<DeviceThreadMock> g_DeviceThreadMock;
 namespace canscope {
 
 bool IsDeviceThread() {
-  return g_DeviceThreadMock.IsDeviceThread();
+  return g_DeviceThreadMock.Pointer()->IsDeviceThread();
 }
 
 }
@@ -216,7 +217,7 @@ public:
   }
 
   void InitOneThread() {
-    ON_CALL(g_DeviceThreadMock, IsDeviceThread()).WillByDefault(Return(true));
+    ON_CALL(g_DeviceThreadMock.Get(), IsDeviceThread()).WillByDefault(Return(true));
     ON_CALL(handle, PostDeviceTask(_)).WillByDefault(NotReached());
     ON_CALL(handle, IsBatchMode()).WillByDefault(Return(false));
   }
@@ -228,7 +229,7 @@ public:
         PostTask(FROM_HERE, Bind(&AttachThread, &(device.prefs_)));
 
     // mock Post and check device thread
-    ON_CALL(g_DeviceThreadMock, IsDeviceThread())
+    ON_CALL(g_DeviceThreadMock.Get(), IsDeviceThread())
         .WillByDefault(ReturnIsDeviceThread(&device_thread));
     ON_CALL(handle, PostDeviceTask(_))
         .WillByDefault(PostDeviceTaskAction(&device_thread));
