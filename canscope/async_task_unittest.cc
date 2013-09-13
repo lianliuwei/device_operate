@@ -5,21 +5,12 @@
 #include "base/synchronization/waitable_event.h"
 
 #include "canscope/async_task.h"
+#include "canscope/async_task_observer_mock.h"
 
 using testing::_;
 
 namespace {
 class AsyncTaskTest;
-
-class AsyncTaskObserverMock : public AsyncTaskObserver {
-public:
-  AsyncTaskObserverMock() {}
-  virtual ~AsyncTaskObserverMock() {}
-
-  MOCK_METHOD2(OnAsyncTaskStart, void(AsyncTask*, base::Value*));
-  MOCK_METHOD3(OnAsyncTaskFinish, void(AsyncTask*, AsyncTaskStatus, base::Value*));
-  MOCK_METHOD3(OnAsyncTaskProgress, void(AsyncTask*, int, base::Value*));
-};
 
 class TestThread : public base::Thread {
 public:

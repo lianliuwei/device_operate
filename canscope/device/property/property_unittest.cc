@@ -6,12 +6,15 @@
 #include "base/json/json_reader.h"
 #include "base/threading/thread.h"
 #include "base/lazy_instance.h"
+#include "base/run_loop.h"
 
 #include "canscope/scoped_trace_event.h"
 #include "canscope/device/property/property.h"
 #include "canscope/device/property/property_delegate.h"
 #include "canscope/device/property/store_member.h"
 #include "canscope/device/property/value_map_device_property_store.h"
+#include "canscope/async_task.h"
+#include "canscope/async_task_observer_mock.h"
 
 using namespace base;
 using testing::_;
@@ -216,6 +219,10 @@ public:
     testing::Mock::VerifyAndClearExpectations(&device);
   }
 
+  void VerifyObserver() {
+    testing::Mock::VerifyAndClearExpectations(&async_observer);
+  }
+
   void InitOneThread() {
     ON_CALL(g_DeviceThreadMock.Get(), IsDeviceThread()).WillByDefault(Return(true));
     ON_CALL(handle, PostDeviceTask(_)).WillByDefault(NotReached());
@@ -236,6 +243,9 @@ public:
     ON_CALL(handle, IsBatchMode()).WillByDefault(Return(false));
   }
 
+  void CheckAsyncStart();
+  void CheckAsyncFinish();
+
 protected:
   virtual void SetUp() {
     device.Init(GetDefaultConfig());
@@ -253,7 +263,9 @@ protected:
   Device device;
   DeviceHandle handle;
   DeviceThread device_thread;
-
+  AsyncTaskObserverMock async_observer;
+  AsyncTaskHandle async_task;
+  base::Closure quit;
 private:
   ScopedDeviceError device_error_;
   ScopedTraceEvent trace_event_;
@@ -484,7 +496,7 @@ TEST_F(PropertyTest, CheckFalseCrossThread) {
 TEST_F(PropertyTest, CallFuncErrorCrossThread) {
   InitCrossThread();
 
- // SetBoolMember return error
+  // SetBoolMember return error
   EXPECT_CALL(device, SetBoolMember()).Times(1).WillOnce(
       DoAll(CheckDeviceThread(&device_thread, true), 
           CallFuncError(ERR_READ_DEVICE)));
@@ -512,4 +524,56 @@ TEST_F(PropertyTest, CallFuncErrorCrossThread) {
   EXPECT_EQ(false, device.bool_member.value());
 
   Verify();
+}
+
+TEST_F(PropertyTest, AsyncSetValue) {
+  InitCrossThread();
+  MessageLoop message_loop;
+
+  // start is notify before 
+  EXPECT_CALL(handle, bool_property_check(true, kBoolMember))
+      .Times(1).WillOnce(DoAll(CheckDeviceThread(&device_thread, false),
+                               Return(true)));
+  EXPECT_CALL(device, SetBoolMember())
+      .Times(1).WillOnce(CheckDeviceThread(&device_thread, true));
+
+  // set from handle
+  async_task = AsyncTaskHandle(new AsyncTask());
+  async_task->AddObserver(&async_observer);
+
+  EXPECT_CALL(async_observer, OnAsyncTaskStart(async_task.get(), NULL))
+      .Times(1).WillOnce(
+          WithoutArgs(
+            Invoke(static_cast<PropertyTest*>(this), &PropertyTest::CheckAsyncStart)));
+  EXPECT_CALL(async_observer, OnAsyncTaskFinish(_, _, _)).Times(0);
+  EXPECT_CALL(async_observer, OnAsyncTaskProgress(_, _, _)).Times(0);
+
+  
+  handle.bool_property.set_value(true, async_task);
+  
+  RunLoop run_loop;
+  quit = run_loop.QuitClosure();
+  run_loop.Run();
+}
+
+void PropertyTest::CheckAsyncStart() {
+  VerifyObserver();
+  
+  EXPECT_CALL(async_observer, OnAsyncTaskStart(_, _)).Times(0);
+  EXPECT_CALL(async_observer, OnAsyncTaskFinish(async_task.get(), kFinish, NULL))
+      .Times(1).WillOnce(
+            WithoutArgs(Invoke(this, &PropertyTest::CheckAsyncFinish)));
+  EXPECT_CALL(async_observer, OnAsyncTaskProgress(_, _, _)).Times(0);
+}
+
+void PropertyTest::CheckAsyncFinish() {
+  VerifyObserver();
+  Verify();
+
+  // no fetch error and property now
+  // EXPECT_EQ(OK, LastDeviceError());
+  // EXPECT_EQ(true, handle.bool_property.value());
+  EXPECT_EQ(true, device.bool_member.value());
+
+  MessageLoopProxy::current()->PostTask(FROM_HERE, quit);
 }

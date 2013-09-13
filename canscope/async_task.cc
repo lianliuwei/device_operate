@@ -43,12 +43,14 @@ bool AsyncTask::HasObserver(AsyncTaskObserver* obs) {
   return observer_list_.HasObserver(obs);
 }
 
+
 void AsyncTask::NotifyStart(base::Value* param) {
-  if (!message_loop_->BelongsToCurrentThread()) {
-    message_loop_->PostTask(FROM_HERE, 
-        Bind(&AsyncTask::NotifyStart, this, param));
-    return;
-  }
+  message_loop_->PostTask(FROM_HERE, 
+      Bind(&AsyncTask::NotifyStartImpl, this, param));
+}
+
+void AsyncTask::NotifyStartImpl(base::Value* param) {
+  DCHECK(message_loop_->BelongsToCurrentThread());
   scoped_ptr<base::Value> scoped(param);
   {
   AutoLock lock(lock_);
@@ -59,7 +61,6 @@ void AsyncTask::NotifyStart(base::Value* param) {
       OnAsyncTaskStart(this, param));
 }
 
-
 void AsyncTask::NotifyProgress(bool add, double percent, 
                                base::Value* param) {
   if (add) {
@@ -67,15 +68,12 @@ void AsyncTask::NotifyProgress(bool add, double percent,
     percent += percent_;
   }
   CHECK(0 <= percent && percent <= 100);
-  if (!message_loop_->BelongsToCurrentThread()) {
-    message_loop_->PostTask(FROM_HERE, 
-        Bind(&AsyncTask::OnNotifyProgress, this, percent, param));
-    return;
-  }
-  OnNotifyProgress(percent, param);
+  message_loop_->PostTask(FROM_HERE, 
+      Bind(&AsyncTask::NotifyProgressImpl, this, percent, param));
 }
 
-void AsyncTask::OnNotifyProgress(double percent,
+
+void AsyncTask::NotifyProgressImpl(double percent,
                                  base::Value* param) {
   DCHECK(message_loop_->BelongsToCurrentThread());
   scoped_ptr<base::Value> scoped(param);
@@ -90,15 +88,18 @@ void AsyncTask::OnNotifyProgress(double percent,
 }
 
 void AsyncTask::NotifyError(base::Value* param) {
-  NotifyFinishImp(kError, param);
+  message_loop_->PostTask(FROM_HERE, 
+      Bind(&AsyncTask::NotifyFinishImpl, this, kError, param));
 }
 
 void AsyncTask::NotifyFinish(base::Value* param) {
-  NotifyFinishImp(kFinish, param);
+  message_loop_->PostTask(FROM_HERE, 
+      Bind(&AsyncTask::NotifyFinishImpl, this, kFinish, param));
 }
 
 void AsyncTask::NotifyCancel(base::Value* param) {
-  NotifyFinishImp(kCancel, param);
+  message_loop_->PostTask(FROM_HERE, 
+      Bind(&AsyncTask::NotifyFinishImpl, this, kCancel, param));
 }
 
 bool AsyncTask::UserCancel() {
@@ -106,14 +107,10 @@ bool AsyncTask::UserCancel() {
   return cancel_;
 }
 
-void AsyncTask::NotifyFinishImp(AsyncTaskStatus status, 
+void AsyncTask::NotifyFinishImpl(AsyncTaskStatus status, 
                                 base::Value* param) {
   DCHECK(status != kNoStart && status != kRunning);
-  if (!message_loop_->BelongsToCurrentThread()) {
-    message_loop_->PostTask(FROM_HERE, 
-        Bind(&AsyncTask::NotifyFinishImp, this, status, param));
-    return;
-  }
+  DCHECK(message_loop_->BelongsToCurrentThread());
   scoped_ptr<base::Value> scoped(param);
   {
   AutoLock lock(lock_);

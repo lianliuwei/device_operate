@@ -126,6 +126,7 @@
         'device/property/value_map_device_property_store.cc',
         'device/property/value_map_device_property_store_unittest.cc',
         'device/property/property.h',
+        'device/property/property.cc',
         'device/property/property_unittest.cc',
         'device/property/property_notifiter.h',
         'device/property/property_notifiter.cc',
@@ -142,12 +143,14 @@
         'async_task.h',
         'async_task.cc',
         'async_task_unittest.cc',
+        'async_task_observer_mock.h',
       ],
       'include_dirs': [
         '..',
       ], 
       'dependencies': [
         '../third_party/chromium/base/base_bin.gyp:base_bin',
+        '../third_party/chromium/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
         '../third_party/chromium/base/base_bin.gyp:base_i18n_bin',
         '../third_party/chromium/base/base_bin.gyp:base_static_bin',
         '../third_party/chromium/base/base_bin.gyp:base_prefs_bin',

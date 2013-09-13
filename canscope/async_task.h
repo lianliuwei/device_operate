@@ -43,6 +43,7 @@ enum AsyncTaskStatus {
 // the callback is run in the task thread. use AsyncTaskObserver to get status
 // change notify.
 // pass by AsyncTaskHandle
+// Notify PostTask even on the same thread, this can avoid nest call problem
 class AsyncTask : public base::RefCountedThreadSafe<AsyncTask> {
 public:
   AsyncTask();
@@ -77,11 +78,12 @@ public:
   void NotifyError(base::Value* param);
   void NotifyFinish(base::Value* param);
   void NotifyCancel(base::Value* param);
-
+  
+  
 private:
-  void OnNotifyProgress(double percent, base::Value* param);
-
-  void NotifyFinishImp(AsyncTaskStatus status, base::Value* param);
+  void NotifyStartImpl(base::Value* param);
+  void NotifyProgressImpl(double percent, base::Value* param);
+  void NotifyFinishImpl(AsyncTaskStatus status, base::Value* param);
 
   ObserverList<AsyncTaskObserver> observer_list_;
 
