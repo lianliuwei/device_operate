@@ -21,7 +21,7 @@
          'NOTIFICATION_IMPLEMENTATION',
       ],
       'dependencies': [
-        '../base/base.gyp:base',
+        '../third_party/chromium/base/base_bin.gyp:base_bin',
       ],
     },
   ],

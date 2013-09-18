@@ -5,8 +5,6 @@
 // This file defines the type used to provide details for NotificationService
 // notifications.
 
-#ifndef CONTENT_PUBLIC_BROWSER_NOTIFICATION_DETAILS_H_
-#define CONTENT_PUBLIC_BROWSER_NOTIFICATION_DETAILS_H_
 #pragma once
 
 #include "base/basictypes.h"
@@ -57,5 +55,3 @@ class Details : public NotificationDetails {
 };
 
 }  // namespace content
-
-#endif  // CONTENT_PUBLIC_BROWSER_NOTIFICATION_DETAILS_H_

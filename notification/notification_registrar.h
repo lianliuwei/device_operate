@@ -1,14 +1,13 @@
-// Copyright (c) 2011 The Chromium Authors. All rights reserved.
+// Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CONTENT_PUBLIC_BROWSER_NOTIFICATION_REGISTRAR_H_
-#define CONTENT_PUBLIC_BROWSER_NOTIFICATION_REGISTRAR_H_
 #pragma once
 
 #include <vector>
 
 #include "base/basictypes.h"
+#include "base/threading/non_thread_safe.h"
 
 namespace content {
 
@@ -22,7 +21,8 @@ class NotificationSource;
 // class and use it to register your notifications instead of going through the
 // notification service directly. It will automatically unregister them for
 // you.
-class NotificationRegistrar {
+class NotificationRegistrar :
+    NON_EXPORTED_BASE(public base::NonThreadSafe) {
  public:
   // This class must not be derived from (we don't have a virtual destructor so
   // it won't work). Instead, use it as a member in your class.
@@ -32,10 +32,10 @@ class NotificationRegistrar {
   // Wrappers around NotificationService::[Add|Remove]Observer.
   void Add(NotificationObserver* observer,
            int type,
-           const content::NotificationSource& source);
+           const NotificationSource& source);
   void Remove(NotificationObserver* observer,
               int type,
-              const content::NotificationSource& source);
+              const NotificationSource& source);
 
   // Unregisters all notifications.
   void RemoveAll();
@@ -47,7 +47,7 @@ class NotificationRegistrar {
   // specified details.
   bool IsRegistered(NotificationObserver* observer,
                     int type,
-                    const content::NotificationSource& source);
+                    const NotificationSource& source);
 
  private:
   struct Record;
@@ -65,5 +65,3 @@ class NotificationRegistrar {
 };
 
 }  // namespace content
-
-#endif  // CONTENT_PUBLIC_BROWSER_NOTIFICATION_REGISTRAR_H_

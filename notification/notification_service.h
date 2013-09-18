@@ -1,14 +1,10 @@
-// Copyright (c) 2011 The Chromium Authors. All rights reserved.
+// Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 // This file describes a central switchboard for notifications that might
 // happen in various parts of the application, and allows users to register
 // observers for various classes of events that they're interested in.
-
-#ifndef CONTENT_PUBLIC_NOTIFICATION_SERVICE_H_
-#define CONTENT_PUBLIC_NOTIFICATION_SERVICE_H_
-#pragma once
 
 #include "notification/notification_details.h"
 #include "notification/notification_source.h"
@@ -20,6 +16,8 @@ class NotificationService {
   // Returns the NotificationService object for the current thread, or NULL if
   // none.
   static NotificationService* current();
+
+  static NotificationService* Create();
 
   virtual ~NotificationService() {}
 
@@ -55,9 +53,7 @@ class NotificationService {
 
   // Returns a NotificationDetails object that represents a lack of details
   // associated with a notification.  (This is effectively a null pointer.)
-  static Details<void> NoDetails() { return content::Details<void>(NULL); }
+  static Details<void> NoDetails() { return Details<void>(NULL); }
 };
 
 }  // namespace content
-
-#endif  // CONTENT_COMMON_NOTIFICATION_SERVICE_H_

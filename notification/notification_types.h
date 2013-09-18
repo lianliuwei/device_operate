@@ -1,14 +1,15 @@
-// Copyright (c) 2011 The Chromium Authors. All rights reserved.
+// Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CONTENT_PUBLIC_BROWSER_NOTIFICATION_TYPE_H_
-#define CONTENT_PUBLIC_BROWSER_NOTIFICATION_TYPE_H_
 #pragma once
 
 // This file describes various types used to describe and filter notifications
 // that pass through the NotificationService.
 //
+// Only notifications that are fired from the content module should be here. We
+// should never have a notification that is fired by the embedder and listened
+// to by content.
 namespace content {
 
 enum NotificationType {
@@ -33,5 +34,3 @@ enum NotificationType {
 };
 
 }  // namespace content
-
-#endif  // CONTENT_PUBLIC_BROWSER_NOTIFICATION_TYPE_H_
