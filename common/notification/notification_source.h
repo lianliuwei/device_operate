@@ -9,12 +9,14 @@
 
 #include "base/basictypes.h"
 
-namespace content {
+#include "common/common_export.h"
+
+namespace common {
 
 // Do not declare a NotificationSource directly--use either
 // "Source<sourceclassname>(sourceclasspointer)" or
 // NotificationService::AllSources().
-class NotificationSource {
+class COMMON_EXPORT NotificationSource {
  public:
    NotificationSource(const NotificationSource& other) : ptr_(other.ptr_) {}
   ~NotificationSource() {}

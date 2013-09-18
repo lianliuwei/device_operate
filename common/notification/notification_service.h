@@ -6,12 +6,12 @@
 // happen in various parts of the application, and allows users to register
 // observers for various classes of events that they're interested in.
 
-#include "notification/notification_details.h"
-#include "notification/notification_source.h"
+#include "common/notification/notification_details.h"
+#include "common/notification/notification_source.h"
 
-namespace content {
+namespace common {
 
-class NotificationService {
+class COMMON_EXPORT NotificationService {
  public:
   // Returns the NotificationService object for the current thread, or NULL if
   // none.

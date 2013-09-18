@@ -9,12 +9,14 @@
 
 #include "base/basictypes.h"
 
-namespace content {
+#include "common/common_export.h"
+
+namespace common {
 
 // Do not declare a NotificationDetails directly--use either
 // "Details<detailsclassname>(detailsclasspointer)" or
 // NotificationService::NoDetails().
-class NotificationDetails {
+class COMMON_EXPORT NotificationDetails {
  public:
   NotificationDetails() : ptr_(NULL) {}
   NotificationDetails(const NotificationDetails& other) : ptr_(other.ptr_) {}

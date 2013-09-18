@@ -4,14 +4,16 @@
 
 #pragma once
 
-namespace content {
+namespace common {
 
 class NotificationDetails;
 class NotificationSource;
 
+#include "common/common_export.h"
+
 // This is the base class for notification observers. When a matching
 // notification is posted to the notification service, Observe is called.
-class NotificationObserver {
+class COMMON_EXPORT NotificationObserver {
  public:
   virtual void Observe(int type,
                        const NotificationSource& source,

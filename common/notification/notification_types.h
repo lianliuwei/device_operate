@@ -10,7 +10,7 @@
 // Only notifications that are fired from the content module should be here. We
 // should never have a notification that is fired by the embedder and listened
 // to by content.
-namespace content {
+namespace common {
 
 enum NotificationType {
   NOTIFICATION_CONTENT_START = 0,

@@ -7,9 +7,9 @@
 #include <map>
 
 #include "base/observer_list.h"
-#include "notification/notification_service.h"
+#include "common/notification/notification_service.h"
 
-namespace content {
+namespace common {
 
 class NotificationObserver;
 class NotificationRegistrar;

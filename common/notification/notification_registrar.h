@@ -9,7 +9,9 @@
 #include "base/basictypes.h"
 #include "base/threading/non_thread_safe.h"
 
-namespace content {
+#include "common/common_export.h"
+
+namespace common {
 
 class NotificationObserver;
 class NotificationSource;
@@ -21,7 +23,7 @@ class NotificationSource;
 // class and use it to register your notifications instead of going through the
 // notification service directly. It will automatically unregister them for
 // you.
-class NotificationRegistrar :
+class COMMON_EXPORT NotificationRegistrar :
     NON_EXPORTED_BASE(public base::NonThreadSafe) {
  public:
   // This class must not be derived from (we don't have a virtual destructor so

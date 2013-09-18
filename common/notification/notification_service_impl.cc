@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "notification/notification_service_impl.h"
+#include "common/notification/notification_service_impl.h"
 
 #include "base/lazy_instance.h"
 #include "base/threading/thread_local.h"
-#include "notification/notification_observer.h"
-#include "notification/notification_types.h"
+#include "common/notification/notification_observer.h"
+#include "common/notification/notification_types.h"
 
-namespace  content {
+namespace  common {
 
 namespace {
 
