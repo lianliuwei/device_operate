@@ -32,13 +32,16 @@ protected:
   void DeleteDevice();
   
   // impl for Notify Handle to Drop RefCount
-  // may be call on any thread
+  // call on device_loop_ thread.
   virtual void DestroyImpl() = 0;
 
   // Destroy this object on device thread
+  // call on device_loop_ thread.
   virtual void DeleteDeviceImpl() = 0;
 
 private:
+  void DestroyPos();
+
   base::Lock lock_;
 
   bool destroy_;
