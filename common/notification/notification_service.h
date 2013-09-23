@@ -55,5 +55,11 @@ class COMMON_EXPORT NotificationService {
   // associated with a notification.  (This is effectively a null pointer.)
   static Details<void> NoDetails() { return Details<void>(NULL); }
 };
+ 
+// notification all thread the have NotificationService
+// implement in CommonThreadManager
+void NotifyAll(int type,
+               const NotificationSource& source,
+               const NotificationDetails& details);
 
-}  // namespace content
+}  // namespace common

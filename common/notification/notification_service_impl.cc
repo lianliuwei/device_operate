@@ -5,9 +5,12 @@
 #include "common/notification/notification_service_impl.h"
 
 #include "base/lazy_instance.h"
+#include "base/bind.h"
 #include "base/threading/thread_local.h"
 #include "common/notification/notification_observer.h"
 #include "common/notification/notification_types.h"
+#include "common/common_thread.h"
+
 
 namespace  common {
 
@@ -156,4 +159,25 @@ NotificationServiceImpl::~NotificationServiceImpl() {
   }
 }
 
+namespace {
+
+void NotifyAllImpl(int type, 
+                   NotificationSource source,
+                   NotificationDetails details) {
+  if (NotificationService::current() == NULL)
+    return;
+  NotificationService::current()->Notify(type, source, details);
+}
+
+}
+
+void NotifyAll(int type, 
+               const NotificationSource& source,
+               const NotificationDetails& details) {
+  for (int id = CommonThread::UI; 
+      id < CommonThread::ID_COUNT; ++id) {
+    CommonThread::PostTask(static_cast<CommonThread::ID>(id), FROM_HERE, 
+        base::Bind(&NotifyAllImpl, type, source, details));
+  }
+}
 }  // namespace content
