@@ -85,6 +85,9 @@ class COMMON_EXPORT CommonThread {
     //// This is the thread that processes IPC and network messages.
     //IO,
 
+    // process device operate.
+    DEVICE,
+
     // NOTE: do not add new threads here that are only used by a small number of
     // files. Instead you should just use a Thread class and pass its
     // MessageLoopProxy around. Named threads there are only for threads that
