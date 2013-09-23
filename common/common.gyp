@@ -24,8 +24,8 @@
         'common_thread_impl.cc',
         'common_thread_manager.h',
         'common_thread_manager.cc',
-        #'browser_process_sub_thread.h',
-        #'browser_process_sub_thread.cc',
+        'canscope_thread.h',
+        'canscope_thread.cc',
       ],
     },
     
