@@ -13,9 +13,11 @@ public:
   virtual DevicePropertyStore* GetDevicePropertyStore() = 0;
   // bath mode config device at once
   virtual bool IsBatchMode() = 0;
-  virtual std::string device_name() = 0;
   virtual void PostDeviceTask(const base::Closure& task) = 0;
   virtual void FetchNewPref() = 0;
+
+  // call on device thread
+  virtual void SetPropertyFinish(const std::string& reason) = 0;
 protected:
   PropertyDelegate() {}
   virtual ~PropertyDelegate() {}

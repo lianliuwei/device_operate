@@ -16,14 +16,15 @@ namespace canscope {
 // caller take own of DictonaryValue
 base::DictionaryValue* ErrorAsDictionary(canscope::device::Error error);
 canscope::device::Error ErrorFromDictonary(base::Value* value);
+void UpdateConfig();
 
 template<typename Type, typename StoreType = StoreMember<Type>>
 class Property {
 public:
   typedef base::Callback<bool(Type, const std::string&)> CheckValueCallback;
 
-  Property(PropertyDelegate* delegate, std::string name, 
-      StoreType& member, StoreType& device_member, 
+  Property(PropertyDelegate* delegate, const char* name,
+      StoreType& member, StoreType& device_member,
       base::Closure call_back, CheckValueCallback check_value)
       : delegate_(delegate)
       , name_(name)
@@ -31,9 +32,17 @@ public:
       , device_member_(device_member)
       , call_back_(call_back)
       , check_value_(check_value)
-      , event_(false, false) {
-    device_name_ = delegate_->device_name();
-  }
+      , event_(false, false) {}
+
+ Property(PropertyDelegate* delegate, const char* name,
+      StoreType& member, StoreType& device_member,
+      base::Closure call_back)
+      : delegate_(delegate)
+      , name_(name)
+      , member_(member)
+      , device_member_(device_member)
+      , call_back_(call_back)
+      , event_(false, false) {}
 
   ~Property() {
   }
@@ -47,7 +56,7 @@ public:
   void set_value(const Type& value) {
     TRACE_EVENT0("Property", "SetValueSync");
     TRACE_EVENT_FLOW_BEGIN0("Property", "SetValueSync", this);
-    
+
     // clean this thread error
     canscope::device::CleanError();
 
@@ -64,7 +73,6 @@ public:
 
   // async set_value
   void set_value(const Type& value, AsyncTaskHandle async_task) {
-    TRACE_EVENT0("Property", "SetValueSync");
     TRACE_EVENT_FLOW_BEGIN0("Property", "SetValueAsync", async_task.get());
 
     async_task->NotifyStart(NULL);
@@ -73,17 +81,20 @@ public:
       // General check error
       SetDeviceErrorIfNoError(canscope::device::ERR_INVAILD_VALUE);
       async_task->NotifyError(ErrorAsDictionary(LastDeviceError()));
-      TRACE_EVENT_FLOW_END0("Property", "SetValueASync", async_task.get());
+      TRACE_EVENT_FLOW_END0("Property", "SetValueAsync", async_task.get());
       return;
     }
     DCHECK(!IsDeviceThread());
-    TRACE_EVENT_FLOW_STEP0("Property", "SetValueAsyncSync", 
+    TRACE_EVENT_FLOW_STEP0("Property", "SetValueAsync",
         async_task.get(), "CheckValue");
-    delegate_->PostDeviceTask(Bind(&Property::SetValueAsyncImpl, 
+    delegate_->PostDeviceTask(Bind(&Property::SetValueAsyncImpl,
         base::Unretained(this), value, async_task.get()));
   }
 
   bool CheckValue(const Type& value) {
+    if (check_value_.is_null()) {
+      return true;
+    }
     return check_value_.Run(value, name_);
   }
 
@@ -107,13 +118,13 @@ private:
     // Post
     if (!IsDeviceThread()) {
       delegate_->PostDeviceTask(
-          base::Bind(&Property::SetValueImplSync, 
+          base::Bind(&Property::SetValueImplSync,
               base::Unretained(this), value));
       WaitForCallFinish();
-      
+
       // set this thread error from device thread.
       SetDeviceError(device_error_);
-      
+
       TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "FetchNewPref");
       delegate_->FetchNewPref();
       return;
@@ -147,17 +158,17 @@ private:
 
   void SetValueAsyncImpl(Type value, AsyncTaskHandle async_task) {
     DCHECK(IsDeviceThread());
-    
+
     if (async_task->UserCancel()) {
       async_task->NotifyCancel(NULL);
-      TRACE_EVENT_FLOW_STEP0("Property", "SetValueAsync", 
+      TRACE_EVENT_FLOW_STEP0("Property", "SetValueAsync",
           async_task.get(), "UserCancel");
-      TRACE_EVENT_FLOW_END0("Property", "SetValueASync", async_task.get());
+      TRACE_EVENT_FLOW_END0("Property", "SetValueAsync", async_task.get());
       return;
     }
 
     TRACE_EVENT0("Property", "SetValueDeviceThread");
-    TRACE_EVENT_FLOW_STEP0("Property", "SetValueAsync", 
+    TRACE_EVENT_FLOW_STEP0("Property", "SetValueAsync",
         async_task.get(), "SetValueDeviceThread");
 
     device_member_.set_value(value);
@@ -169,13 +180,14 @@ private:
       async_task->NotifyError(ErrorAsDictionary(LastDeviceError()));
     }
 
-    TRACE_EVENT_FLOW_END0("Property", "SetValueASync", async_task.get());
+    TRACE_EVENT_FLOW_END0("Property", "SetValueAsync", async_task.get());
   }
 
   void CallCallback() {
     call_back_.Run();
-    //ConfigManager::Get(device_name_)
-    //    ->ConfigUpdate("set property" + name_);
+    std::string reason;
+    reason = "SetProperty: " + device_member_.pref_name();
+    delegate_->SetPropertyFinish(reason);
   }
 
   void WaitForCallFinish() {
@@ -192,8 +204,6 @@ private:
   base::Closure call_back_;
   CheckValueCallback check_value_;
   std::string name_;
-  // cache delegate_->device_name() for access on otherthread
-  std::string device_name_;
   // error happen on device
   canscope::device::Error device_error_;
 
