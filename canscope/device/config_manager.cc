@@ -10,45 +10,6 @@
 using namespace base;
 using namespace common;
 
-namespace {
-class ConfigManagerServices {
-public:
-  static ConfigManagerServices* GetInstance() {
-    return Singleton<ConfigManagerServices>::get();
-  }
-  
-  // return if exist or create one
-  ConfigManager* Get(const std::string& name);
-
-private:
-  ConfigManagerServices() {}
-  ~ConfigManagerServices() {
-    STLDeleteValues(&manager_map_);
-  }
-
-  typedef std::map<std::string, ConfigManager*> ManagerMap;
-  ManagerMap manager_map_;
-
-  friend struct DefaultSingletonTraits<ConfigManagerServices>;
-
-  DISALLOW_COPY_AND_ASSIGN(ConfigManagerServices);
-};
-
-ConfigManager* ConfigManagerServices::Get(const std::string& name) {
-  ManagerMap::iterator it = manager_map_.find(name);
-  if (it != manager_map_.end()) {
-    return it->second;
-  }
-  ConfigManager* manager = new ConfigManager();
-  manager_map_.insert(std::pair<std::string, ConfigManager*>(name, manager));
-  return manager;
-}
-
-}
-
-ConfigManager* ConfigManager::Get(const std::string& name) {
-  return ConfigManagerServices::GetInstance()->Get(name);
-}
 
 ConfigManager::Config ConfigManager::GetLast() {
   AutoLock lock(lock_);
