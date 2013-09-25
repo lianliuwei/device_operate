@@ -2,6 +2,7 @@
 
 #include "base/memory/ref_counted.h"
 #include "base/synchronization/lock.h"
+#include "base/message_loop/message_loop_proxy.h"
 
 template<typename T>
 struct DeviceManagerTraits {
@@ -17,10 +18,10 @@ struct DeviceManagerTraits {
 // 4. DeleteDevice() be called.
 // 5. DeleteDevice PostTask To Delete DeviceBase
 class DeviceManager : public base::RefCountedThreadSafe<
-    DeviceManager, DeviceManagerTraits> {
+    DeviceManager, DeviceManagerTraits<DeviceManager> > {
 public:
-  DeviceManager(MessageLoopProxy* device_loop);
-  ~DeviceManager() {}
+  DeviceManager(base::MessageLoopProxy* device_loop);
+  virtual ~DeviceManager() {}
 
   bool IsDestroying();
 
@@ -47,7 +48,7 @@ private:
   bool destroy_;
 
   scoped_refptr<DeviceManager> own_ref_;
-  scoped_refptr<MessageLoopProxy> device_loop_;
+  scoped_refptr<base::MessageLoopProxy> device_loop_;
 
-  friend struct DeviceManagerTraits<T>;
+  friend struct DeviceManagerTraits<DeviceManager>;
 };
