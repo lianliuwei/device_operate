@@ -29,6 +29,8 @@ public:
   DevicePropertyStore* prefs() { return prefs_; }
   const DevicePropertyStore* prefs() const { return prefs_; }
 
+  const std::string& pref_name() const { return pref_name_; }
+
 protected:
   StoreMemberBase();
   virtual ~StoreMemberBase();
@@ -54,8 +56,6 @@ protected:
   // Verifies the preference name, and lazily loads the preference value if
   // it hasn't been loaded yet.
   void VerifyPref() const;
-
-  const std::string& pref_name() const { return pref_name_; }
 
   // Used to allow registering plain base::Closure callbacks.
   static void InvokeUnnamedCallback(const base::Closure& callback,
