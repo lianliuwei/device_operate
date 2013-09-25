@@ -12,7 +12,7 @@ ScopedDeviceLock::ScopedDeviceLock(
     if (ret)
       return;
     if (wait) {
-      device_->Wait();
+      device_->TryWaitLock();
     } else {
       return;
     }

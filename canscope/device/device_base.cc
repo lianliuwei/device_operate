@@ -1,6 +1,9 @@
 #include "canscope/device/device_base.h"
 
 #include "base/logging.h"
+#include "base/values.h"
+
+#include "canscope/device/config_manager.h"
 
 using namespace base;
 
@@ -44,7 +47,7 @@ bool DeviceBase::IsLocked() {
   return seq_ != kNullSeq;
 }
 
-void DeviceBase::Wait() {
+void DeviceBase::TryWaitLock() {
   event_.Wait();
 }
 
@@ -60,3 +63,21 @@ bool DeviceBase::CheckLock(int seq) {
   AutoLock scoped(lock_);
   return seq_ == seq;
 }
+
+void DeviceBase::LoadFromConfig() {
+  if (DevicePrefs() == NULL)
+    return;
+  if (config_manager_ == NULL)
+    return;
+  DevicePrefs()->ChangeContent(config_manager_->GetLast());  
+}
+
+void DeviceBase::UpdateConfig(const std::string& reason) {
+  if (DevicePrefs() == NULL)
+    return;
+  if (config_manager_ == NULL)
+    return;
+  config_manager_->UpdateAndNotify(DevicePrefs()->Serialize());
+}
+
+
