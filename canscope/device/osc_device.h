@@ -8,6 +8,9 @@
 #include "canscope/device/register/trigger2_register.h"
 #include "canscope/device/register/trigger_state_register.h"
 #include "canscope/device/device_delegate.h"
+#include "canscope/device/device_base.h"
+
+class ConfigManager;
 
 namespace canscope {
 // TODO need canscope_device.h
@@ -39,10 +42,13 @@ struct ChnlConfig {
   Coupling coupling;
 };
 
-class OscDevice : public OscDeviceProperty {
+class OscDevice : public OscDeviceProperty
+                , public DeviceBase {
 public:
-  OscDevice(DeviceDelegate* device_delegate);
-  ~OscDevice() {}
+  OscDevice(DeviceDelegate* device_delegate, ConfigManager* config_manager);
+  virtual ~OscDevice() {}
+
+  void ConfigUpdate();
 
   CalibrateInfo GetCalibrateInfo(Chnl chnl, VoltRange range);
   VoltRange GetChnlVoltRange(Chnl chnl);
@@ -74,6 +80,10 @@ public:
   bool Start();
 
 private:
+  // DeviceBase
+  virtual void LockStatusChanged() {}
+  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { return &prefs_; }
+
   // set register according to property
   void SetAnalogCtrl(Chnl chnl);
   void SetSoftDiff(Chnl chnl);

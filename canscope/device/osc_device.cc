@@ -1,8 +1,10 @@
 #include "canscope/device/osc_device.h"
 
-#include "canscope/device/register/scope_ctrl_register.h"
-
 #include <cmath>
+
+#include "canscope/device/register/scope_ctrl_register.h"
+#include "canscope/device_errors.h"
+#include "canscope/device/config_manager.h"
 
 using namespace device;
 
@@ -90,8 +92,10 @@ uint32 CalibrateInfo::CH_OFFSET(double offset) {
       (Voffset(offset) + 2.67) * pow(2.0, 16) / 4.2 / 1.25);
 }
 
-OscDevice::OscDevice(DeviceDelegate* device_delegate)
-    : device_delegate_(device_delegate) {}
+OscDevice::OscDevice(DeviceDelegate* device_delegate, 
+                     ConfigManager* config_manager)
+    : DeviceBase(config_manager)
+    , device_delegate_(device_delegate) {}
 
 
 CalibrateInfo OscDevice::GetCalibrateInfo(Chnl chnl, VoltRange range) {
@@ -247,7 +251,11 @@ void OscDevice::ReadDevice(RegisterMemory* memory, bool* state) {
         memory->start_addr(), memory->buffer(), memory->size());
 }
 
+#define OPERATE_HEAD() \
+  device::CleanError();
+
 void OscDevice::SetVoltRange(Chnl chnl) {
+  OPERATE_HEAD();
   if (chnl != CAN_DIFF) {
     SetAnalogCtrl(chnl);
     SetAnalogSwitch(chnl);

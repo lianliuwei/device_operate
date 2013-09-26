@@ -116,7 +116,7 @@ DECLARE_ENUM_STORE_MEMBER(CompareType);
 class OscDeviceProperty {
 public:
   OscDeviceProperty() {}
-  ~OscDeviceProperty() {}
+  virtual ~OscDeviceProperty() {}
 
   // take owned of dict, and use it to init the prefs_
   void Init(base::DictionaryValue* dict);
