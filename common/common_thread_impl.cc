@@ -26,6 +26,7 @@ static const char* g_browser_thread_names[CommonThread::ID_COUNT] = {
   //"DBThread",  // DB
   //"WebKitThread",  // WEBKIT_DEPRECATED
   "FileThread",  // FILE
+  "DeviceThread",
   //"FileUserBlockingThread",  // FILE_USER_BLOCKING
   //"ProcessLauncherThread",  // PROCESS_LAUNCHER
   //"CacheThread",  // CACHE
