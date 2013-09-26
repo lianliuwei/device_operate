@@ -11,12 +11,18 @@ using namespace base;
 
 class DeviceMock: public DeviceBase {
 public:
-  DeviceMock() {}
+  DeviceMock() 
+      : DeviceBase(NULL) {}
   ~DeviceMock() {}
 
   MOCK_METHOD0(LockStatusChanged, void());
 
 private:
+  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() {
+    NOTIMPLEMENTED();
+    return NULL;
+  }
+
   DISALLOW_COPY_AND_ASSIGN(DeviceMock);
 };
 

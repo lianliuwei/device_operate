@@ -114,7 +114,7 @@ TEST(OscDeviceTest, WriteChnlConfig) {
   UsbPortDeviceDelegate device_delegate;
   ScopeOpenDevice open_device(&(device_delegate));
   EXPECT_TRUE_OR_RET(open_device.IsOpen());
-  OscDevice osc_device(&device_delegate);
+  OscDevice osc_device(&device_delegate, NULL);
 
   // config osc_device
   string content(kOscConfig);

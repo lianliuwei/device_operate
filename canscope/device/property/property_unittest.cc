@@ -66,10 +66,10 @@ class DeviceHandle : public Device
                    , public canscope::PropertyDelegate {
 public:
   DeviceHandle(Device& device)
-      : bool_property(this, kBoolMember, bool_member, device.bool_member,
+      : bool_property(this, bool_member, device.bool_member,
           Bind(&Device::SetBoolMember, Unretained(&device)),
           Bind(&DeviceHandle::bool_property_check, Unretained(this)))
-      , int_property(this, kIntMember, int_member, device.int_member,
+      , int_property(this, int_member, device.int_member,
           Bind(&Device::SetIntMember, Unretained(&device)),
           Bind(&DeviceHandle::int_property_check, Unretained(this)))
       , device_(device) {
@@ -93,9 +93,6 @@ public:
 
   MOCK_METHOD0(IsBatchMode, bool());
 
-  virtual std::string device_name() {
-    return "device";
-  }
 
   MOCK_METHOD1(PostDeviceTask, void(const Closure&));
 
@@ -105,6 +102,9 @@ public:
   Device* device() {
     return &device_;
   }
+
+  virtual void SetPropertyFinish(const std::string& reason) {}
+
 
   canscope::BooleanProperty bool_property;
   canscope::IntegerProperty int_property;
