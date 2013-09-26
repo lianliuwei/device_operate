@@ -73,25 +73,25 @@ IMPLEMENT_ENUM_STORE_MEMBER_INT(CompareType);
 void OscDeviceProperty::Init(base::DictionaryValue* dict) {
   prefs_.Reset(dict);
 
-  range_can_h.Init(kRangeCANHItem, &prefs_);
-  offset_can_h.Init(kOffsetCANHItem, &prefs_);
-  coupling_can_h.Init(kCouplingCANHItem, &prefs_);
-  range_can_l.Init(kRangeCANLItem, &prefs_);
-  offset_can_l.Init(kOffsetCANLItem, &prefs_);
-  coupling_can_l.Init(kCouplingCANLItem, &prefs_);
-  range_can_diff.Init(kRangeCANDIFFItem, &prefs_);
-  offset_can_diff.Init(kOffsetCANDIFFItem, &prefs_);
-  diff_ctrl.Init(kDiffCtrlItem, &prefs_);
-  time_base.Init(kTimeBaseItem, &prefs_);
-  time_offset.Init(kTimeOffsetItem, &prefs_);
-  auto_time.Init(kAutoTimeItem, &prefs_);
-  trigger_source.Init(kTriggerSourceItem, &prefs_);
-  trigger_type.Init(kTriggerTypeItem, &prefs_);
-  trigger_mode.Init(kTriggerModeItem, &prefs_);
-  trigger_sens.Init(kTriggerSensItem, &prefs_);
-  compare.Init(kCompareItem, &prefs_);
-  trigger_volt.Init(kTriggerVoltItem, &prefs_);
-  time_param.Init(kTimeParamItem, &prefs_);
+  range_can_h.Init(kOscCANHVoltRange, &prefs_);
+  offset_can_h.Init(kOscCANHOffset, &prefs_);
+  coupling_can_h.Init(kOscCANHCoupling, &prefs_);
+  range_can_l.Init(kOscCANLVoltRange, &prefs_);
+  offset_can_l.Init(kOscCANLOffset, &prefs_);
+  coupling_can_l.Init(kOscCANLCoupling, &prefs_);
+  range_can_diff.Init(kOscCANDIFFVoltRange, &prefs_);
+  offset_can_diff.Init(kOscCANDIFFOffset, &prefs_);
+  diff_ctrl.Init(kOscDiffCtrl, &prefs_);
+  time_base.Init(kOscTimeBase, &prefs_);
+  time_offset.Init(kOscTimeOffset, &prefs_);
+  auto_time.Init(kOscAutoTime, &prefs_);
+  trigger_source.Init(kOscTriggerSource, &prefs_);
+  trigger_type.Init(kOscTriggerType, &prefs_);
+  trigger_mode.Init(kOscTriggerMode, &prefs_);
+  trigger_sens.Init(kOscTriggerSens, &prefs_);
+  compare.Init(kOscCompare, &prefs_);
+  trigger_volt.Init(kOscTriggerVolt, &prefs_);
+  time_param.Init(kOscTimeParam, &prefs_);
 }
 
 } // namespace canscope
