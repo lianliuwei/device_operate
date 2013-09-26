@@ -1,7 +1,11 @@
 #include "canscope/device/device_manager.h"
 
+#include "base/bind.h"
+#include "base/location.h"
 
-DeviceManager::DeviceManager(MessageLoopProxy* device_loop)
+using namespace base;
+
+DeviceManager::DeviceManager(base::MessageLoopProxy* device_loop)
     : destroy_(false) 
     , own_ref_(this)
     , device_loop_(device_loop) {
@@ -31,6 +35,7 @@ void DeviceManager::DestroyPos() {
 }
 
 void DeviceManager::DeleteDevice() {
+  // use the raw ptr, or will break RefCount in_dtor CHECK
   device_loop_->PostTask(FROM_HERE, 
-      Bind(&DeviceManager::DeleteDeviceImpl, this));
+      Bind(&DeviceManager::DeleteDeviceImpl, Unretained(this)));
 }
