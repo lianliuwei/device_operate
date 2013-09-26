@@ -1,25 +1,26 @@
 #pragma once
 
 namespace canscope {
-// Osc Device
-static const char* kOscDeviceGroup = "OscDevice";
-static const char* kRangeCANHItem = "CANH.Range";
-static const char* kOffsetCANHItem = "CANH.Offset";
-static const char* kCouplingCANHItem = "CANH.Coupling";
-static const char* kRangeCANLItem = "CANL.RangeCANH";
-static const char* kOffsetCANLItem = "CANL.OffsetCANH";
-static const char* kCouplingCANLItem = "CANL.Coupling";
-static const char* kRangeCANDIFFItem = "CANDIFF.Range";
-static const char* kOffsetCANDIFFItem = "CANDIFF.Offset";
-static const char* kDiffCtrlItem = "DiffCtrl";
-static const char* kTimeBaseItem = "Time.Base";
-static const char* kTimeOffsetItem = "Time.Offset";
-static const char* kAutoTimeItem = "Trigger.AutoTime";
-static const char* kTriggerSourceItem = "Trigger.Source";
-static const char* kTriggerTypeItem = "Trigger.Type";
-static const char* kTriggerModeItem = "Trigger.Mode";
-static const char* kTriggerSensItem = "Trigger.Sens";
-static const char* kCompareItem = "Trigger.Compare";
-static const char* kTriggerVoltItem = "Trigger.Volt";
-static const char* kTimeParamItem = "Trigger.Param";
+
+// OscDevice
+extern const char kOscCANHVoltRange[];
+extern const char kOscCANHOffset[];
+extern const char kOscCANHCoupling[];
+extern const char kOscCANLVoltRange[];
+extern const char kOscCANLOffset[];
+extern const char kOscCANLCoupling[];
+extern const char kOscCANDIFFVoltRange[];
+extern const char kOscCANDIFFOffset[];
+extern const char kOscDiffCtrl[];
+extern const char kOscTimeBase[];
+extern const char kOscTimeOffset[];
+extern const char kOscAutoTime[];
+extern const char kOscTriggerSource[];
+extern const char kOscTriggerType[];
+extern const char kOscTriggerMode[];
+extern const char kOscTriggerSens[];
+extern const char kOscCompare[];
+extern const char kOscTriggerVolt[];
+extern const char kOscTimeParam[];
+
 }; // namespace canscope

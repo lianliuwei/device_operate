@@ -1,4 +1,4 @@
-#include "canscope/device/device_constants.h"
+#include "canscope/device/canscope_device_property_constants.h"
 
 namespace canscope {
 
