@@ -25,7 +25,6 @@ class COMMON_EXPORT CommonThreadImpl : public CommonThread,
 
   static void ShutdownThreadPool();
 
- protected:
   virtual void Init() OVERRIDE;
   virtual void Run(base::MessageLoop* message_loop) OVERRIDE;
   virtual void CleanUp() OVERRIDE;

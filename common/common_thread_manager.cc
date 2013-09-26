@@ -40,6 +40,7 @@ void CommonThreadManager::InitializeMainThread() {
   // Register the main thread by instantiating it, but don't call any methods.
   main_thread_.reset(
       new MainThreadType(CommonThread::UI, base::MessageLoop::current()));
+  main_thread_->Init();
 }
 
 void CommonThreadManager::CreateThreads() {
@@ -170,6 +171,7 @@ void CommonThreadManager::ShutdownThreadsAndCleanUp() {
 
   PostDestroyThreads();
 
+  main_thread_->CleanUp();
   main_thread_.reset();
   main_message_loop_.reset();
 }

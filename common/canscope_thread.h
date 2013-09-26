@@ -10,10 +10,10 @@ public:
                  base::MessageLoop* message_loop);
   virtual ~CANScopeThread() {}
 
-protected:
   // base::Thread
   virtual void Init() OVERRIDE;
   virtual void CleanUp() OVERRIDE;
+  
 
 private:
   scoped_ptr<common::NotificationService> notifier_;
