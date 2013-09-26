@@ -23,22 +23,20 @@ class Property {
 public:
   typedef base::Callback<bool(Type, const std::string&)> CheckValueCallback;
 
-  Property(PropertyDelegate* delegate, const char* name,
+  Property(PropertyDelegate* delegate,
       StoreType& member, StoreType& device_member,
       base::Closure call_back, CheckValueCallback check_value)
       : delegate_(delegate)
-      , name_(name)
       , member_(member)
       , device_member_(device_member)
       , call_back_(call_back)
       , check_value_(check_value)
       , event_(false, false) {}
 
- Property(PropertyDelegate* delegate, const char* name,
+ Property(PropertyDelegate* delegate, 
       StoreType& member, StoreType& device_member,
       base::Closure call_back)
       : delegate_(delegate)
-      , name_(name)
       , member_(member)
       , device_member_(device_member)
       , call_back_(call_back)
@@ -95,18 +93,21 @@ public:
     if (check_value_.is_null()) {
       return true;
     }
-    return check_value_.Run(value, name_);
+    return check_value_.Run(value, member_.pref_name());
   }
 
   // observer
   void AddPrefObserver(DevicePropertyStore::Observer* obs) {
-    delegate_->GetDevicePropertyStore()->AddPrefObserver(name_, obs);
+    delegate_->GetDevicePropertyStore()->
+        AddPrefObserver(member_.pref_name(), obs);
   }
   void RemovePrefObserver(DevicePropertyStore::Observer* obs) {
-    delegate_->GetDevicePropertyStore()->RemovePrefObserver(name_, obs);
+    delegate_->GetDevicePropertyStore()->
+        RemovePrefObserver(member_.pref_name(), obs);
   }
   bool HasObserver(DevicePropertyStore::Observer* obs) const {
-    return delegate_->GetDevicePropertyStore()->HasObserver(name_, obs);
+    return delegate_->GetDevicePropertyStore()->
+        HasObserver(member_.pref_name(), obs);
   }
 
 private:
@@ -203,7 +204,6 @@ private:
   StoreType& device_member_;
   base::Closure call_back_;
   CheckValueCallback check_value_;
-  std::string name_;
   // error happen on device
   canscope::device::Error device_error_;
 
