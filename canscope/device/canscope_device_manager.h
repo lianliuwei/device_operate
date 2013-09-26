@@ -4,6 +4,8 @@
 
 #include "canscope/device/device_manager.h"
 #include "canscope/device/osc_device.h"
+#include "canscope/device/usb_port_device_delegate.h"
+#include "canscope/device/config_manager.h"
 
 namespace base {
 class MessageLoopProxy;
@@ -20,7 +22,7 @@ public:
   static CANScopeDeviceManager* Create();
 
   OscDevice* osc_device() {
-    return osc_device_.get();
+    return &osc_device_;
   }
 
 private:
@@ -31,7 +33,10 @@ private:
   CANScopeDeviceManager(base::MessageLoopProxy* device_loop);
   virtual ~CANScopeDeviceManager() {}
 
-  scoped_ptr<OscDevice> osc_device_;
+  UsbPortDeviceDelegate device_delegate_;
+  
+  ConfigManager osc_device_config_;
+  OscDevice osc_device_;
 
   DISALLOW_COPY_AND_ASSIGN(CANScopeDeviceManager);
 };

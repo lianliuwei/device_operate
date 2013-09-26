@@ -18,18 +18,21 @@ public:
   // or user call this.
   void DestroyHandle();
 
+  OscDeviceHandle* osc_device_handle() { return osc_device_handle_.get(); }
 
   virtual void Observe(int type, 
                        const common::NotificationSource& source, 
                        const common::NotificationDetails& details);
 
 private:
+  void Init();
+
   CANScopeDeviceManagerHandle(CANScopeDeviceManager* manager);
-  virtual ~CANScopeDeviceManagerHandle();
+  virtual ~CANScopeDeviceManagerHandle() {}
 
   common::NotificationRegistrar registrar_;
 
-  OscDeviceHandle* osc_device_handle_;
+  scoped_ptr<OscDeviceHandle> osc_device_handle_;
 
   scoped_refptr<CANScopeDeviceManager> device_manager_;
 };

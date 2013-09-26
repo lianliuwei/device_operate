@@ -31,6 +31,7 @@ CANScopeDeviceManagerHandle* CANScopeDeviceManagerHandle::Create() {
       << "CANScopeDeviceManager need be existed";
   handle_tls_ptr.Pointer()->Set(
       new CANScopeDeviceManagerHandle(CANScopeDeviceManager::GetInstance()));
+  GetInstance()->Init();
   return GetInstance();
 }
 
@@ -53,5 +54,10 @@ void CANScopeDeviceManagerHandle::Observe(int type,
                                           const common::NotificationDetails& details) {
   DestroyHandle();
 }
+
+void CANScopeDeviceManagerHandle::Init() {
+  osc_device_handle_.reset(new OscDeviceHandle(device_manager_->osc_device()));
+}
+
 
 }

@@ -47,8 +47,7 @@ void CANScopeDeviceManager::DeleteDeviceImpl() {
 
 CANScopeDeviceManager::CANScopeDeviceManager(
     base::MessageLoopProxy* device_loop)
-    : DeviceManager(device_loop) {}
-
-
+    : DeviceManager(device_loop)
+    , osc_device_(&device_delegate_, &osc_device_config_) {}
 
 }
