@@ -4,11 +4,13 @@
 #include "base/values.h"
 
 #include "canscope/device/config_manager.h"
+#include "canscope/device/property/value_map_device_property_store.h"
 
 using namespace base;
 
-DeviceBase::DeviceBase()
+DeviceBase::DeviceBase(ConfigManager* config_manager)
     : seq_(kNullSeq)
+    , config_manager_(config_manager)
     , lock_name_("")
     // init no lock
     , event_(true, true) {
@@ -69,7 +71,11 @@ void DeviceBase::LoadFromConfig() {
     return;
   if (config_manager_ == NULL)
     return;
-  DevicePrefs()->ChangeContent(config_manager_->GetLast());  
+  ConfigManager::Config config = config_manager_->GetLast();
+  DCHECK(config.pref->IsType(Value::TYPE_DICTIONARY));
+  DictionaryValue* dict_value;
+  config.pref->GetAsDictionary(&dict_value);
+  DevicePrefs()->ChangeContent(dict_value->DeepCopy());  
 }
 
 void DeviceBase::UpdateConfig(const std::string& reason) {
