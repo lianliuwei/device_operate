@@ -1,4 +1,5 @@
 #include "testing/gtest/include/gtest/gtest.h"
+#include "testing/gmock/include/gmock/gmock.h"
 
 #include <string>
 
@@ -8,10 +9,12 @@
 #include "base/json/json_reader.h"
 
 #include "canscope/device/property/value_map_device_property_store.h"
+#include "canscope/device/property/device_property_observer_mock.h"
 
 using namespace canscope;
 using namespace base;
 using namespace std;
+using testing::_;
 
 TEST(ValueMapDevicePropertyStoreTest, SetAndGetValue) {
   ValueMapDevicePropertyStore prefs;
@@ -29,37 +32,28 @@ TEST(ValueMapDevicePropertyStoreTest, SetAndGetValue) {
   EXPECT_EQ(10, temp);
 }
 
-class DevicePropertyObserverStub : public DevicePropertyStore::Observer {
-public:
-  DevicePropertyObserverStub() 
-      : count(0) {}
-  virtual ~DevicePropertyObserverStub() {}
-
-  virtual void OnPreferenceChanged(const std::string& pref_name) {
-    ++count;
-    last_pref_name = pref_name;
-  }
- 
-  int count;
-  string last_pref_name;
-};
-
 TEST(ValueMapDevicePropertyStoreTest, Observer) {
-  DevicePropertyObserverStub stub;
-  EXPECT_EQ(0, stub.count);
-  EXPECT_EQ("", stub.last_pref_name);
+  DevicePropertyObserverMock stub;
   ValueMapDevicePropertyStore prefs;
   string pref_name = "test.1.2.3";
   prefs.AddPrefObserver(pref_name, &stub);
+
+  EXPECT_CALL(stub, OnPreferenceChanged(pref_name)).Times(1);
+  
   Value* value = new FundamentalValue(10);
   prefs.SetValue(pref_name, value);
-  EXPECT_EQ(1, stub.count);
-  EXPECT_EQ(pref_name, stub.last_pref_name);
+
+  testing::Mock::VerifyAndClearExpectations(&stub);
+
+
+  EXPECT_CALL(stub, OnPreferenceChanged(_)).Times(0);
   value = new FundamentalValue(true);
   string pref_name2 = "test.NoNotify";
   prefs.SetValueSilently(pref_name2, value);
-  EXPECT_EQ(1, stub.count);
-  EXPECT_EQ(pref_name, stub.last_pref_name);
+
+  testing::Mock::VerifyAndClearExpectations(&stub);
+
+
   const Value* ptr = NULL;
   bool ret = prefs.GetValue(pref_name2, &ptr);
   EXPECT_TRUE(ret);
@@ -67,6 +61,7 @@ TEST(ValueMapDevicePropertyStoreTest, Observer) {
   bool temp;
   EXPECT_TRUE(ptr->GetAsBoolean(&temp));
   EXPECT_EQ(true, temp);
+
   prefs.RemovePrefObserver(pref_name, &stub);
 }
 
