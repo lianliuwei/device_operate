@@ -25,6 +25,8 @@ public:
     return &osc_device_;
   }
 
+  ConfigManager* osc_device_config_test() { return &osc_device_config_; }
+
 private:
   // DeviceManager
   virtual void DestroyImpl() OVERRIDE;
@@ -34,7 +36,7 @@ private:
   virtual ~CANScopeDeviceManager() {}
 
   UsbPortDeviceDelegate device_delegate_;
-  
+
   ConfigManager osc_device_config_;
   OscDevice osc_device_;
 
