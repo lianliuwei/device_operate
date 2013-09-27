@@ -72,7 +72,8 @@ OscDeviceHandle::OscDeviceHandle(OscDevice* device)
     , time_param(this,
         properties_.time_param, device->time_param,
         Bind(&OscDevice::SetTimeParam, Unretained(device))) {
-    
+  InitHandle();
+  properties_.Init();
 }
 
 } // namespace canscope
