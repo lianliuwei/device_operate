@@ -94,8 +94,8 @@ private:
 
   void TriggerVolt(uint8* cmp_high, uint8* cmp_low);
 
-  void WriteDevice(device::RegisterMemory* memory, bool* state);
-  void ReadDevice(device::RegisterMemory* memory, bool* state);
+  void WriteDevice(::device::RegisterMemory* memory, bool* state);
+  void ReadDevice(::device::RegisterMemory* memory, bool* state);
 
   AnalogCtrlRegister analog_ctrl_;
   SoftDiffRegister soft_diff_;
