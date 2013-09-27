@@ -1,5 +1,8 @@
 #pragma once
 
+#include "common/notification/notification_observer.h"
+#include "common/notification/notification_registrar.h"
+
 #include "canscope/device/device_base.h"
 #include "canscope/device/property/property_delegate.h"
 
@@ -7,7 +10,8 @@ namespace canscope {
 class ValueMapDevicePropertyStore;
 }
 
-class DeviceHandleBase : public canscope::PropertyDelegate {
+class DeviceHandleBase : public canscope::PropertyDelegate
+                       , public common::NotificationObserver {
 public:
   DeviceHandleBase(DeviceBase* device);
   virtual ~DeviceHandleBase() {}
@@ -28,6 +32,12 @@ protected:
   virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() = 0;
 
 private:
+  virtual void Observe(int type, 
+                       const common::NotificationSource& source, 
+                       const common::NotificationDetails& details);
+
+  common::NotificationRegistrar registrar_;
+
   DeviceBase* device_;
   int current_pref_;
   bool batch_mode_;

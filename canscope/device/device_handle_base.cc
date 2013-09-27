@@ -1,7 +1,9 @@
 #include "canscope/device/device_handle_base.h"
 
 #include "common/common_thread.h"
+#include "common/notification/notification_source.h"
 
+#include "canscope/canscope_notification_types.h"
 #include "canscope/device/config_manager.h"
 #include "canscope/device/property/value_map_device_property_store.h"
 
@@ -12,7 +14,8 @@ DeviceHandleBase::DeviceHandleBase(DeviceBase* device)
     : device_(device)
     , current_pref_(0)
     , batch_mode_(false) {
-
+ registrar_.Add(this, NOTIFICATION_DEVICE_PREFS_UPDATE, 
+      common::Source<ConfigManager>(device->config_manager()));
 }
 
 DevicePropertyStore* DeviceHandleBase::GetDevicePropertyStore() {
@@ -50,6 +53,17 @@ void DeviceHandleBase::InitHandle() {
   config.pref->GetAsDictionary(&dict_value);
   DevicePrefs()->Reset(dict_value->DeepCopy());
 }
+
+void DeviceHandleBase::Observe(int type, 
+                               const common::NotificationSource& source, 
+                               const common::NotificationDetails& details) {
+  if (type == NOTIFICATION_DEVICE_PREFS_UPDATE) {
+    FetchNewPref();
+    return;
+  }
+  NOTREACHED();
+}
+
 
 #ifndef UNIT_TEST
 namespace {
