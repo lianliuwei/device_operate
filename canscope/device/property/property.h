@@ -153,7 +153,7 @@ private:
     CallCallback();
     // TODO check and record last error
     // CheckLastError();
-    device_error_ = LastDeviceError();
+    device_error_ = canscope::device::LastDeviceError();
     SignalFinish();
   }
 
@@ -175,10 +175,11 @@ private:
     device_member_.set_value(value);
     CallCallback();
 
-    if (LastDeviceError() == canscope::device::OK) {
+    if (canscope::device::LastDeviceError() == canscope::device::OK) {
       async_task->NotifyFinish(NULL);
     } else {
-      async_task->NotifyError(ErrorAsDictionary(LastDeviceError()));
+      async_task->NotifyError(
+          ErrorAsDictionary(canscope::device::LastDeviceError()));
     }
 
     TRACE_EVENT_FLOW_END0("Property", "SetValueAsync", async_task.get());
