@@ -78,6 +78,18 @@ void DeviceBase::LoadFromConfig() {
   DevicePrefs()->ChangeContent(dict_value->DeepCopy());  
 }
 
+void DeviceBase::InitFromConfig() {
+  if (DevicePrefs() == NULL)
+    return;
+  if (config_manager_ == NULL)
+    return;
+  ConfigManager::Config config = config_manager_->GetLast();
+  DCHECK(config.pref->IsType(Value::TYPE_DICTIONARY));
+  DictionaryValue* dict_value;
+  config.pref->GetAsDictionary(&dict_value);
+  DevicePrefs()->Reset(dict_value->DeepCopy());  
+}
+
 void DeviceBase::UpdateConfig(const std::string& reason) {
   if (DevicePrefs() == NULL)
     return;

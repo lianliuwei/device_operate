@@ -35,6 +35,7 @@ public:
 
   // must CheckConfig() before LoadFromConfig()
   void LoadFromConfig();
+  void InitFromConfig();
   virtual bool CheckConfig(base::Value** error_info) { return true; }
   void UpdateConfig(const std::string& reason);
   ConfigManager* config_manager() { return config_manager_; }
