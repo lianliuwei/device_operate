@@ -7,7 +7,7 @@
 namespace canscope {
 class UsbCommand {
 public:
-  device::RegisterMemory memory;
+  ::device::RegisterMemory memory;
 
   Uint16Bind cmd_id;
   BoolBind mode;

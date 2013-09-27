@@ -6,7 +6,7 @@
 namespace canscope {
 class Trigger1Register {
 public:
-  device::RegisterMemory memory;
+  ::device::RegisterMemory memory;
 
   Uint32Bind trig_pre;
   Uint32Bind trig_post;

@@ -8,7 +8,7 @@
 namespace canscope {
 class SoftDiffRegister {
 public:
-  device::RegisterMemory memory;
+  ::device::RegisterMemory memory;
 
   BoolBind  sys_cfg;
   Uint8Bind ch_sens_canh;

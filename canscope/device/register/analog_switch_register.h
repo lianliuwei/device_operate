@@ -6,7 +6,7 @@
 namespace canscope {
 class AnalogSwitchRegister {
 public:
-  device::RegisterMemory memory;
+  ::device::RegisterMemory memory;
 
   BoolBind coupling_canh;
   BoolBind coupling_canl;

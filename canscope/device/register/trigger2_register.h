@@ -7,7 +7,7 @@
 namespace canscope {
 class Trigger2Register {
 public:
-  device::RegisterMemory memory;
+  ::device::RegisterMemory memory;
 
   Uint32SubBind trig_source;
   // CmpVol

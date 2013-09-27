@@ -6,7 +6,7 @@
 namespace canscope {
 class AnalogCtrlRegister {
 public:
-  device::RegisterMemory memory;
+  ::device::RegisterMemory memory;
 
   Uint32Bind can_l_gain;
   Uint32Bind can_l_offset;

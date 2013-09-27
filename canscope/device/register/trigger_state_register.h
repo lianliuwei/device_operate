@@ -7,7 +7,7 @@
 namespace canscope {
   class TriggerStateRegister {
   public:
-    device::RegisterMemory memory;
+    ::device::RegisterMemory memory;
     
     // TRIG_STATE
     BoolBind pre_bit;

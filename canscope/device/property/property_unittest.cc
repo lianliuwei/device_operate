@@ -15,6 +15,7 @@
 #include "canscope/device/property/value_map_device_property_store.h"
 #include "canscope/async_task.h"
 #include "canscope/async_task_observer_mock.h"
+#include "canscope/device/device_thread_mock.h"
 
 using namespace base;
 using testing::_;
@@ -27,19 +28,6 @@ static const char* kBoolMember = "test.bool_member";
 static const char* kIntMember = "test.int_member";
 }
 
-class DeviceThreadMock {
-public:
-  MOCK_METHOD0(IsDeviceThread, bool());
-};
-
-static base::LazyInstance<DeviceThreadMock> g_DeviceThreadMock;
-namespace canscope {
-
-bool IsDeviceThread() {
-  return g_DeviceThreadMock.Pointer()->IsDeviceThread();
-}
-
-}
 class Device {
 public:
   Device() {}
@@ -148,7 +136,6 @@ static const char kTestConfig[] =  {" \
   \"test.int_member\" : 3 \
 } \
 "};
-}
 
 DictionaryValue* GetDefaultConfig() {
   std::string content(kTestConfig);
@@ -159,6 +146,8 @@ DictionaryValue* GetDefaultConfig() {
   DictionaryValue* dict_value;
   value->GetAsDictionary(&dict_value);
   return dict_value;
+}
+
 }
 
 ACTION_P(CallFuncError, device_error) {
