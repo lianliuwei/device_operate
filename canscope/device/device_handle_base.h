@@ -9,7 +9,7 @@ class ValueMapDevicePropertyStore;
 
 class DeviceHandleBase : public canscope::PropertyDelegate {
 public:
-  DeviceHandleBase(DeviceBase* device) {}
+  DeviceHandleBase(DeviceBase* device);
   virtual ~DeviceHandleBase() {}
 
   // PropertyDelegate

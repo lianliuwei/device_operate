@@ -8,6 +8,13 @@
 using namespace common;
 using namespace canscope;
 
+DeviceHandleBase::DeviceHandleBase(DeviceBase* device)
+    : device_(device)
+    , current_pref_(0)
+    , batch_mode_(false) {
+
+}
+
 DevicePropertyStore* DeviceHandleBase::GetDevicePropertyStore() {
   return DevicePrefs();
 }
@@ -43,3 +50,13 @@ void DeviceHandleBase::InitHandle() {
   config.pref->GetAsDictionary(&dict_value);
   DevicePrefs()->Reset(dict_value->DeepCopy());
 }
+
+#ifndef UNIT_TEST
+namespace {
+
+bool Is DeviceThread() {
+  return CommonThread::CurrentlyOn(CommonThread::DEVICE);
+}
+
+}
+#endif
