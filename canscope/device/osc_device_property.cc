@@ -72,7 +72,10 @@ IMPLEMENT_ENUM_STORE_MEMBER_INT(CompareType);
 
 void OscDeviceProperty::Init(base::DictionaryValue* dict) {
   prefs_.Reset(dict);
+  Init();
+}
 
+void OscDeviceProperty::Init() {
   range_can_h.Init(kOscCANHVoltRange, &prefs_);
   offset_can_h.Init(kOscCANHOffset, &prefs_);
   coupling_can_h.Init(kOscCANHCoupling, &prefs_);

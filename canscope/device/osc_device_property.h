@@ -120,6 +120,8 @@ public:
 
   // take owned of dict, and use it to init the prefs_
   void Init(base::DictionaryValue* dict);
+  // Init for prefs_ be already init
+  void Init();
 
   ValueMapDevicePropertyStore prefs_;
 
