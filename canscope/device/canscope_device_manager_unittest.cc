@@ -12,7 +12,9 @@
 #include "canscope/device/canscope_device_manager.h"
 #include "canscope/device/canscope_device_manager_handle.h"
 #include "canscope/canscope_notification_types.h"
+#include "canscope/device/canscope_device_property_constants.h"
 #include "canscope/device/device_thread_mock.h"
+#include "canscope/device/property/device_property_observer_mock.h"
 
 using namespace base;
 using namespace common;
@@ -94,7 +96,8 @@ class CANScopeDeviceManagerTest : public testing::Test
                                 , public NotificationObserver {
 public:
   CANScopeDeviceManagerTest()
-    : event_(true, false) {}
+    : event_(true, false)
+    , mock_ (NULL) {}
   virtual ~CANScopeDeviceManagerTest() {}
 
   static void SetUpTestCase() {
@@ -108,6 +111,14 @@ public:
   }
 
   void GetValueTest();
+  void SetValueFileThread();
+  static void StartQuit() {
+    CANScopeDeviceManager::GetInstance()->StartDestroying();
+  }
+  void SetValueAndNotifyCheck();
+
+protected:
+    DevicePropertyObserverMock* mock_;
 
 private:
   virtual void SetUp() {
@@ -165,7 +176,7 @@ void CANScopeDeviceManagerTest::GetValueTest() {
   EXPECT_DOUBLE_EQ(0.0, handle->trigger_volt.value());
   EXPECT_DOUBLE_EQ(1.0, handle->time_param.value());
 
-  CANScopeDeviceManager::GetInstance()->StartDestroying();
+  StartQuit();
 }
 
 TEST_F(CANScopeDeviceManagerTest, GetValue) {
@@ -180,6 +191,40 @@ TEST_F(CANScopeDeviceManagerTest, SetValue) {
   EXPECT_EQ(k8V, handle->volt_range_can_h.value());
   handle->volt_range_can_h.set_value(k1V);
   EXPECT_EQ(k1V, handle->volt_range_can_h.value());
-  CANScopeDeviceManager::GetInstance()->StartDestroying();
+
+  StartQuit();
+  GetTestProcess()->MainMessageLoopRun();
+}
+
+void CANScopeDeviceManagerTest::SetValueFileThread() {
+  CANScopeDeviceManagerHandle::Create();
+  OscDeviceHandle* handle = CANScopeDeviceManagerHandle::GetInstance()->
+      osc_device_handle();
+  EXPECT_EQ(k8V, handle->volt_range_can_h.value());
+  handle->volt_range_can_h.set_value(k1V);
+  EXPECT_EQ(k1V, handle->volt_range_can_h.value());
+}
+
+void CANScopeDeviceManagerTest::SetValueAndNotifyCheck() {
+  OscDeviceHandle* handle = CANScopeDeviceManagerHandle::GetInstance()->
+      osc_device_handle();
+  EXPECT_EQ(k1V, handle->volt_range_can_h.value());
+  handle->volt_range_can_h.RemovePrefObserver(mock_);
+  mock_ = NULL;
+  StartQuit();
+}
+
+TEST_F(CANScopeDeviceManagerTest, SetValueAndNotify) {
+  OscDeviceHandle* handle = CANScopeDeviceManagerHandle::GetInstance()->
+      osc_device_handle();
+  DevicePropertyObserverMock mock;
+  mock_ = &mock;
+  handle->volt_range_can_h.AddPrefObserver(&mock);
+  EXPECT_CALL(mock, OnPreferenceChanged(kOscCANHVoltRange)).Times(1)
+      .WillOnce(InvokeWithoutArgs(this, 
+          &CANScopeDeviceManagerTest::SetValueAndNotifyCheck));
+
+  CommonThread::PostTask(CommonThread::FILE, FROM_HERE, 
+      Bind(&CANScopeDeviceManagerTest::SetValueFileThread, Unretained(this)));
   GetTestProcess()->MainMessageLoopRun();
 }
