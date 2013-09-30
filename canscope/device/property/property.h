@@ -26,7 +26,7 @@ public:
       , device_member_(device_member)
       , call_back_(call_back)
       , check_value_(check_value)
-      , event_(false, false) {}
+      , event_(true, false) {}
 
  Property(PropertyDelegate* delegate, 
       StoreType& member, StoreType& device_member,
@@ -35,14 +35,14 @@ public:
       , member_(member)
       , device_member_(device_member)
       , call_back_(call_back)
-      , event_(false, false) {}
+      , event_(true, false) {}
 
   Property(PropertyDelegate* delegate, 
       StoreType& member, StoreType& device_member)
       : delegate_(delegate)
       , member_(member)
       , device_member_(device_member)
-      , event_(false, false) {}
+      , event_(true, false) {}
 
   ~Property() {
   }
@@ -208,6 +208,7 @@ private:
 
   void WaitForCallFinish() {
     event_.Wait();
+    event_.Reset();
   }
 
   void SignalFinish() {
