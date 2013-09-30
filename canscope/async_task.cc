@@ -9,7 +9,6 @@ using namespace base;
 AsyncTask::AsyncTask()
     : status_(kNoStart) 
     , percent_(0)
-    , cancel_(false)
     , message_loop_(MessageLoopProxy::current()) {
   DCHECK(message_loop_.get());
 }
@@ -25,10 +24,9 @@ int AsyncTask::GetProgress() {
 }
 
 void AsyncTask::Cancel() {
-  AutoLock lock(lock_);
-  LOG_IF(WARNING, cancel_) 
+  LOG_IF(WARNING, cancel_.IsSet()) 
       << "call cancel more than once, may the work thread no response";
-  cancel_ = true;
+  cancel_.Set();
 }
 
 void AsyncTask::AddObserver(AsyncTaskObserver* obs) {
@@ -104,7 +102,7 @@ void AsyncTask::NotifyCancel(base::Value* param) {
 
 bool AsyncTask::UserCancel() {
   AutoLock lock(lock_);
-  return cancel_;
+  return cancel_.IsSet();
 }
 
 void AsyncTask::NotifyFinishImpl(AsyncTaskStatus status, 

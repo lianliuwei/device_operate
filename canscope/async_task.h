@@ -7,6 +7,7 @@
 #include "base/observer_list.h"
 #include "base/message_loop_proxy.h"
 #include "base/synchronization/lock.h"
+#include "base/synchronization/cancellation_flag.h"
 
 class AsyncTask;
 enum AsyncTaskStatus;
@@ -95,7 +96,7 @@ private:
   AsyncTaskStatus status_;
   double percent_;
   // flag the work thread to Cancel.
-  bool cancel_;
+  base::CancellationFlag cancel_;
   
   DISALLOW_COPY_AND_ASSIGN(AsyncTask);
 };
