@@ -7,6 +7,7 @@
 #include "base/synchronization/lock.h"
 
 class ConfigManager;
+class ScopedDevicePropertyCommit;
 
 namespace base {
 class Value;
@@ -41,6 +42,8 @@ public:
   ConfigManager* config_manager() { return config_manager_; }
 
 protected:
+  friend class ScopedDevicePropertyCommit;
+
   virtual void LockStatusChanged() = 0;
 
   virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() = 0;

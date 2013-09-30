@@ -10,6 +10,8 @@ namespace canscope {
 class ValueMapDevicePropertyStore;
 }
 
+class ScopedDevicePropertyCommit;
+
 class DeviceHandleBase : public canscope::PropertyDelegate
                        , public common::NotificationObserver {
 public:
@@ -28,7 +30,10 @@ public:
   // init handle from Device
   void InitHandle();
 
+  DeviceBase* device() { return device_; }
 protected:
+  friend class ScopedDevicePropertyCommit;
+
   virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() = 0;
 
 private:
