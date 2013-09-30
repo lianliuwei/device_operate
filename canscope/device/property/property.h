@@ -13,11 +13,6 @@
 
 namespace canscope {
 
-// caller take own of DictonaryValue
-base::DictionaryValue* ErrorAsDictionary(canscope::device::Error error);
-canscope::device::Error ErrorFromDictonary(base::Value* value);
-void UpdateConfig();
-
 template<typename Type, typename StoreType = StoreMember<Type>>
 class Property {
 public:
@@ -42,6 +37,13 @@ public:
       , call_back_(call_back)
       , event_(false, false) {}
 
+  Property(PropertyDelegate* delegate, 
+      StoreType& member, StoreType& device_member)
+      : delegate_(delegate)
+      , member_(member)
+      , device_member_(device_member)
+      , event_(false, false) {}
+
   ~Property() {
   }
 
@@ -61,7 +63,8 @@ public:
     if (!CheckValue(value)) {
       TRACE_EVENT_FLOW_END0("Property", "SetValueSync", this);
       // General check error
-      SetDeviceErrorIfNoError(canscope::device::ERR_INVAILD_VALUE);
+      canscope::device::SetDeviceErrorIfNoError(
+          canscope::device::ERR_INVAILD_VALUE);
       return;
     }
     TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "CheckValue");
@@ -77,8 +80,10 @@ public:
     if (!CheckValue(value)) {
       TRACE_EVENT_FLOW_END0("Property", "SetValueAsync", async_task.get());
       // General check error
-      SetDeviceErrorIfNoError(canscope::device::ERR_INVAILD_VALUE);
-      async_task->NotifyError(ErrorAsDictionary(LastDeviceError()));
+      canscope::device::SetDeviceErrorIfNoError(
+          canscope::device::ERR_INVAILD_VALUE);
+      async_task->NotifyError(
+          canscope::device::ErrorAsDictionary(LastDeviceError()));
       TRACE_EVENT_FLOW_END0("Property", "SetValueAsync", async_task.get());
       return;
     }
@@ -148,12 +153,16 @@ private:
     TRACE_EVENT0("Property", "SetValueDeviceThread");
     TRACE_EVENT_FLOW_STEP0("Property", "SetValueSync", this, "SetValueDeviceThread");
 
+    canscope::device::CleanError();
+
     DCHECK(IsDeviceThread());
     device_member_.set_value(value);
     CallCallback();
+    
     // TODO check and record last error
     // CheckLastError();
     device_error_ = canscope::device::LastDeviceError();
+
     SignalFinish();
   }
 
@@ -172,6 +181,8 @@ private:
     TRACE_EVENT_FLOW_STEP0("Property", "SetValueAsync",
         async_task.get(), "SetValueDeviceThread");
 
+    canscope::device::CleanError();
+
     device_member_.set_value(value);
     CallCallback();
 
@@ -179,14 +190,17 @@ private:
       async_task->NotifyFinish(NULL);
     } else {
       async_task->NotifyError(
-          ErrorAsDictionary(canscope::device::LastDeviceError()));
+          canscope::device::ErrorAsDictionary(
+              canscope::device::LastDeviceError()));
     }
 
     TRACE_EVENT_FLOW_END0("Property", "SetValueAsync", async_task.get());
   }
 
   void CallCallback() {
-    call_back_.Run();
+    if (!call_back_.is_null()) {
+      call_back_.Run();
+    }
     std::string reason;
     reason = "SetProperty: " + device_member_.pref_name();
     delegate_->SetPropertyFinish(reason);

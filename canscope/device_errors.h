@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/basictypes.h"
+#include "base/values.h"
 
 namespace canscope {
 namespace device {
@@ -24,6 +25,10 @@ void SetDeviceError(Error error);
 void SetDeviceErrorIfNoError(Error error);
 
 void CleanError();
+
+// caller take own of DictonaryValue
+base::DictionaryValue* ErrorAsDictionary(canscope::device::Error error);
+canscope::device::Error ErrorFromDictonary(base::Value* value);
 
 class ScopedDeviceError {
 public:
