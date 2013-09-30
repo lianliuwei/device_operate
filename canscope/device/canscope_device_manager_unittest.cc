@@ -15,6 +15,7 @@
 #include "canscope/device/canscope_device_property_constants.h"
 #include "canscope/device/device_thread_mock.h"
 #include "canscope/device/property/device_property_observer_mock.h"
+#include "canscope/device/scoped_device_property_commit.h"
 
 using namespace base;
 using namespace common;
@@ -226,5 +227,74 @@ TEST_F(CANScopeDeviceManagerTest, SetValueAndNotify) {
 
   CommonThread::PostTask(CommonThread::FILE, FROM_HERE, 
       Bind(&CANScopeDeviceManagerTest::SetValueFileThread, Unretained(this)));
+  GetTestProcess()->MainMessageLoopRun();
+}
+class CallAndWaitOnDeviceThread {
+public:
+  CallAndWaitOnDeviceThread() 
+      : event_(true, false) {}
+  ~CallAndWaitOnDeviceThread() {}
+
+  static void Call(base::Closure call);
+
+  void Backend();
+
+private:
+  WaitableEvent event_;
+  base::Closure closure_;
+};
+
+void CallAndWaitOnDeviceThread::Call(base::Closure call) {
+  scoped_ptr<CallAndWaitOnDeviceThread> waiter(new CallAndWaitOnDeviceThread);
+  waiter->closure_ = call;  
+  CommonThread::PostTask(CommonThread::DEVICE, FROM_HERE,
+      Bind(&CallAndWaitOnDeviceThread::Backend, Unretained(waiter.get())));
+  waiter->event_.Wait();
+  waiter->event_.Reset();
+}
+
+void CallAndWaitOnDeviceThread::Backend() {
+  closure_.Run();
+  event_.Signal();
+}
+
+namespace {
+void DeviceNoChange() {
+  OscDevice* device = CANScopeDeviceManager::GetInstance()->osc_device();
+
+  EXPECT_EQ(k8V, device->range_can_h.value());
+  EXPECT_EQ(0.0, device->offset_can_h.value());
+  EXPECT_EQ(kAC, device->coupling_can_h.value());
+}
+
+void DeviceChanged() {
+  OscDevice* device = CANScopeDeviceManager::GetInstance()->osc_device();
+
+  EXPECT_EQ(k1V, device->range_can_h.value());
+  EXPECT_EQ(1.0, device->offset_can_h.value());
+  EXPECT_EQ(kDC, device->coupling_can_h.value());
+}
+
+}
+
+TEST_F(CANScopeDeviceManagerTest, BatchSetValue) {
+  OscDeviceHandle* handle = CANScopeDeviceManagerHandle::GetInstance()->
+      osc_device_handle();
+  OscDevice* device = CANScopeDeviceManager::GetInstance()->osc_device();
+  {
+  ScopedDevicePropertyCommit batch(handle, "BatchSetValueTest");
+  handle->volt_range_can_h.set_value(k1V);
+  handle->offset_can_h.set_value(1.0);
+  handle->coupling_can_h.set_value(kDC);
+  // handle change but device no change, device change after out of scope
+  EXPECT_EQ(k1V, handle->volt_range_can_h.value());
+  EXPECT_DOUBLE_EQ(1.0, handle->offset_can_h.value());
+  EXPECT_EQ(kDC, handle->coupling_can_h.value());
+
+  CallAndWaitOnDeviceThread::Call(Bind(&DeviceNoChange));
+  }
+  CallAndWaitOnDeviceThread::Call(Bind(&DeviceChanged));
+
+  StartQuit();
   GetTestProcess()->MainMessageLoopRun();
 }
