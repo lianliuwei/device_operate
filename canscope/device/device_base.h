@@ -44,7 +44,7 @@ public:
 protected:
   friend class ScopedDevicePropertyCommit;
 
-  virtual void LockStatusChanged() = 0;
+  virtual void LockStatusChanged();
 
   virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() = 0;
 

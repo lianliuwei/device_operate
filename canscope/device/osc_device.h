@@ -81,7 +81,6 @@ public:
 
 private:
   // DeviceBase
-  virtual void LockStatusChanged() {}
   virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { return &prefs_; }
 
   // set register according to property

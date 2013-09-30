@@ -2,9 +2,13 @@
 
 #include "base/logging.h"
 #include "base/values.h"
+#include "base/debug/trace_event.h"
+
+#include "common/notification/notification_service.h"
 
 #include "canscope/device/config_manager.h"
 #include "canscope/device/property/value_map_device_property_store.h"
+#include "canscope/canscope_notification_types.h"
 
 using namespace base;
 
@@ -28,6 +32,8 @@ bool DeviceBase::Lock(int* seq, std::string lock_name) {
   lock_name_ = lock_name;
   event_.Reset();
   }
+  TRACE_EVENT_INSTANT1("Device", "Lock", TRACE_EVENT_SCOPE_NAME_PROCESS,
+      "seq", seq_);
   // release lock before notify, or may dead lock.
   LockStatusChanged();
   return true;
@@ -41,6 +47,8 @@ void DeviceBase::UnLock(int seq) {
   lock_name_ = "";
   event_.Signal();
   }
+  TRACE_EVENT_INSTANT1("Device", "UnLock", TRACE_EVENT_SCOPE_NAME_PROCESS,
+      "seq", seq);
   LockStatusChanged();
 }
 
@@ -98,4 +106,9 @@ void DeviceBase::UpdateConfig(const std::string& reason) {
   config_manager_->UpdateAndNotify(DevicePrefs()->Serialize());
 }
 
+void DeviceBase::LockStatusChanged() {
+  NotifyAll(canscope::NOTIFICATION_DEVICE_LOCK_STATUS_CHANGED, 
+      common::Source<DeviceBase>(this), 
+      common::NotificationService::NoDetails());
+}
 
