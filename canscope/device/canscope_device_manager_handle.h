@@ -20,11 +20,11 @@ public:
 
   OscDeviceHandle* osc_device_handle() { return osc_device_handle_.get(); }
 
+private:
   virtual void Observe(int type, 
                        const common::NotificationSource& source, 
                        const common::NotificationDetails& details);
 
-private:
   void Init();
 
   CANScopeDeviceManagerHandle(CANScopeDeviceManager* manager);
