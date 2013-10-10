@@ -2,7 +2,11 @@
 
 namespace canscope {
 
+// version
+extern const char kVersionPath[];
+const int kVersion = 1;
 // OscDevice
+extern const char kOscDevice[];
 extern const char kOscCANHVoltRange[];
 extern const char kOscCANHOffset[];
 extern const char kOscCANHCoupling[];

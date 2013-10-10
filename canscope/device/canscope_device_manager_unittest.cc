@@ -1,6 +1,8 @@
+#include "base/values.h"
 #include "base/message_loop.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/json/json_string_value_serializer.h"
+#include "base/json/json_file_value_serializer.h"
 #include "base/json/json_reader.h"
 
 #include "common/common_thread_manager.h"
@@ -25,26 +27,28 @@ using testing::Invoke;
 
 namespace {
 static const char kOscConfig [] =  {" \
-{ \
-  \"CANH.Range\" : 3, \
-  \"CANH.Offset\" : 0.0, \
-  \"CANH.Coupling\" : 1, \
-  \"CANL.Range\" : 3, \
-  \"CANL.Offset\" : 0.0, \
-  \"CANL.Coupling\" : 1, \
-  \"CANDIFF.Range\" : 3, \
-  \"CANDIFF.Offset\" : 0.0, \
-  \"DiffCtrl\" : 0, \
-  \"Time.Base\" : 4, \
-  \"Time.Offset\" : 0.0, \
-  \"Trigger.AutoTime\" : 100.0, \
-  \"Trigger.Source\" : 2, \
-  \"Trigger.Type\" : 0, \
-  \"Trigger.Mode\" : 0, \
-  \"Trigger.Sens\" : 0, \
-  \"Trigger.Compare\" : 0, \
-  \"Trigger.Volt\" : 0.0, \
-  \"TimeParam\" : 1.0 \
+{ \"OscDevice\" : \
+  { \
+    \"CANH.Range\" : 3, \
+    \"CANH.Offset\" : 0.0, \
+    \"CANH.Coupling\" : 1, \
+    \"CANL.Range\" : 3, \
+    \"CANL.Offset\" : 0.0, \
+    \"CANL.Coupling\" : 1, \
+    \"CANDIFF.Range\" : 3, \
+    \"CANDIFF.Offset\" : 0.0, \
+    \"DiffCtrl\" : 0, \
+    \"Time.Base\" : 4, \
+    \"Time.Offset\" : 0.0, \
+    \"Trigger.AutoTime\" : 100.0, \
+    \"Trigger.Source\" : 2, \
+    \"Trigger.Type\" : 0, \
+    \"Trigger.Mode\" : 0, \
+    \"Trigger.Sens\" : 0, \
+    \"Trigger.Compare\" : 0, \
+    \"Trigger.Volt\" : 0.0, \
+    \"TimeParam\" : 1.0 \
+  } \
 } \
 "};
 
@@ -137,9 +141,7 @@ private:
 
   void CreateDeviceManager() {
     CANScopeDeviceManager* manager = CANScopeDeviceManager::Create();
-    manager->osc_device_config_test()->Update(GetDefaultConfig());
-    manager->osc_device()->InitFromConfig();
-    manager->osc_device()->Init();
+    manager->Init(GetDefaultConfig());
     event_.Signal();
   }
 
@@ -290,11 +292,21 @@ TEST_F(CANScopeDeviceManagerTest, BatchSetValue) {
   EXPECT_EQ(k1V, handle->volt_range_can_h.value());
   EXPECT_DOUBLE_EQ(1.0, handle->offset_can_h.value());
   EXPECT_EQ(kDC, handle->coupling_can_h.value());
-
   CallAndWaitOnDeviceThread::Call(Bind(&DeviceNoChange));
   }
   CallAndWaitOnDeviceThread::Call(Bind(&DeviceChanged));
 
   StartQuit();
   GetTestProcess()->MainMessageLoopRun();
+}
+
+TEST_F(CANScopeDeviceManagerTest, SaveConfig) {
+  scoped_ptr<DictionaryValue> dict_value(
+      CANScopeDeviceManager::GetInstance()->SaveConfig());
+  std::string key(kVersionPath);
+  dict_value->Set(key, new FundamentalValue(kVersion));
+  FilePath path(L"canscope_config.json");
+  JSONFileValueSerializer serializer(path);
+  bool ret = serializer.Serialize(*(dict_value.get()));
+  DCHECK(ret);
 }

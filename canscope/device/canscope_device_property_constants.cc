@@ -1,7 +1,8 @@
 #include "canscope/device/canscope_device_property_constants.h"
 
 namespace canscope {
-
+// version
+const char kVersionPath[]              = "Version";
 // OscDevice
 const char kOscDevice[]                = "OscDevice";
 const char kOscCANHVoltRange[]         = "CANH.Range";

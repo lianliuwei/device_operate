@@ -27,6 +27,15 @@ public:
 
   ConfigManager* osc_device_config_test() { return &osc_device_config_; }
 
+  // take ownership of value
+  void Init(base::Value* value);
+
+  // take ownership of value
+  void LoadConfig(base::Value* value);
+
+  // pass out ownership value
+  base::DictionaryValue* SaveConfig();
+
 private:
   // DeviceManager
   virtual void DestroyImpl() OVERRIDE;
