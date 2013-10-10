@@ -251,11 +251,7 @@ void OscDevice::ReadDevice(RegisterMemory* memory, bool* state) {
         memory->start_addr(), memory->buffer(), memory->size());
 }
 
-#define OPERATE_HEAD() \
-  device::CleanError();
-
 void OscDevice::SetVoltRange(Chnl chnl) {
-  OPERATE_HEAD();
   if (chnl != CAN_DIFF) {
     SetAnalogCtrl(chnl);
     SetAnalogSwitch(chnl);
