@@ -4,6 +4,7 @@
 
 #include "base/logging.h"
 #include "base/stl_util.h"
+#include "base/bind.h"
 
 using namespace std;
 using namespace base;
@@ -15,6 +16,10 @@ struct KeyEqual {
     return item->id() == key;
   }
 };
+
+std::string NodeName(CalcItem* item) {
+  return item->name();
+}
 
 }
 
@@ -53,22 +58,22 @@ void CalcGroup::RemoveCalcItem(CalcItem* item) {
   delete item;
 }
 
-bool CalcGroup::HasCalcItem(CalcItem* item) {
- vector<CalcItem*>::iterator it = std::find(all_nodes_.begin(), 
-                                            all_nodes_.end(), 
-                                            item);
+bool CalcGroup::HasCalcItem(CalcItem* item) const {
+ vector<CalcItem*>::const_iterator it = std::find(all_nodes_.begin(), 
+                                                  all_nodes_.end(), 
+                                                  item);
   return it != all_nodes_.end();
 }
 
-bool CalcGroup::HasCalcItem(CalcKey key) {
+bool CalcGroup::HasCalcItem(CalcKey key) const {
   return GetCalcItem(key) != NULL;
 }
 
-CalcItem* CalcGroup::GetCalcItem(CalcKey key) {
+CalcItem* CalcGroup::GetCalcItem(CalcKey key) const {
   KeyEqual key_equal = { key };
-  vector<CalcItem*>::iterator it = std::find_if(all_nodes_.begin(), 
-                                                all_nodes_.end(), 
-                                                key_equal);
+  vector<CalcItem*>::const_iterator it = std::find_if(all_nodes_.begin(), 
+                                                      all_nodes_.end(), 
+                                                      key_equal);
   return it != all_nodes_.end() ? *it : NULL;
 }
 
@@ -82,14 +87,30 @@ void CalcGroup::SetDepend(CalcKey er, CalcKey ee) {
   SetDepend(GetCalcItem(er), GetCalcItem(ee));
 }
 
-CalcGroup* CalcGroup::Clone() {
+CalcGroup* CalcGroup::Clone() const {
   CalcGroup* group = new CalcGroup(name_);
-  group->all_nodes_ = all_nodes_;
-  group->edges_ = edges_;
+  typedef std::map<CalcItem*, CalcItem*> ItemMap;
+  ItemMap item_map;
+  
+  // clone all node
+  for (std::vector<CalcItem*>::const_iterator it = all_nodes_.begin();
+      it != all_nodes_.end(); ++it) {
+    CalcItem* clone_item = (*it)->Clone();
+    DCHECK(clone_item);
+    group->all_nodes_.push_back(clone_item);
+    item_map.insert(std::make_pair(*it, clone_item));
+  }
+
+  // copy map according node map
+  for (EdgeMap::const_iterator it = edges_.begin();
+      it != edges_.end(); ++it) {
+    group->edges_.insert(
+        std::make_pair(item_map[it->first], item_map[it->second]));
+  }
   return group;
 }
 
-vector<CalcItem*> CalcGroup::FreeNode() {
+vector<CalcItem*> CalcGroup::FreeNode() const {
   std::vector<CalcItem*> queue;
 
   std::copy(all_nodes_.begin(),
@@ -128,7 +149,7 @@ std::vector<CalcItem*> CalcGroup::NodeSuccess(CalcItem* node) {
     if (!has_incoming_edges)
       output.push_back(dest);
   }
-  delete node;
+  DeleteIsolateNode(node);
   return output;
 }
 
@@ -140,16 +161,86 @@ void CalcGroup::NodeFailed(CalcItem* node) {
     CalcItem* node = queue.front();
     queue.pop_front();
 
+
     std::pair<EdgeMap::iterator, EdgeMap::iterator> range =
         edges_.equal_range(node);
     EdgeMap::iterator it = range.first;
     while (it != range.second) {
       CalcItem* dest = it->second;
       EdgeMap::iterator temp = it;
-      it++;
+      ++it;
       edges_.erase(temp);
       queue.push_back(dest);
+
+      // clear all edge dest point to other
+      EdgeMap::iterator jt = edges_.begin();
+      while (jt != edges_.end()) {
+        // use temp to key jt valid
+        EdgeMap::iterator temp = jt;
+        ++jt;
+        if (temp->second == dest) {
+          edges_.erase(temp);
+        }
+      }
     }
-    delete node;
+    DeleteIsolateNode(node);
   }
+}
+
+void CalcGroup::DeleteIsolateNode(CalcItem* node) {
+  all_nodes_.erase(std::remove(all_nodes_.begin(),
+                               all_nodes_.end(),
+                               node),
+                   all_nodes_.end());
+  delete node;
+}
+
+std::string CalcGroup::DumpAsGraphviz(
+    const std::string& toplevel_name, 
+    const base::Callback<std::string(CalcItem*)>& 
+        node_name_callback) const {
+std::string result("digraph {\n");
+
+  // Make a copy of all nodes.
+  std::deque<CalcItem*> nodes;
+  std::copy(all_nodes_.begin(), all_nodes_.end(), std::back_inserter(nodes));
+
+  // State all dependencies and remove |second| so we don't generate an
+  // implicit dependency on the top level node.
+  std::deque<CalcItem*>::iterator nodes_end(nodes.end());
+  result.append("  /* Dependencies */\n");
+  for (EdgeMap::const_iterator it = edges_.begin(); it != edges_.end(); ++it) {
+    result.append("  ");
+    result.append(node_name_callback.Run(it->second));
+    result.append(" -> ");
+    result.append(node_name_callback.Run(it->first));
+    result.append(";\n");
+
+    nodes_end = std::remove(nodes.begin(), nodes_end, it->second);
+  }
+  nodes.erase(nodes_end, nodes.end());
+
+  // Every node that doesn't depend on anything else will implicitly depend on
+  // the top level node.
+  result.append("\n  /* Toplevel attachments */\n");
+  for (std::deque<CalcItem*>::const_iterator it =
+           nodes.begin(); it != nodes.end(); ++it) {
+    result.append("  ");
+    result.append(node_name_callback.Run(*it));
+    result.append(" -> ");
+    result.append(toplevel_name);
+    result.append(";\n");
+  }
+
+  result.append("\n  /* Toplevel node */\n");
+  result.append("  ");
+  result.append(toplevel_name);
+  result.append(" [shape=box];\n");
+
+  result.append("}\n");
+  return result;
+}
+
+std::string CalcGroup::DumpAsGraphviz() const {
+  return DumpAsGraphviz(name_, Bind(&NodeName));
 }

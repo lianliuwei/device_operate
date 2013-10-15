@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "base/callback.h"
+#include "base/gtest_prod_util.h"
 
 #include "depend_calc/calc_item.h"
 
@@ -20,9 +21,9 @@ public:
   // take ownership, item can not be add twice
   void AddCalcItem(CalcItem* item);
   void RemoveCalcItem(CalcItem* item);
-  bool HasCalcItem(CalcItem* item);
-  bool HasCalcItem(CalcKey key);
-  CalcItem* GetCalcItem(CalcKey key);
+  bool HasCalcItem(CalcItem* item) const;
+  bool HasCalcItem(CalcKey key) const;
+  CalcItem* GetCalcItem(CalcKey key) const;
 
   // cycle Depend will break
   // er <- ee
@@ -32,9 +33,9 @@ public:
   bool HasCycle();
 
   // pass out ownership CalcGroup
-  CalcGroup* Clone();
+  CalcGroup* Clone() const;
 
-  std::string name() { return name_; }
+  std::string name() const { return name_; }
 
   // Returns representation of the dependency graph in graphviz format.
   std::string DumpAsGraphviz(
@@ -42,8 +43,18 @@ public:
       const base::Callback<std::string(CalcItem*)>&
       node_name_callback) const;
 
+  std::string DumpAsGraphviz() const;
+
 private:
-  std::vector<CalcItem*> FreeNode();
+  FRIEND_TEST_ALL_PREFIXES(CalcGroupTest, TwoItem);
+  FRIEND_TEST_ALL_PREFIXES(CalcGroupTest, ThreeForkItem);
+  FRIEND_TEST_ALL_PREFIXES(CalcGroupTest, ThreeCombineItem);
+  FRIEND_TEST_ALL_PREFIXES(CalcGroupTest, FourForkItem);
+  FRIEND_TEST_ALL_PREFIXES(CalcGroupTest, FourCombineItem);
+  FRIEND_TEST_ALL_PREFIXES(CalcGroupTest, FourForkItemFailed);
+  FRIEND_TEST_ALL_PREFIXES(CalcGroupTest, FourCombineItemFailed);
+
+  std::vector<CalcItem*> FreeNode() const;
 
   // return all Node depend only on node, and remove node
   // node must be free node
@@ -52,6 +63,9 @@ private:
   // remove node and item depend on node
   // node must be free node
   void NodeFailed(CalcItem* node);
+
+  // node is isolate, delete it from all node
+  void DeleteIsolateNode(CalcItem* node);
 
   typedef std::multimap<CalcItem*, CalcItem*> EdgeMap;
 

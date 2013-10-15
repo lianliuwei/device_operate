@@ -1,24 +1,35 @@
 #pragma once
 
+#include <string>
+
+#include "base/basictypes.h"
+
 class CalcDelegate;
 
-typedef int CalcKey;
+typedef void* CalcKey;
 
 class CalcItem {
 public:
-
-  std::string name();
+  CalcItem(const char* name, CalcKey id);
+  CalcItem(std::string name, CalcKey id);
+  virtual ~CalcItem() {}
   
-  virtual CalcItem* Clone();
+  std::string name() const { return name_; }
+  
+  virtual CalcItem* Clone() const;
 
   // to id what this calc about.
   // use the ptr of the obj summit this object.
   // and use this id to get calc result.
-  CalcKey id();
+  CalcKey id() const { return id_; }
+
 protected:
   // may be call on other thread.
   virtual bool Run(CalcDelegate* delegate);
 
 private:
+  std::string name_;
+  CalcKey id_;
 
+  DISALLOW_COPY_AND_ASSIGN(CalcItem);
 };
