@@ -2,9 +2,12 @@
 
 #include <string>
 
+#include "base/file_util.h"
+#include "base/files/file_path.h"
 #include "depend_calc/calc_group.h"
 
 using namespace std;
+using namespace base;
 
 namespace {
 static const char* kGroupName = "TestGroup";
@@ -301,4 +304,23 @@ TEST(CalcGroupTest, FourCombineItemFailed) {
   CalcItem* expect_items[] = { item2 };
   VectorEqual(free_node, expect_items, arraysize(expect_items));
   }
+}
+
+TEST(CalcGroupTest, Graphviz) {
+  string name(kGroupName);
+  CalcGroup group(name);
+  CalcItem* item1 = new CalcItem(kItem1Name, const_cast<char*>(kItem1Name));
+  group.AddCalcItem(item1);
+  CalcItem* item2 = new CalcItem(kItem2Name, const_cast<char*>(kItem2Name));
+  group.AddCalcItem(item2);
+  CalcItem* item3 = new CalcItem(kItem3Name, const_cast<char*>(kItem3Name));
+  group.AddCalcItem(item3);
+  CalcItem* item4 = new CalcItem(kItem4Name, const_cast<char*>(kItem4Name));
+  group.AddCalcItem(item4);
+  group.SetDepend(item1, item2);
+  group.SetDepend(item2, item4);
+  group.SetDepend(item3, item4);
+
+  string result = group.DumpAsGraphviz();
+  file_util::WriteFile(FilePath(L"calc_group"), result.c_str(), result.length());
 }
