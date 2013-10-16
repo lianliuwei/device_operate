@@ -5,11 +5,9 @@
 #include "base/logging.h"
 
 CalcGroupWalker::CalcGroupWalker(CalcGroup* group) {
-  DCHECK(!group->HasCycle());
+  DCHECK(group->NoCycle());
   graph_.reset(group->Clone());
-}
 
-void CalcGroupWalker::FreeNode() {
   std::vector<CalcItem*> free_node = graph_->FreeNode();
   runnable_.insert(runnable_.end(), free_node.begin(), free_node.end());
 }
@@ -43,5 +41,6 @@ void CalcGroupWalker::Mark(CalcItem * item, bool success) {
   }
 }
 
-
-
+bool CalcGroupWalker::Finish() {
+  return (current_.size() + runnable_.size()) == 0;
+}

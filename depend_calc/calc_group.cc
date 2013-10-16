@@ -222,3 +222,52 @@ std::string result("digraph {\n");
 std::string CalcGroup::DumpAsGraphviz() const {
   return DumpAsGraphviz(name_, Bind(&NodeName));
 }
+
+bool CalcGroup::NoCycle() {
+  // Step 1: Build a set of nodes with no incoming edges.
+  std::deque<CalcItem*> queue;
+  std::copy(all_nodes_.begin(),
+            all_nodes_.end(),
+            std::back_inserter(queue));
+
+  std::deque<CalcItem*>::iterator queue_end = queue.end();
+  for (EdgeMap::const_iterator it = edges_.begin();
+       it != edges_.end(); ++it) {
+    queue_end = std::remove(queue.begin(), queue_end, it->second);
+  }
+  queue.erase(queue_end, queue.end());
+
+  // Step 2: Do the Kahn topological sort.
+  EdgeMap edges(edges_);
+  while (!queue.empty()) {
+    CalcItem* node = queue.front();
+    queue.pop_front();
+
+    std::pair<EdgeMap::iterator, EdgeMap::iterator> range =
+        edges.equal_range(node);
+    EdgeMap::iterator it = range.first;
+    while (it != range.second) {
+      CalcItem* dest = it->second;
+      EdgeMap::iterator temp = it;
+      it++;
+      edges.erase(temp);
+
+      bool has_incoming_edges = false;
+      for (EdgeMap::iterator jt = edges.begin(); jt != edges.end(); ++jt) {
+        if (jt->second == dest) {
+          has_incoming_edges = true;
+          break;
+        }
+      }
+
+      if (!has_incoming_edges)
+        queue.push_back(dest);
+    }
+  }
+
+  if (!edges.empty()) {
+    // Dependency graph has a cycle.
+    return false;
+  }
+  return true;
+}

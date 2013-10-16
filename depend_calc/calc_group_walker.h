@@ -18,8 +18,6 @@ public:
   void Mark(CalcItem * item, bool success);
 
 private:
-  void FreeNode();
-
   scoped_ptr<CalcGroup> graph_;
   std::deque<CalcItem*> runnable_;
   std::deque<CalcItem*> current_;
