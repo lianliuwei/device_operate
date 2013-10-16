@@ -201,13 +201,6 @@ std::string CalcGroup::DumpAsGraphviz(
         node_name_callback) const {
 std::string result("digraph {\n");
 
-  // Make a copy of all nodes.
-  std::deque<CalcItem*> nodes;
-  std::copy(all_nodes_.begin(), all_nodes_.end(), std::back_inserter(nodes));
-
-  // State all dependencies and remove |second| so we don't generate an
-  // implicit dependency on the top level node.
-  std::deque<CalcItem*>::iterator nodes_end(nodes.end());
   result.append("  /* Dependencies */\n");
   for (EdgeMap::const_iterator it = edges_.begin(); it != edges_.end(); ++it) {
     result.append("  ");
@@ -215,23 +208,8 @@ std::string result("digraph {\n");
     result.append(" -> ");
     result.append(node_name_callback.Run(it->first));
     result.append(";\n");
-
-    nodes_end = std::remove(nodes.begin(), nodes_end, it->second);
   }
-  nodes.erase(nodes_end, nodes.end());
-
-  // Every node that doesn't depend on anything else will implicitly depend on
-  // the top level node.
-  result.append("\n  /* Toplevel attachments */\n");
-  for (std::deque<CalcItem*>::const_iterator it =
-           nodes.begin(); it != nodes.end(); ++it) {
-    result.append("  ");
-    result.append(node_name_callback.Run(*it));
-    result.append(" -> ");
-    result.append(toplevel_name);
-    result.append(";\n");
-  }
-
+ 
   result.append("\n  /* Toplevel node */\n");
   result.append("  ");
   result.append(toplevel_name);

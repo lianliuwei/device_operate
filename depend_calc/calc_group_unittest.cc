@@ -322,5 +322,6 @@ TEST(CalcGroupTest, Graphviz) {
   group.SetDepend(item3, item4);
 
   string result = group.DumpAsGraphviz();
+  file_util::Delete(FilePath(L"calc_group"), false);
   file_util::WriteFile(FilePath(L"calc_group"), result.c_str(), result.length());
 }
