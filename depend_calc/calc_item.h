@@ -5,6 +5,7 @@
 #include "base/basictypes.h"
 
 class CalcDelegate;
+class CalcExecuter;
 
 typedef void* CalcKey;
 
@@ -23,11 +24,12 @@ public:
   // and use this id to get calc result.
   CalcKey id() const { return id_; }
 
-protected:
+private:
+  friend class CalcExecuter;
+
   // may be call on other thread.
   virtual bool Run(CalcDelegate* delegate);
 
-private:
   std::string name_;
   CalcKey id_;
 

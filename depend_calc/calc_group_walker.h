@@ -6,7 +6,7 @@
 
 class CalcGroupWalker {
 public: 
-  CalcGroupWalker(CalcGroup* group);
+  CalcGroupWalker(const CalcGroup* group);
   ~CalcGroupWalker() {}
 
   std::vector<CalcItem*> Runnable();
@@ -21,4 +21,6 @@ private:
   scoped_ptr<CalcGroup> graph_;
   std::deque<CalcItem*> runnable_;
   std::deque<CalcItem*> current_;
+
+  DISALLOW_COPY_AND_ASSIGN(CalcGroupWalker);
 };

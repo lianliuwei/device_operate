@@ -223,7 +223,7 @@ std::string CalcGroup::DumpAsGraphviz() const {
   return DumpAsGraphviz(name_, Bind(&NodeName));
 }
 
-bool CalcGroup::NoCycle() {
+bool CalcGroup::NoCycle() const {
   // Step 1: Build a set of nodes with no incoming edges.
   std::deque<CalcItem*> queue;
   std::copy(all_nodes_.begin(),

@@ -30,7 +30,7 @@ public:
   void SetDepend(CalcItem* er, CalcItem* ee);
   void SetDepend(CalcKey er, CalcKey ee);
 
-  bool NoCycle();
+  bool NoCycle() const;
 
   // pass out ownership CalcGroup
   CalcGroup* Clone() const;

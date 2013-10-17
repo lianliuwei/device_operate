@@ -4,7 +4,7 @@
 
 #include "base/logging.h"
 
-CalcGroupWalker::CalcGroupWalker(CalcGroup* group) {
+CalcGroupWalker::CalcGroupWalker(const CalcGroup* group) {
   DCHECK(group->NoCycle());
   graph_.reset(group->Clone());
 
