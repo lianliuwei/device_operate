@@ -38,7 +38,7 @@ public:
   void ChangeContent(DictionaryValue* value_owned);
 
   // can only be access on the thread call AttachThread()
-  void AttachThread();
+  void DetachFromThread();
 
 private:
   void SetValueInner(const std::string& key, base::Value* value);
