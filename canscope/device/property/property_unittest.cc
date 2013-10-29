@@ -192,10 +192,6 @@ ACTION_P(PostDeviceTaskAction, device_thread) {
   device_thread->message_loop()->PostTask(FROM_HERE, arg0);
 }
 
-void AttachThread(canscope::ValueMapDevicePropertyStore* prefs) {
-  prefs->AttachThread();
-}
-
 class PropertyTest : public testing::Test {
 public:
   PropertyTest() 
@@ -221,8 +217,8 @@ public:
   void InitCrossThread() {
     created_thread_ = true;
     device_thread.Start();
-    device_thread.message_loop()->
-        PostTask(FROM_HERE, Bind(&AttachThread, &(device.prefs_)));
+    // HACK delete device from this thread
+    device.prefs_.DetachFromThread();
 
     // mock Post and check device thread
     ON_CALL(g_DeviceThreadMock.Get(), IsDeviceThread())
@@ -243,8 +239,6 @@ protected:
 
   virtual void TearDown() {
     if (created_thread_) {
-      // HACK delete device from this thread
-      device.prefs_.AttachThread();
       device_thread.Stop();
     }
   }

@@ -28,7 +28,7 @@ class PropertyNotifiter {
   // be mocked for unit testing.
   void FireObservers(const std::string& path);
 
-  void AttachThread();
+  void DetachFromThread();
 
  protected:
   // A map from pref names to a list of observers. Observers get fired in the

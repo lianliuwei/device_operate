@@ -83,7 +83,7 @@ void PropertyNotifiter::FireObservers(const std::string& path) {
                     OnPreferenceChanged(path));
 }
 
-void PropertyNotifiter::AttachThread() {
+void PropertyNotifiter::DetachFromThread() {
   thread_checker_.DetachFromThread();
 }
 

@@ -232,8 +232,10 @@ void ValueMapDevicePropertyStore::ChangeContent(DictionaryValue* value_owned) {
   trace_object_.snapshot(&format);
 }
 
-void ValueMapDevicePropertyStore::AttachThread() {
-  notifier_.AttachThread();
+void ValueMapDevicePropertyStore::DetachFromThread() {
+  // DevicePropertyStore is NonThreadSafe
+  DevicePropertyStore::DetachFromThread();
+  notifier_.DetachFromThread();
 }
 
 } // namespace canscope
