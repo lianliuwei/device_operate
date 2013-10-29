@@ -5,12 +5,12 @@
 #include "base/json/json_file_value_serializer.h"
 #include "base/json/json_reader.h"
 
-#include "common/common_thread_manager.h"
 #include "common/common_thread.h"
 
 #include "testing/gtest/include/gtest/gtest.h"
 #include "testing/gmock/include/gmock/gmock.h"
 
+#include "canscope/test/test_process.h"
 #include "canscope/device/canscope_device_manager.h"
 #include "canscope/device/canscope_device_manager_handle.h"
 #include "canscope/canscope_notification_types.h"
@@ -67,34 +67,6 @@ bool ActionIsDeviceThread() {
   return CommonThread::CurrentlyOn(CommonThread::DEVICE);
 }
 
-}
-
-class TestProcess : public common::CommonThreadManager {
-public:
-  TestProcess();
-  virtual ~TestProcess() {}
-
-private:
-};
-namespace {
-TestProcess* g_TestProcess = NULL;
-}
-
-
-TestProcess::TestProcess() {
-  if (g_TestProcess) {
-    NOTREACHED();
-  }
-  g_TestProcess = this;
-}
-
-TestProcess* GetTestProcess() {
-  return g_TestProcess;
-}
-void DestroyTestProcess() {
-  GetTestProcess()->ShutdownThreadsAndCleanUp();
-  delete g_TestProcess;
-  g_TestProcess = NULL;
 }
 
 class CANScopeDeviceManagerTest : public testing::Test
