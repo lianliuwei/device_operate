@@ -82,6 +82,11 @@ bool StoreMemberBase::IsOnCorrectThread() const {
   return thread_loop_ == NULL || thread_loop_->BelongsToCurrentThread();
 }
 
+void StoreMemberBase::DetachFromThread() {
+  thread_loop_ = NULL;
+}
+
+
 } // namespace subtle
 
 template <>

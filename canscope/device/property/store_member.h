@@ -31,6 +31,8 @@ public:
 
   const std::string& pref_name() const { return pref_name_; }
 
+  void DetachFromThread();
+
 protected:
   StoreMemberBase();
   virtual ~StoreMemberBase();
