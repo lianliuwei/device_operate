@@ -1,11 +1,5 @@
 #include "depend_calc/calc_item.h"
 
-
-CalcItem::CalcItem(const char* name, CalcKey id) 
-    : name_(name)
-    , id_(id) {
-}
-
 CalcItem::CalcItem(std::string name, CalcKey id)
     : name_(name)
     , id_(id) {

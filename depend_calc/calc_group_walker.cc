@@ -6,7 +6,7 @@
 
 CalcGroupWalker::CalcGroupWalker(const CalcGroup* group) {
   DCHECK(group->NoCycle());
-  graph_.reset(group->Clone());
+  graph_.reset(group->Clone(group->name() + "_walker"));
 
   std::vector<CalcItem*> free_node = graph_->FreeNode();
   runnable_.insert(runnable_.end(), free_node.begin(), free_node.end());
@@ -28,11 +28,12 @@ std::vector<CalcItem*> CalcGroupWalker::StartAll() {
 }
 
 void CalcGroupWalker::Mark(CalcItem * item, bool success) {
-  std::deque<CalcItem*>::iterator it = std::find(current_.begin(), 
-                                                 current_.end(), 
+  std::deque<CalcItem*>::iterator it = std::find(current_.begin(),
+                                                 current_.end(),
                                                  item);
   DCHECK(it != current_.end());
 
+  current_.erase(it);
   if (success) {
     std::vector<CalcItem*> free_node = graph_->NodeSuccess(item);
     runnable_.insert(runnable_.end(), free_node.begin(), free_node.end());

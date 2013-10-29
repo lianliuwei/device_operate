@@ -15,7 +15,7 @@ class CalcGroup {
 public:
   friend class CalcGroupWalker;
 
-  CalcGroup(const std::string& name);
+  CalcGroup(const std::string name);
   ~CalcGroup();
 
   // take ownership, item can not be add twice
@@ -33,7 +33,7 @@ public:
   bool NoCycle() const;
 
   // pass out ownership CalcGroup
-  CalcGroup* Clone() const;
+  CalcGroup* Clone(std::string name) const;
 
   std::string name() const { return name_; }
 

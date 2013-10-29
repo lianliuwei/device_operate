@@ -4,7 +4,7 @@
 
 #include "common/common_thread.h"
 
-#include "depend_calc/calc_group_walker.h"
+#include "depend_calc/calc_delegate.h"
 
 using namespace common;
 using namespace std;
@@ -18,16 +18,35 @@ CalcExecuter::CalcExecuter(CalcGroup* group)
   CHECK(group_);
 }
 
+
+void CalcExecuter::set_delegate(CalcDelegate* delegate) {
+  {
+  AutoLock lock(lock_);
+  CHECK(notify_end_) << "can't set delegate when running";
+  }
+  delegate_ = delegate;
+}
+
 void CalcExecuter::StartRun(AsyncTaskHandle task) {
   DCHECK(delegate_) << "must set delegate";
   task_.swap(task);
+  {
+  AutoLock lock(lock_);
   Reset();
+  task_->NotifyStart(NULL);
+  // if no item
+  if (walker_->Finish()) {
+    notify_end_ = true;
+    task_->NotifyFinish(NULL);
+    return;
+  }
+  }
   StartAllRunnable();
 }
 
 void CalcExecuter::Reset() {
   DCHECK(notify_end_);
-  walker_.reset(new CalcGroupWalker(group_));
+  walker_.reset(new CalcGroupWalker(group_.get()));
   notify_end_ = false;
 }
 
@@ -69,6 +88,7 @@ void CalcExecuter::RunItem(CalcItem* item) {
   }
 
   bool ret = item->Run(delegate_);
+  delegate_->ItemFinish(item->id(), item, ret);
 
   {
   AutoLock lock(lock_);

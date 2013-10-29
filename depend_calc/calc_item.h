@@ -11,7 +11,6 @@ typedef void* CalcKey;
 
 class CalcItem {
 public:
-  CalcItem(const char* name, CalcKey id);
   CalcItem(std::string name, CalcKey id);
   virtual ~CalcItem() {}
   

@@ -143,7 +143,7 @@ TEST(CalcGroupTest, CloneGroup) {
   group.SetDepend(item1, item2);
   group.SetDepend(item3, item2);
 
-  scoped_ptr<CalcGroup> clone_group(group.Clone());
+  scoped_ptr<CalcGroup> clone_group(group.Clone("clone"));
   CalcItem* clone_item1 = clone_group->GetCalcItem(const_cast<char*>(kItem1Name));
   EXPECT_NE(clone_item1, item1);
   EXPECT_EQ(clone_item1->name(), item1->name());

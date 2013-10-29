@@ -5,7 +5,8 @@
 #include "depend_calc/calc_group.h"
 
 class CalcGroupWalker {
-public: 
+public:
+  // no take ownership of group
   CalcGroupWalker(const CalcGroup* group);
   ~CalcGroupWalker() {}
 

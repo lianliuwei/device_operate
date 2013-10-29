@@ -1,17 +1,19 @@
 #pragma once
 
+#include "base/memory/scoped_ptr.h"
+#include "base/memory/ref_counted.h"
 #include "base/synchronization/lock.h"
+
+#include "depend_calc/calc_group.h"
+#include "depend_calc/calc_group_walker.h"
 
 #include "canscope/async_task.h"
 
-#include "depend_calc/calc_group.h"
-
-class CalcExecuter {
+class CalcExecuter : public base::RefCountedThreadSafe<CalcExecuter> {
 public:
-  // no take own of group
-  // group must out live of CalcExecuter
+  // take ownership of group
   CalcExecuter(CalcGroup* group);
-  ~CalcExecuter();
+  ~CalcExecuter() {}
 
   void set_delegate(CalcDelegate* delegate);
 
@@ -27,7 +29,7 @@ private:
   void RunItem(CalcItem* item);
 
   CalcDelegate* delegate_;
-  CalcGroup* group_;
+  scoped_ptr<CalcGroup> group_;
 
   base::Lock lock_;
   bool notify_end_;

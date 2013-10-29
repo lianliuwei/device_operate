@@ -23,9 +23,8 @@ std::string NodeName(CalcItem* item) {
 
 }
 
-CalcGroup::CalcGroup(const std::string& name) 
-  : name_(name) {
-
+CalcGroup::CalcGroup(const std::string name) 
+    : name_(name) {
 }
 
 CalcGroup::~CalcGroup() {
@@ -87,8 +86,8 @@ void CalcGroup::SetDepend(CalcKey er, CalcKey ee) {
   SetDepend(GetCalcItem(er), GetCalcItem(ee));
 }
 
-CalcGroup* CalcGroup::Clone() const {
-  CalcGroup* group = new CalcGroup(name_);
+CalcGroup* CalcGroup::Clone(std::string name) const {
+  CalcGroup* group = new CalcGroup(name);
   typedef std::map<CalcItem*, CalcItem*> ItemMap;
   ItemMap item_map;
   
