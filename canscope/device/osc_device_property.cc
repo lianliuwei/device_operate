@@ -70,8 +70,11 @@ IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerMode);
 IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerSens);
 IMPLEMENT_ENUM_STORE_MEMBER_INT(CompareType);
 
-void OscDeviceProperty::Init(base::DictionaryValue* dict) {
-  prefs_.Reset(dict);
+void OscDeviceProperty::Init(base::Value* dict) {
+  DCHECK(dict->IsType(Value::TYPE_DICTIONARY));
+  DictionaryValue* dict_value;
+  dict->GetAsDictionary(&dict_value);
+  prefs_.Reset(dict_value);
   Init();
 }
 
@@ -95,6 +98,30 @@ void OscDeviceProperty::Init() {
   compare.Init(kOscCompare, &prefs_);
   trigger_volt.Init(kOscTriggerVolt, &prefs_);
   time_param.Init(kOscTimeParam, &prefs_);
+}
+
+void OscDeviceProperty::DetachFromThread() {
+  prefs_.DetachFromThread();
+
+  range_can_h.DetachFromThread();
+  offset_can_h.DetachFromThread();
+  coupling_can_h.DetachFromThread();
+  range_can_l.DetachFromThread();
+  offset_can_l.DetachFromThread();
+  coupling_can_l.DetachFromThread();
+  range_can_diff.DetachFromThread();
+  offset_can_diff.DetachFromThread();
+  diff_ctrl.DetachFromThread();
+  time_base.DetachFromThread();
+  time_offset.DetachFromThread();
+  auto_time.DetachFromThread();
+  trigger_source.DetachFromThread();
+  trigger_type.DetachFromThread();
+  trigger_mode.DetachFromThread();
+  trigger_sens.DetachFromThread();
+  compare.DetachFromThread();
+  trigger_volt.DetachFromThread();
+  time_param.DetachFromThread();
 }
 
 } // namespace canscope

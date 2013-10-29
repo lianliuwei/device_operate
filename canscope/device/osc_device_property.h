@@ -21,7 +21,7 @@ enum VoltRange {
   k8V,
   k20V,
   k50V,
-  kVoltBaseSize,
+  kVoltRangeSize,
 };
 
 // unit V
@@ -119,9 +119,11 @@ public:
   virtual ~OscDeviceProperty() {}
 
   // take owned of dict, and use it to init the prefs_
-  void Init(base::DictionaryValue* dict);
+  void Init(base::Value* dict);
   // Init for prefs_ be already init
   void Init();
+
+  void DetachFromThread();
 
   ValueMapDevicePropertyStore prefs_;
 
