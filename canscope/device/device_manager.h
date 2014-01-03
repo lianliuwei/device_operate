@@ -27,6 +27,7 @@ public:
 
   // call on any thread
   void StartDestroying();
+
 protected:
   // call from DefaultRefCountedThreadSafeTraits, and Post Task
   // to delete device on Device

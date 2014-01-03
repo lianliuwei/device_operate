@@ -53,11 +53,11 @@ public:
   
   AsyncTaskStatus status();
 
-  bool IsReady() {return status() == kNoStart; }
-  bool IsRunning() {return status() == kRunning; }
-  bool IsError() {return status() == kError; }
-  bool IsCancel() {return status() == kCancel; }
-  bool IsFinish() {return status() == kFinish; }
+  bool IsReady() { return status() == kNoStart; }
+  bool IsRunning() { return status() == kRunning; }
+  bool IsError() { return status() == kError; }
+  bool IsCancel() { return status() == kCancel; }
+  bool IsFinish() { return status() == kFinish; }
  
   // 0 - 100
   int GetProgress();
