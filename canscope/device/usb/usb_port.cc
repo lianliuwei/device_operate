@@ -326,7 +326,7 @@ bool UsbPort::ReadEP2(uint32 addr, UsbMode mode, uint8* buffer, int size) {
   DCHECK(buffer);
   DCHECK(size > 0);
   SetCmd(RDEP2, addr, mode, NULL, size);
-  if (SendCmd())
+  if (!SendCmd())
     return false;
 
   int read_num = 0;
