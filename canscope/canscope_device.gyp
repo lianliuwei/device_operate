@@ -202,7 +202,17 @@
         'osc_chnl_calc/freq_time.h',
         'osc_chnl_calc/freq_time.cc',
         'osc_chnl_calc/chnl_calc_manager_unittest.cc',
+        'device/canscope_data_collecters.h',
+        'device/data_collecter.h',
+        #'device/data_collecter.cc',
+        'device/threaded_loop_run.h',
+        #'device/threaded_loop_run.cc',
+        'device/canscope_device_finder.h',
+        'device/canscope_device_finder.cc',
+        'device/canscope_device_constants.h',
+        'device/merge_device_list_unittest.cc',
       ],
+      
       'include_dirs': [
         '..',
       ], 
