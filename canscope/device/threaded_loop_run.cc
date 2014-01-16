@@ -61,28 +61,52 @@ void ThreadedLoopRun::Reset() {
 
 void ThreadedLoopRun::LoopRun() {
   {
-    base::AutoLock lock(lock_);
-    if (stop_) {
-      Reset();
-      return;
+    bool stop = false;
+    bool state_change = false;
+    {
+      base::AutoLock lock(lock_);
+      if (stop_) {
+        stop = true;
+        Reset();
+      } else if (!running_) {
+        state_change = true;
+        running_ = true;
+      }
     }
-    if (!running_) {
-      running_ = true;
+    if (state_change) {
       OnStateChanged();
     }
+    if (stop) {
+      OnStop();
+      return;
+    }
   }
+
   bool ret = LoopRunImp();
 
   {
-    base::AutoLock lock(lock_);
-    if (stop_) { 
-      Reset();
-      OnStateChanged();
-      return;
+    bool stop = false;
+    bool state_change = false;
+    {
+      base::AutoLock lock(lock_);
+      if (stop_) { 
+        stop = true;
+        state_change = true;
+        running_ = false;
+        Reset();
+        return;
+      }
+      if (!ret ) {
+        state_change = true;
+        running_ = false;
+        return;
+      }
     }
-    if (!ret ) {
-      Reset();
+    if (state_change) {
       OnStateChanged();
+    }
+    if (stop) {
+      OnStop();
       return;
     }
   }
@@ -92,4 +116,8 @@ void ThreadedLoopRun::LoopRun() {
 
 ThreadedLoopRun::ThreadedLoopRun() {
   Reset();
+}
+
+void ThreadedLoopRun::OnStop() {
+
 }

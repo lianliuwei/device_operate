@@ -7,7 +7,7 @@ namespace canscope {
 
 device::Error CANScopeRunner::InitDevice() {
   DCHECK(!inited_) << "device already init";
-  Device::Error error = InitDeviceImpl(device_path_);
+  device::Error error = InitDeviceImpl(device_path_);
   if (error != device::OK) {
     return error;
   }
@@ -21,7 +21,7 @@ device::Error CANScopeRunner::InitDevice() {
 device::Error CANScopeRunner::ReOnline() {
   DCHECK(inited_) << "device need InitDevice";
   CloseDeviceImpl();
-  Device::Error error = InitDeviceImpl(device_path_);
+  device::Error error = InitDeviceImpl(device_path_);
   if (error != device::OK) {
     return error;
   }
@@ -58,7 +58,7 @@ device::Error CANScopeRunner::InitDeviceImpl(string16 device_path) {
   ret = file_util::ReadFileToString(fpga_file, &content); 
   if (!ret) {
     usb_port->CloseDevice();
-    return device::ERR_DEVICE_DOWNLOADFPGA;
+    return device::ERR_DEVICE_LOADFPGAFILE;
   }
   ret = usb_port->DownloadFPGA((uint8*)(content.c_str()), content.size());
   if (!ret) {

@@ -2,10 +2,9 @@
 
 namespace canscope {
 
-
 // init the device first and download the FPGA.
 // carefully with loop refcounted!!!!
-// live in the 
+// live in CANScopeDeviceManager
 class CANScopeRunner {
 public:
   scoped_refptr<OscDataCollecter> osc_data;

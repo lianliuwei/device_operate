@@ -32,10 +32,13 @@ protected:
   bool NeedStop() const;
   bool IsSingle() const;
 
+  // all call on run thread
   // return true if continue run
   virtual bool LoopRunImp() = 0;
   // notify state changed
   virtual void OnStateChanged();
+  // called when loop going to stop state
+  virtual void OnStop();
 
   // no lock
   base::TimeDelta next_loop_delay_;
