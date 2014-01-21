@@ -6,6 +6,7 @@
 #include "canscope/device/osc_device.h"
 #include "canscope/device/usb_port_device_delegate.h"
 #include "canscope/device/config_manager.h"
+#include "canscope/device/canscope_device_runner.h"
 
 namespace base {
 class MessageLoopProxy;
@@ -15,8 +16,6 @@ namespace canscope {
 
 class CANScopeDeviceManager : public DeviceManager {
 public:
-  // call after get Device manager create notify
-  static CANScopeDeviceManager* GetInstance();
 
   // no thread safety, call on Device Thread only.
   static CANScopeDeviceManager* Create();
@@ -36,6 +35,8 @@ public:
   // pass out ownership value
   base::DictionaryValue* SaveConfig();
 
+  CANScopeRunner* runner();
+
 private:
   // DeviceManager
   virtual void DestroyImpl() OVERRIDE;
@@ -48,6 +49,8 @@ private:
 
   ConfigManager osc_device_config_;
   OscDevice osc_device_;
+
+  CANScopeRunner runner_;
 
   DISALLOW_COPY_AND_ASSIGN(CANScopeDeviceManager);
 };

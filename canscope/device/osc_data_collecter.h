@@ -1,5 +1,9 @@
 #pragma once
 
+#include "canscope/device_errors.h"
+#include "canscope/device/data_collecter.h"
+#include "canscope/device/osc_raw_data.h"
+
 namespace canscope {
 
 // implement as state machine
@@ -35,7 +39,7 @@ private:
   OscRawDataDeviceConfig LastConfig();
   UsbPort* usb_port_;
   bool stop_by_offine_;
-  Device::Error rv_;
+  device::Error rv_;
 };
 
 } // namespace canscope

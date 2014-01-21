@@ -11,6 +11,7 @@ device::Error CANScopeRunner::InitDevice() {
   if (error != device::OK) {
     return error;
   }
+  status_ = kOnline;
   inited_ = true;
   if (start_on_device_online) {
     StartAll();
@@ -74,5 +75,22 @@ void CANScopeRunner::CloseDeviceImpl() {
   bool ret = usb_port->CloseDevice();
   DCHECK(!ret);
 }
+
+// NOTE may DevicesManager manager the state is better
+void CANScopeRunner::DeviceStateChanged() {
+  scoped_refptr<DevicesManager> manager = DevicesManager::Get();
+  DeviceStatus status = manager->GetDeviceStatus(device_path_);
+  if (status == status_)
+    return;
+  if (status == kOffline) {
+  } else if (status == kOnline) {
+    device::Error error = ReOnline();
+    if (error == device::OK) {
+      status_ = kOnline;
+    }
+  }
+}
+
+void CANScopeRunner::DeviceListChanged() {}
 
 } // namespace canscope

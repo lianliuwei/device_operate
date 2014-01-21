@@ -14,24 +14,17 @@ using namespace common;
 using namespace std;
 using namespace base;
 
-namespace {
-static canscope::CANScopeDeviceManager* g_DeviceManager = NULL;
-}
-namespace canscope {
 
-CANScopeDeviceManager* CANScopeDeviceManager::GetInstance() {
-  return g_DeviceManager;
-}
+namespace canscope {
 
 CANScopeDeviceManager* CANScopeDeviceManager::Create() {
   DCHECK(CommonThread::CurrentlyOn(CommonThread::DEVICE));
-  CHECK(g_DeviceManager == NULL);
-  g_DeviceManager = new CANScopeDeviceManager(
+  CANScopeDeviceManager* device = new CANScopeDeviceManager(
       CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE));
   NotifyAll(NOTIFICATION_DEVICE_MANAGER_CREATED, 
-      Source<CANScopeDeviceManager>(g_DeviceManager), 
+      Source<CANScopeDeviceManager>(device), 
       NotificationService::NoDetails());
-  return g_DeviceManager;
+  return device;
 }
 
 void CANScopeDeviceManager::DestroyImpl() {
@@ -45,9 +38,6 @@ void CANScopeDeviceManager::DeleteDeviceImpl() {
   NotifyAll(NOTIFICATION_DEVICE_MANAGER_DESTROYED, 
       Source<CANScopeDeviceManager>(this), 
       NotificationService::NoDetails());
-
-  DCHECK(g_DeviceManager);
-  g_DeviceManager = NULL;
 
   delete this;
 }

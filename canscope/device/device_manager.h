@@ -21,7 +21,6 @@ class DeviceManager : public base::RefCountedThreadSafe<
     DeviceManager, DeviceManagerTraits<DeviceManager> > {
 public:
   DeviceManager(base::MessageLoopProxy* device_loop);
-  virtual ~DeviceManager() {}
 
   bool IsDestroying();
 
@@ -40,6 +39,10 @@ protected:
   // Destroy this object on device thread
   // call on device_loop_ thread.
   virtual void DeleteDeviceImpl() = 0;
+
+protected:
+  friend class base::RefCountedThreadSafe<DeviceManager>;
+  virtual ~DeviceManager() {}
 
 private:
   void DestroyPos();

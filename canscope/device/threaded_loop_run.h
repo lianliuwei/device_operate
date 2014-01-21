@@ -12,7 +12,6 @@
 class ThreadedLoopRun : public base::RefCountedThreadSafe<ThreadedLoopRun> {
 public:
   ThreadedLoopRun();
-  virtual ~ThreadedLoopRun() {}
 
   void Start();
   void Single();
@@ -44,6 +43,9 @@ protected:
   base::TimeDelta next_loop_delay_;
 
 private:
+  friend class base::RefCountedThreadSafe<ThreadedLoopRun>;
+  virtual ~ThreadedLoopRun() {}
+
   void LoopRun();
   void Reset();
 

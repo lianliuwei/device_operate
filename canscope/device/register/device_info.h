@@ -6,7 +6,7 @@
 namespace canscope {
 class DeviceInfo {
 public:
-  device::RegisterMemory memory;
+  ::device::RegisterMemory memory;
   
   Uint16Bind id;
   Uint32Bind loader_version;

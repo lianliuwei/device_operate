@@ -2,8 +2,10 @@
 
 #include "base/memory/ref_counted.h"
 #include "base/callback.h"
+#include "base/single_thread_task_runner.h"
+#include "base/observer_list_threadsafe.h"
 
-#include "canscope/device/thread_loop_run.h"
+#include "canscope/device/threaded_loop_run.h"
 
 // call Start() Stop() according thread and get notify at each thread
 // the add observer
@@ -12,7 +14,7 @@ class DataCollecter : public ThreadedLoopRun {
 public:
   class Observer {
   public:
-    void StateChanged() = 0;
+    virtual void StateChanged() = 0;
 
   protected:
     Observer() {}
@@ -24,7 +26,7 @@ public:
 
   typedef base::Callback<void()> RunOnFaultDelegate;
 
-  DataCollecter(scoped_refptr<SingleThreadTaskRunner> runner,
+  DataCollecter(scoped_refptr<base::SingleThreadTaskRunner> runner,
       RunOnFaultDelegate run_on_fault);
   virtual ~DataCollecter();
 
