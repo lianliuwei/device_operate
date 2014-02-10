@@ -14,7 +14,7 @@ enum Error {
 #undef DEVICE_ERROR
 };
 
-const char* ErrorToString(int error);
+const char* ErrorToString(Error error);
 
 Error LastDeviceError();
 
