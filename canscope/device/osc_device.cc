@@ -289,8 +289,7 @@ void OscDevice::SetDiffCtrl() {
 }
 
 void OscDevice::SetTimeBase() {
-  // TODO device add Device Type obtain.
-  SetTrigger1(DT_CS1202);
+  SetTrigger1(device_type());
   bool state = true;
   WriteDevice(&(trigger1_.memory), &state);
 }
@@ -341,10 +340,6 @@ void OscDevice::SetTimeParam() {
   SetTriggerSource();
 }
 
-void OscDevice::UpdateTriggerState() {
-  bool state;
-  ReadDevice(&(trigger_state_.memory), &state);
-}
 
 void OscDevice::SetAll() {
   SetAnalogCtrl(CAN_H);
@@ -354,8 +349,7 @@ void OscDevice::SetAll() {
   SetSoftDiff(CAN_DIFF);
   SetAnalogSwitch(CAN_H);
   SetAnalogSwitch(CAN_L);
-  // TODO device add Device Type obtain.
-  SetTrigger1(DT_CS1202);
+  SetTrigger1(device_type());
   SetTrigger2();
 
   bool state;
@@ -364,18 +358,6 @@ void OscDevice::SetAll() {
   WriteDevice(&(analog_switch_.memory), &state);
   WriteDevice(&(trigger1_.memory), &state);
   WriteDevice(&(trigger2_.memory), &state);
-}
-
-bool OscDevice::Start() {
-  ScopeCtrlRegister scope_ctrl;
-  scope_ctrl.scope_ctrl.set_value(true);
-  bool state;
-  WriteDevice(&(scope_ctrl.memory), &state);
-  return state;
-}
-
-bool OscDevice::IsCollected() {
-  return trigger_state_.clet_bit.value();
 }
 
 } // namespace canscope

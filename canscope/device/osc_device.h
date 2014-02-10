@@ -9,16 +9,13 @@
 #include "canscope/device/register/trigger_state_register.h"
 #include "canscope/device/device_delegate.h"
 #include "canscope/device/device_base.h"
+#include "canscope/device/canscope_device_constants.h"
+
 
 class ConfigManager;
 
 namespace canscope {
-// TODO need canscope_device.h
-enum DeviceType {
-  DT_CS1201,
-  DT_CS1202,
-  DT_CS1203,
-};
+
 // X K point of Device
 int DeviceK(DeviceType device_type);
 
@@ -70,14 +67,9 @@ public:
   void SetTriggerVolt();
   void SetTimeParam();
   void SetAll();
-  
-  // update property.
-  void UpdateTriggerState();
-  
-  bool IsCollected();
 
-  // start scope
-  bool Start();
+  void set_device_type(canscope::DeviceType value) { device_type_ = value; }
+  canscope::DeviceType device_type() const { return device_type_; }
 
 private:
   // DeviceBase
@@ -101,7 +93,7 @@ private:
   AnalogSwitchRegister analog_switch_;
   Trigger1Register trigger1_;
   Trigger2Register trigger2_;
-  TriggerStateRegister trigger_state_;
+  DeviceType device_type_;
 
   DeviceDelegate* device_delegate_;
 
