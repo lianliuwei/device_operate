@@ -29,7 +29,7 @@ void ThreadedLoopRun::Single() {
 void ThreadedLoopRun::Stop() {
   {
     base::AutoLock lock(lock_);
-    if (!start_ || !single_ || stop_)
+    if ((!start_ && !single_) || stop_)
       return;
     stop_ = true;
   }
