@@ -6,7 +6,7 @@
 namespace canscope {
 class ScopeCtrlRegister {
 public:
-  device::RegisterMemory memory;
+  ::device::RegisterMemory memory;
 
   BoolBind scope_ctrl;
   
