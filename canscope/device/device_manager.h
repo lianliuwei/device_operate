@@ -27,6 +27,8 @@ public:
   // call on any thread
   void StartDestroying();
 
+  scoped_refptr<base::SingleThreadTaskRunner> run_thread();
+
 protected:
   // call from DefaultRefCountedThreadSafeTraits, and Post Task
   // to delete device on Device

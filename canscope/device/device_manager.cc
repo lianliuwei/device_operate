@@ -39,3 +39,7 @@ void DeviceManager::DeleteDevice() {
   device_loop_->PostTask(FROM_HERE, 
       Bind(&DeviceManager::DeleteDeviceImpl, Unretained(this)));
 }
+
+scoped_refptr<base::SingleThreadTaskRunner> DeviceManager::run_thread() {
+  return device_loop_;
+}
