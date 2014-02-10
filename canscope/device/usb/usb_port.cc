@@ -42,6 +42,10 @@ bool UsbModel2Memory(UsbMode mode) {
   return kUsbModelStream == mode;
 }
 
+int To4Align(int size) {
+  return size % 4 ? (size/4 + 1) *4 : size;
+}
+
 }
 
 namespace canscope {  
@@ -112,22 +116,25 @@ bool UsbPort::WritePort2Raw(uint8* buffer, int size) {
     int current_write;
     if (need_write%4) {
       // align to 4
-      int len = (need_write/4 + 1) * 4;
+      int len = To4Align(need_write);
       scoped_ptr<uint8[]> temp_buffer(new uint8[len]);
       memset(temp_buffer.get(), 0x00, len);
       memcpy(temp_buffer.get(), buffer + write_num, need_write);
       if (!WritePort(kPort2, &current_write, temp_buffer.get(), len)) {
         return false;
       }
+      if (current_write != len) {
+        return false;
+      }
     } else {
       if (!WritePort(kPort2, &current_write, buffer + write_num, need_write)) {
         return false;
       }
+      if (current_write != need_write) {
+        return false;
+      }
     }
-    if (current_write != need_write) {
-      return false;
-    }
-    write_num += current_write;
+    write_num += need_write;
     if (write_num == size)
       break;
     CHECK(write_num <= size);
@@ -141,6 +148,8 @@ bool UsbPort::WritePort2Raw(uint8* buffer, int size) {
       read_size <= 0) {
     return false;
   }
+  LOG_IF (ERROR, rsp_buffer.cmd_id.value() == 0xFFFF) << "FPGA file is damaged";
+  
   return rsp_buffer.cmd_id.value() == WRITE_SUCCESS;
 
 }
@@ -148,7 +157,8 @@ bool UsbPort::WritePort2Raw(uint8* buffer, int size) {
 bool UsbPort::DownloadFPGA(uint8* buffer, int size) {
   DCHECK(buffer);
   DCHECK(size > 0);
-  SetCmd(DOWNLOAD_FPGA, 0, kUsbModelNormal, NULL, size);
+  // DownloadFPGA can no be 4 align, align here and patch 0 in WritePort2Raw
+  SetCmd(DOWNLOAD_FPGA, 0, kUsbModelNormal, NULL, To4Align(size));
   if (!SendCmd())
     return false;
   
