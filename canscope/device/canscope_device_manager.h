@@ -35,7 +35,12 @@ public:
   // pass out ownership value
   base::DictionaryValue* SaveConfig();
 
-  CANScopeRunner* runner();
+  CANScopeRunner* runner() { return &runner_; }
+
+  UsbPortDeviceDelegate* device_delegate() { return &device_delegate_; }
+
+  // after DeviceType Detected the DeviceType type can not change.
+  void DeviceTypeDetected(DeviceType type);
 
 private:
   // DeviceManager
