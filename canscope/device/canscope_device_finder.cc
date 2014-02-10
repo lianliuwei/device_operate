@@ -16,6 +16,9 @@ bool CANScopeDeviceFinder::LoopRunImp() {
   int find_device_size = static_cast<int>(devices.size());
 
   scoped_refptr<DevicesManager> manager = DevicesManager::Get();
+  // manager is destroyed
+  if (manager.get() == NULL)
+    return false;
   manager->DeviceListChanged(devices);
 
   // found something and stop
@@ -33,14 +36,8 @@ CANScopeDeviceFinder::CANScopeDeviceFinder(
     bool stop_on_found)
     : stop_on_found_(stop_on_found) {
   set_run_thread(run_thread);
+  next_loop_delay_ = base::TimeDelta::FromSeconds(1);
 }
 
-void CANScopeDeviceFinder::NotifyStateChanged() {
-  observer_list_.Notify(&Observer::StateChanged);
-}
-
-void CANScopeDeviceFinder::OnStateChanged() {
-  NotifyStateChanged();
-}
 
 } // namespace canscope
