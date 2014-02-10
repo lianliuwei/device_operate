@@ -116,8 +116,17 @@ void ThreadedLoopRun::LoopRun() {
 
 ThreadedLoopRun::ThreadedLoopRun() {
   Reset();
+  observer_list_ = new ObserverListThreadSafe<Observer>();
 }
 
 void ThreadedLoopRun::OnStop() {
 
+}
+
+void ThreadedLoopRun::OnStateChanged() {
+  NotifyStateChanged();
+}
+
+void ThreadedLoopRun::NotifyStateChanged() {
+  observer_list_->Notify(&Observer::StateChanged);
 }
