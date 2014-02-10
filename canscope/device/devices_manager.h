@@ -59,7 +59,7 @@ private:
       bool auto_close_offline);
 
   friend class base::RefCountedThreadSafe<DevicesManager>;
-  virtual ~DevicesManager();
+  virtual ~DevicesManager() {}
 
   // run on run_thread
   bool OpenDeviceImpl(string16 device_path, bool notify);
@@ -89,7 +89,7 @@ private:
 
   scoped_refptr<base::SingleThreadTaskRunner> run_thread_;
 
-  base::Lock lock_;
+  mutable base::Lock lock_;
 
   DISALLOW_COPY_AND_ASSIGN(DevicesManager);
 };

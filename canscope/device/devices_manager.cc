@@ -3,6 +3,7 @@
 #include "base/synchronization/lock.h"
 
 #include "canscope/device/usb/usb_port.h"
+#include "canscope/device/canscope_device_constants.h"
 
 using namespace std;
 
@@ -165,6 +166,9 @@ bool DevicesManager::OpenDeviceImpl(string16 device_path, bool notify) {
   scoped_refptr<CANScopeDeviceManager> device = CANScopeDeviceManager::Create();
   CANScopeRunner* runner = device->runner();
   runner->Init(device_path);
+  runner->auto_init_device = kDefaultAutoInitDevice;
+  runner->start_on_device_online = kDefaultStartOnDeviceOnline;
+  runner->rerun_on_back_online = kDefaultRerunOnbackOnline;
   device::Error error = runner->InitDevice();
   if (error != device::OK) {
     LOG(WARNING) << "Device Open Error: " << ErrorToString(error) << 
@@ -234,6 +238,7 @@ void DevicesManager::DestroyDevices() {
   if (!run_thread_->BelongsToCurrentThread()) {
     run_thread_->PostTask(FROM_HERE, 
       Bind(&DevicesManager::DestroyDevices, this));
+    return;
   } else {
     DestroyDevicesImpl();
   }
@@ -256,6 +261,7 @@ void DevicesManager::OpenDevice(string16 device_path) {
   if (!run_thread_->BelongsToCurrentThread()) {
     run_thread_->PostTask(FROM_HERE, 
         Bind(&DevicesManager::OpenDevice, this, device_path));
+    return;
   } else {
     OpenDeviceImpl(device_path, true);
   }
@@ -265,9 +271,42 @@ void DevicesManager::CloseDevice(string16 device_path) {
   if (!run_thread_->BelongsToCurrentThread()) {
     run_thread_->PostTask(FROM_HERE, 
       Bind(&DevicesManager::CloseDevice, this, device_path));
+    return;
   } else {
     CloseDeviceImpl(device_path, true);
   }
+}
+
+DeviceStatus DevicesManager::GetDeviceStatus(string16 device_path) const {
+  base::AutoLock lock(lock_);
+  DeviceStatusMap::const_iterator it =  device_to_status_.find(device_path);
+  // device no exist
+  if (it == device_to_status_.end()) {
+    return kNoExist;
+  }
+  return it->second;
+}
+
+scoped_refptr<CANScopeDeviceManager> DevicesManager::GetDeviceManager(string16 device_path) const {
+  base::AutoLock lock(lock_);
+  PathDeviceMap::const_iterator device_it = path_to_device_.find(device_path);
+  if (device_it == path_to_device_.end()) {
+    return NULL;
+  }
+  return device_it->second;
+}
+
+std::vector<string16> DevicesManager::GetDeviceList() {
+  std::vector<string16> devices;
+
+  {
+  base::AutoLock lock(lock_);
+  for (DeviceStatusMap::iterator it = device_to_status_.begin(); 
+    it != device_to_status_.end(); ++it) {
+      devices.push_back(it->first);
+  }
+  }
+  return devices;
 }
 
 
