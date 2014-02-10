@@ -12,24 +12,7 @@
 
 class DataCollecter : public ThreadedLoopRun {
 public:
-  class Observer {
-  public:
-    virtual void StateChanged() = 0;
-
-  protected:
-    Observer() {}
-    virtual ~Observer() {}
-  };
-
-  void AddObserver();
-  void RemoveObserver();
-
-  typedef base::Callback<void()> RunOnFaultDelegate;
-
-  DataCollecter(scoped_refptr<base::SingleThreadTaskRunner> runner,
-      RunOnFaultDelegate run_on_fault);
-  virtual ~DataCollecter();
-
+  DataCollecter() {}
 
   // data collect freq 
   void SetFreq(double freq);
@@ -41,8 +24,6 @@ public:
   void set_stop_by_offine(bool value) { stop_by_offine_ = value; }
   bool stop_by_offine() const { return stop_by_offine_; }
 
-  int Count() const;
-
   enum LoopState {
     // call loop next message loop
     NEXT_LOOP,
@@ -52,22 +33,18 @@ public:
     STOP,
   };
 
-
 protected:
-  ObserverListThreadSafe<Observer> observer_;
-  bool stop_by_offine_;
-
-
-  base::Lock lock_;
-  
-  // implement ThreadLoopRun
-  virtual void OnStateChanged() OVERRIDE;
+  virtual ~DataCollecter() {}
 
   virtual LoopState OnLoopRun() = 0;
 
 private:
   // implement ThreadLoopRun
   virtual bool LoopRunImp() OVERRIDE;
+
+  bool stop_by_offine_;
+
+  base::Lock lock_;
 
 };
 

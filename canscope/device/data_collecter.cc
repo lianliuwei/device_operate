@@ -18,3 +18,12 @@ bool DataCollecter::LoopRunImp() {
 
   return state == NEXT_LOOP;
 }
+
+void DataCollecter::SetFreq(double freq) {
+  next_loop_delay_ = 
+      base::TimeDelta::FromMilliseconds(static_cast<double>(1000.0/freq));
+}
+
+double DataCollecter::Freq() const {
+  return 1.0 / next_loop_delay_.InSecondsF();
+}
