@@ -26,7 +26,7 @@ public:
   void Init(string16 device_path);
 
   device::Error InitDevice();
-  bool IsInited() const;
+  bool IsInited() const { return inited_; }
   device::Error ReOnline();
   void CloseDevice();
 
@@ -41,6 +41,9 @@ private:
   // 
   virtual void DeviceStateChanged();
   virtual void DeviceListChanged();
+
+  // call after inited
+  DeviceType GetDeviceType();
 
   string16 device_path_;
   CANScopeDeviceManager* canscope_;

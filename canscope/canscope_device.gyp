@@ -168,9 +168,9 @@
         'device/scoped_device_lock.cc',
         'device/canscope_device_manager.h',
         'device/canscope_device_manager.cc',
-        'device/canscope_device_manager_unittest.cc',
+        #'device/canscope_device_manager_unittest.cc',
         'device/canscope_device_manager_handle.h',
-        'device/canscope_device_manager_handle.cc',
+        #'device/canscope_device_manager_handle.cc',
         'device/config_manager.h',
         'device/config_manager.cc',
         'device/device_handle_base.h',
@@ -217,6 +217,9 @@
         'device/merge_device_list_unittest.cc',
         'device/canscope_device_runner.h',
         'device/canscope_device_runner.cc',
+        'device/devices_manager_unittest.cc',
+        'device/canscope_data_collecter_callback.h',
+        'device/canscope_data_collecter_callback.cc',
       ],
       
       'include_dirs': [
@@ -277,12 +280,14 @@
           'destination': '<(PRODUCT_DIR)/../Release/',
           'files': [
             'fpga/Release/CANScope.dll',
+            'fpga/Release/CANScopePro.dll',
           ],
         },
         {
           'destination': '<(PRODUCT_DIR)/../Debug/',
           'files': [
             'fpga/Debug/CANScope.dll',
+            'fpga/Debug/CANScopePro.dll',
           ],
         },
       ],   

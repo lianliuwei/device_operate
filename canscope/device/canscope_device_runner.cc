@@ -1,9 +1,40 @@
 #include "canscope/device/canscope_device_runner.h"
 
+#include "base/base_paths.h"
 #include "base/path_service.h"
+#include "base/file_util.h"
+
+#include "canscope/device/canscope_device_manager.h"
+#include "canscope/device/devices_manager.h"
+#include "canscope/device/canscope_data_collecter_callback.h"
+
+using namespace base;
 
 namespace canscope {
 
+CANScopeRunner::CANScopeRunner(CANScopeDeviceManager* canscope)
+    : canscope_(canscope)
+    , inited_(false)
+    // when runner is create the device is online, 
+    // or this obj will be destroy immediate
+    , status_(kOnline) {
+
+}
+
+CANScopeRunner::~CANScopeRunner() {
+  StopAll();
+}
+
+void CANScopeRunner::Init(string16 device_path) {
+  DCHECK(!inited_) << "set device_path before inited";
+  device_path_ = device_path;
+
+  // create osc Data
+  osc_data = new OscDataCollecter(Bind(&OscDataCollected), 
+      canscope_->device_delegate(), canscope_->osc_device());
+  scoped_refptr<SingleThreadTaskRunner> run_thread = canscope_->run_thread();
+  osc_data->set_run_thread(run_thread);
+}
 
 device::Error CANScopeRunner::InitDevice() {
   DCHECK(!inited_) << "device already init";
@@ -13,6 +44,7 @@ device::Error CANScopeRunner::InitDevice() {
   }
   status_ = kOnline;
   inited_ = true;
+  canscope_->DeviceTypeDetected(GetDeviceType());
   if (start_on_device_online) {
     StartAll();
   }
@@ -34,8 +66,16 @@ device::Error CANScopeRunner::ReOnline() {
   return error;
 }
 
+void CANScopeRunner::CloseDevice() {
+  if (!inited_)
+    return;
+  StopAll();
+  CloseDeviceImpl();
+  inited_ = false;
+}
+
 device::Error CANScopeRunner::InitDeviceImpl(string16 device_path) {
-  UsbPortDeviceDelegate* device_delegate = canscope_->device_delegate_;
+  UsbPortDeviceDelegate* device_delegate = canscope_->device_delegate();
   // INFO now  just usb_port, if add more port change device_delegate interface
   UsbPort* usb_port = device_delegate->usb_port_ptr();
   bool ret = false;
@@ -54,8 +94,10 @@ device::Error CANScopeRunner::InitDeviceImpl(string16 device_path) {
   }
   std::string content;
   base::FilePath fpga_file;
-  base::PathService(base::BasePathKey::DIR_EXE, &fpga_file);
-  fpga_file = fpga_file.Append(_T("CANScope.dll"));
+  PathService::Get(base::DIR_EXE, &fpga_file);
+  // pro use different FPGA file.
+  fpga_file = fpga_file.Append(
+      device_info_.IsProVersion() ? L"CANScopePro.dll" : L"CANScope.dll");
   ret = file_util::ReadFileToString(fpga_file, &content); 
   if (!ret) {
     usb_port->CloseDevice();
@@ -70,7 +112,7 @@ device::Error CANScopeRunner::InitDeviceImpl(string16 device_path) {
 }
 
 void CANScopeRunner::CloseDeviceImpl() {
-  UsbPortDeviceDelegate* device_delegate = canscope_->device_delegate_;
+  UsbPortDeviceDelegate* device_delegate = canscope_->device_delegate();
   UsbPort* usb_port = device_delegate->usb_port_ptr();
   bool ret = usb_port->CloseDevice();
   DCHECK(!ret);
@@ -92,5 +134,22 @@ void CANScopeRunner::DeviceStateChanged() {
 }
 
 void CANScopeRunner::DeviceListChanged() {}
+
+void CANScopeRunner::StartAll() {
+  osc_data->Start();
+}
+
+void CANScopeRunner::StopAll() {
+  osc_data->Stop();
+}
+
+void CANScopeRunner::ReRunAll() {
+  osc_data->ReRun();
+}
+
+canscope::DeviceType CANScopeRunner::GetDeviceType() {
+  DCHECK(inited_);
+  return device_info_.GetDeviceType(); 
+}
 
 } // namespace canscope
