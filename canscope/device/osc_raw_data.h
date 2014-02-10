@@ -15,13 +15,15 @@ class OscRawDataDeviceConfig : public OscDeviceProperty
                                   OscRawDataDeviceConfig> {
 public:
   OscRawDataDeviceConfig(const ConfigManager::Config& config);
-  virtual ~OscRawDataDeviceConfig() {}
 
   bool SameConfig(const ConfigManager::Config& config) const;
 
   int id() const;
 
 private:
+  friend class base::RefCountedThreadSafe<OscRawDataDeviceConfig>;
+  ~OscRawDataDeviceConfig() {}
+
   int id_;
 
   DISALLOW_COPY_AND_ASSIGN(OscRawDataDeviceConfig);
@@ -34,7 +36,6 @@ class OscRawData : public base::RefCountedThreadSafe<OscRawData> {
 public:
   OscRawData(DeviceType type, OscRawDataDeviceConfigHandle property);
   OscRawData(int size, OscRawDataDeviceConfigHandle property);
-  ~OscRawData() {}
 
   int size() const;
   int chnl_size() const;
@@ -47,6 +48,9 @@ public:
   int id() const;
 
 private:
+  friend class base::RefCountedThreadSafe<OscRawData>;
+  ~OscRawData() {}
+
   std::vector<uint8> raw_data_;
   DeviceType type_;
 
