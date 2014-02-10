@@ -22,7 +22,7 @@ CANScopeRunner::CANScopeRunner(CANScopeDeviceManager* canscope)
 }
 
 CANScopeRunner::~CANScopeRunner() {
-  StopAll();
+  CloseDevice();
 }
 
 void CANScopeRunner::Init(string16 device_path) {
@@ -115,7 +115,7 @@ void CANScopeRunner::CloseDeviceImpl() {
   UsbPortDeviceDelegate* device_delegate = canscope_->device_delegate();
   UsbPort* usb_port = device_delegate->usb_port_ptr();
   bool ret = usb_port->CloseDevice();
-  DCHECK(!ret);
+  DCHECK(ret);
 }
 
 // NOTE may DevicesManager manager the state is better
