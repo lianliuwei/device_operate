@@ -22,4 +22,19 @@ DeviceInfo::DeviceInfo()
     , fpga_core_temp(memory.PtrByRelative(kDeviceInfoFpgaCoreTempOffset), false)
     , env_temp(memory.PtrByRelative(kDeviceInfoEnvTempOffset), false) {}
 
+canscope::DeviceType DeviceInfo::GetDeviceType() {
+  uint32 dt = device_type.value();
+  dt -= 0x1201;
+  switch (dt) {
+  case 0: return DT_CS1201;
+  case 1: return DT_CS1202;
+  case 2: return DT_CS1203;
+  default: NOTREACHED(); return DT_CS1201;
+  }
+}
+
+bool DeviceInfo::IsProVersion() {
+  return GetDeviceType() == DT_CS1203;
+}
+
 } // namespace canscope

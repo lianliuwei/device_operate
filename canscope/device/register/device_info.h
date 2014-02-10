@@ -2,6 +2,7 @@
 
 #include "device/simple_type_bind.h"
 #include "device/register_memory.h"
+#include "canscope/device/canscope_device_constants.h"
 
 namespace canscope {
 class DeviceInfo {
@@ -25,6 +26,9 @@ public:
   Uint16Bind fpga_core_temp;
   Uint16Bind env_temp;
     
+  DeviceType GetDeviceType();
+  bool IsProVersion();
+
   DeviceInfo();
   ~DeviceInfo() {}
 
