@@ -11,9 +11,10 @@ namespace canscope {
 class CANScopeDeviceManagerHandle : public common::NotificationObserver {
 public:
   // each messageloop thread has at most one DeviceManagerHandle
-  static CANScopeDeviceManagerHandle* GetInstance();
+  static CANScopeDeviceManagerHandle* GetInstance(CANScopeDeviceManager* manager);
   
-  static CANScopeDeviceManagerHandle* Create();
+  static CANScopeDeviceManagerHandle* Create(CANScopeDeviceManager* manager);
+
   // receive manager destroy notify
   // or user call this.
   void DestroyHandle();
@@ -28,13 +29,15 @@ private:
   void Init();
 
   CANScopeDeviceManagerHandle(CANScopeDeviceManager* manager);
-  virtual ~CANScopeDeviceManagerHandle() {}
+  virtual ~CANScopeDeviceManagerHandle();
 
   common::NotificationRegistrar registrar_;
 
   scoped_ptr<OscDeviceHandle> osc_device_handle_;
 
   scoped_refptr<CANScopeDeviceManager> device_manager_;
+
+  DISALLOW_COPY_AND_ASSIGN(CANScopeDeviceManagerHandle);
 };
 
 } // namespace canscope

@@ -90,11 +90,8 @@ public:
     DestroyTestProcess();
   }
 
-  void GetOscRawData() {
-    CommonThread::PostDelayedTask(CommonThread::UI, FROM_HERE, 
-      Bind(&DevicesManagerTest::StopDeviceManager, Unretained(this)),
-      base::TimeDelta::FromSeconds(3));
-  }
+  void GetOscRawData();
+  void GetValueTest();
 
   void StopDeviceManager() {
     DevicesManager::Get()->CloseDevice(device_path_);
@@ -162,9 +159,52 @@ private:
   NotificationRegistrar registrar_;
 };
 
+void DevicesManagerTest::GetOscRawData() {
+  CommonThread::PostDelayedTask(CommonThread::UI, FROM_HERE, 
+    Bind(&DevicesManagerTest::StopDeviceManager, Unretained(this)),
+    base::TimeDelta::FromSeconds(3));
+}
+
+void DevicesManagerTest::GetValueTest() {
+  ASSERT_TRUE(manager_.get() != NULL) << "no Devices Finded";
+  CANScopeDeviceManagerHandle::Create(manager_);
+ OscDeviceHandle* handle = CANScopeDeviceManagerHandle::GetInstance(manager_)->
+    osc_device_handle();
+
+  EXPECT_EQ(k8V, handle->volt_range_can_h.value());
+  EXPECT_DOUBLE_EQ(0.0, handle->offset_can_h.value());
+  EXPECT_EQ(kAC, handle->coupling_can_h.value());
+  EXPECT_EQ(k8V, handle->volt_range_can_l.value());
+  EXPECT_DOUBLE_EQ(0.0, handle->offset_can_l.value());
+  EXPECT_EQ(kAC, handle->coupling_can_l.value());
+  EXPECT_EQ(kSub, handle->diff_ctrl.value());
+  EXPECT_EQ(k20us, handle->time_base.value());
+  EXPECT_DOUBLE_EQ(0.0, handle->time_offset.value());
+  EXPECT_DOUBLE_EQ(100, handle->auto_time.value());
+  EXPECT_EQ(kTriggerSourceCANDIFF, handle->trigger_source.value());
+  EXPECT_EQ(kRisingEdge, handle->trigger_type.value());
+  EXPECT_EQ(kAuto, handle->trigger_mode.value());
+  EXPECT_EQ(kDefault, handle->trigger_sens.value());
+  EXPECT_EQ(kGreater, handle->compare.value());
+  EXPECT_DOUBLE_EQ(0.0, handle->trigger_volt.value());
+  EXPECT_DOUBLE_EQ(1.0, handle->time_param.value());
+
+  CANScopeDeviceManagerHandle::GetInstance(manager_)->DestroyHandle();
+
+  CommonThread::PostTask(CommonThread::UI, FROM_HERE, 
+      Bind(&DevicesManagerTest::StopDeviceManager, Unretained(this)));
+}
+
+
 TEST_F(DevicesManagerTest, GetOscRawData) {
   ASSERT_TRUE(manager_.get() != NULL) << "no Devices Finded";
   CommonThread::PostTask(CommonThread::UI, FROM_HERE, 
       Bind(&DevicesManagerTest::GetOscRawData, Unretained(this)));
+  GetTestProcess()->MainMessageLoopRun();
+}
+
+TEST_F(DevicesManagerTest, GetValue) {
+ CommonThread::PostTask(CommonThread::UI, FROM_HERE, 
+      Bind(&DevicesManagerTest::GetValueTest, Unretained(this)));
   GetTestProcess()->MainMessageLoopRun();
 }
