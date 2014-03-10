@@ -5,10 +5,10 @@
 
 using namespace base;
 
-DeviceManager::DeviceManager(base::MessageLoopProxy* device_loop)
+DeviceManager::DeviceManager(scoped_refptr<base::SingleThreadTaskRunner> device_loop)
     : destroy_(false) 
     , own_ref_(this)
-    , device_loop_(device_loop) {
+    , runner_(device_loop) {
   DCHECK(device_loop);
 }
 
@@ -24,7 +24,7 @@ void DeviceManager::StartDestroying() {
     return;
   destroy_ = true;
   }
-  device_loop_->PostTask(FROM_HERE, 
+  runner_->PostTask(FROM_HERE, 
       Bind(&DeviceManager::DestroyPos, this));
 }
 
@@ -36,10 +36,10 @@ void DeviceManager::DestroyPos() {
 
 void DeviceManager::DeleteDevice() {
   // use the raw ptr, or will break RefCount in_dtor CHECK
-  device_loop_->PostTask(FROM_HERE, 
+  runner_->PostTask(FROM_HERE, 
       Bind(&DeviceManager::DeleteDeviceImpl, Unretained(this)));
 }
 
 scoped_refptr<base::SingleThreadTaskRunner> DeviceManager::run_thread() {
-  return device_loop_;
+  return runner_;
 }

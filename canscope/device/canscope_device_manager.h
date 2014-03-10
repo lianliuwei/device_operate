@@ -18,7 +18,8 @@ class CANScopeDeviceManager : public DeviceManager {
 public:
 
   // no thread safety, call on Device Thread only.
-  static CANScopeDeviceManager* Create();
+  static CANScopeDeviceManager* Create(
+      scoped_refptr<base::SingleThreadTaskRunner> runner);
 
   OscDevice* osc_device() {
     return &osc_device_;
@@ -47,7 +48,7 @@ private:
   virtual void DestroyImpl() OVERRIDE;
   virtual void DeleteDeviceImpl() OVERRIDE;
 
-  CANScopeDeviceManager(base::MessageLoopProxy* device_loop);
+  CANScopeDeviceManager(scoped_refptr<base::SingleThreadTaskRunner> device_loop);
   virtual ~CANScopeDeviceManager() {}
 
   UsbPortDeviceDelegate device_delegate_;

@@ -163,7 +163,8 @@ bool DevicesManager::OpenDeviceImpl(string16 device_path, bool notify) {
     if (status == kOnline || status == kOffline)
       return false;
   }
-  scoped_refptr<CANScopeDeviceManager> device = CANScopeDeviceManager::Create();
+  scoped_refptr<CANScopeDeviceManager> device = 
+      CANScopeDeviceManager::Create(run_thread_);
   CANScopeRunner* runner = device->runner();
   runner->Init(device_path);
   runner->auto_init_device = kDefaultAutoInitDevice;

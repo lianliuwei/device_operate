@@ -5,7 +5,6 @@
 #include "base/values.h"
 
 #include "common/notification/notification_service.h"
-#include "common/common_thread.h"
 
 #include "canscope/canscope_notification_types.h"
 #include "canscope/device/canscope_device_property_constants.h"
@@ -17,10 +16,10 @@ using namespace base;
 
 namespace canscope {
 
-CANScopeDeviceManager* CANScopeDeviceManager::Create() {
-  DCHECK(CommonThread::CurrentlyOn(CommonThread::DEVICE));
-  CANScopeDeviceManager* device = new CANScopeDeviceManager(
-      CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE));
+CANScopeDeviceManager* CANScopeDeviceManager::Create(
+    scoped_refptr<base::SingleThreadTaskRunner> runner) {
+  DCHECK(runner->BelongsToCurrentThread());
+  CANScopeDeviceManager* device = new CANScopeDeviceManager(runner);
   NotifyAll(NOTIFICATION_DEVICE_MANAGER_CREATED, 
       Source<CANScopeDeviceManager>(device), 
       NotificationService::NoDetails());
@@ -34,7 +33,7 @@ void CANScopeDeviceManager::DestroyImpl() {
 }
 
 void CANScopeDeviceManager::DeleteDeviceImpl() {
-  DCHECK(CommonThread::CurrentlyOn(CommonThread::DEVICE));
+  DCHECK(run_thread()->BelongsToCurrentThread());
   NotifyAll(NOTIFICATION_DEVICE_MANAGER_DESTROYED, 
       Source<CANScopeDeviceManager>(this), 
       NotificationService::NoDetails());
@@ -43,7 +42,7 @@ void CANScopeDeviceManager::DeleteDeviceImpl() {
 }
 
 CANScopeDeviceManager::CANScopeDeviceManager(
-    base::MessageLoopProxy* device_loop)
+    scoped_refptr<base::SingleThreadTaskRunner> device_loop)
     : DeviceManager(device_loop)
     , osc_device_(&device_delegate_, &osc_device_config_)
     , runner_(this) {}

@@ -20,7 +20,7 @@ struct DeviceManagerTraits {
 class DeviceManager : public base::RefCountedThreadSafe<
     DeviceManager, DeviceManagerTraits<DeviceManager> > {
 public:
-  DeviceManager(base::MessageLoopProxy* device_loop);
+  DeviceManager(scoped_refptr<base::SingleThreadTaskRunner> device_loop);
 
   bool IsDestroying();
 
@@ -54,7 +54,7 @@ private:
   bool destroy_;
 
   scoped_refptr<DeviceManager> own_ref_;
-  scoped_refptr<base::MessageLoopProxy> device_loop_;
+  scoped_refptr<base::SingleThreadTaskRunner> runner_;
 
   friend struct DeviceManagerTraits<DeviceManager>;
 };
