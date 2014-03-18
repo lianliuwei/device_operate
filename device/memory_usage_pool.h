@@ -13,7 +13,6 @@ public:
   typedef base::Callback<void(int)> HaveFreeCallbackType;
 
   MemoryUsagePool(int memory_limit);
-  ~MemoryUsagePool();
 
   uint8* Alloc(int size);
   void Free(uint8* free);
@@ -27,6 +26,9 @@ public:
   void CancelCallback();
 
 private:
+  friend class base::RefCountedThreadSafe<MemoryUsagePool>;
+  ~MemoryUsagePool();
+
   bool HitCeiling(int size);
 
   HaveFreeCallbackType have_free_;
