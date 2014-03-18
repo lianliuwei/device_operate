@@ -28,6 +28,11 @@
         'register_memory.h',
         'register_memory.cc',
         'register_property.h',
+        'memory_frame_pool.h',
+        'memory_frame_pool.cc',
+        'sequenced_bulk_buffer.h',
+        'memory_usage_pool.h',
+        'memory_usage_pool.cc',
       ], 
     },
     {
@@ -40,6 +45,8 @@
         'register_memory_unittest.cc',
         'simple_type_bind_unittest.cc',
         'uint32_sub_bind_unittest.cc',
+        'memory_usage_pool_unittest.cc',
+        'memory_frame_pool_unittest.cc',
       ],
       'include_dirs': [
         '..',
