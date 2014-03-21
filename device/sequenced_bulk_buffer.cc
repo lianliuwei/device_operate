@@ -140,13 +140,6 @@ void SequencedBulkBufferBase::FireCallbackNoLock(int64 reach_count) {
   }
 }
 
-void SequencedBulkBufferBase::FireCallback(int64 reach_count) {
-  {
-  base::AutoLock lock(lock_);
-  FireCallbackNoLock(reach_count);
-  }
-}
-
 int64 SequencedBulkBufferBase::Count() const {
   base::AutoLock lock(lock_);
   return count_ - 1;
@@ -158,7 +151,6 @@ int64 SequencedBulkBufferBase::CountNoLock() const {
 }
 
 void SequencedBulkBufferBase::IncCount() {
-  base::AutoLock lock(lock_);
   ++count_;
 }
 
@@ -216,8 +208,6 @@ void SequencedBulkBufferBase::UnRegisterReader(ReaderBase* reader) {
 }
 
 void SequencedBulkBufferBase::UpdateReaderCount(ReaderBase* reader, int64 count) {
-  {
-  base::AutoLock lock(lock_);
 
   ReaderCountMap::iterator it = count_map_.find(reader);
   DCHECK(it != count_map_.end());
@@ -239,26 +229,21 @@ void SequencedBulkBufferBase::UpdateReaderCount(ReaderBase* reader, int64 count)
     }
   }
   reader_front_count_ = min_value;
-  }
 }
 
 int64 SequencedBulkBufferBase::ReaderMin() {
-  base::AutoLock lock(lock_);
   return reader_front_count_;
 }
 
 int64 SequencedBulkBufferBase::ReaderMax() {
-  base::AutoLock lock(lock_);
   return reader_back_count_;
 }
 
 int SequencedBulkBufferBase::ReaderNum() {
-  base::AutoLock lock(lock_);
   return count_map_.size();
 }
 
 bool SequencedBulkBufferBase::GetReaderMinMax(int64* min_value, int64* max_value) {
-  base::AutoLock lock(lock_);
   if (min_value) {
     *min_value = reader_front_count_;
   }

@@ -22,9 +22,11 @@ public:
   class ReaderBase {
   public:
     // the count need to read
-    int64 Count() { return count_; }
+    int64 Count() const { return count_; }
     void Skip(int64 n) { count_ += n; }
 
+    // IMPORTANT: after wait GetBulk() may fault, 
+    // because the bulk may be free or recycle.
     // sync wait
     void WaitForReady();
     // true for finish false for timeout
@@ -45,6 +47,8 @@ public:
     ReaderBase(SequencedBulkBufferBase* buffer);
     ~ReaderBase();
 
+    void set_count(int64 n) { count_ = n; }
+
     scoped_refptr<SequencedBulkBufferBase> buffer_;
 
   private:
@@ -64,19 +68,24 @@ public:
 
   SequencedBulkBufferBase();
   
+  // lock
   void Quit();
 
   // current count, -1 for no ready bulk yet
+  // lock
   int64 Count() const;
 
 protected:
   friend class base::RefCountedThreadSafe<SequencedBulkBufferBase>;
   virtual ~SequencedBulkBufferBase();
 
+  // all protected no lock
   // inc only
   void UpdateReaderCount(ReaderBase* reader, int64 count);
 
   void IncCount();
+
+  int64 CountNoLock() const;
 
   // 0 the Min Max is invalid
   int ReaderNum();
@@ -86,7 +95,10 @@ protected:
   // return if min max valid
   bool GetReaderMinMax(int64* min_value, int64* max_value);
 
-  void FireCallback(int64 reach_count);
+
+  void FireCallbackNoLock(int64 reach_count);
+
+  mutable base::Lock lock_;
 
 private:
   friend class ReaderBase;
@@ -94,18 +106,20 @@ private:
   // void OnBufferReady(int64 count, bool quit);
   typedef base::Callback<void(int64, bool)> BufferReadyCallback;
 
+  // lock
   void RegisterReader(ReaderBase* reader, int64 start_count);
+  // lock
   void UnRegisterReader(ReaderBase* reader);
 
   // one time callback.
   // if callback match, call immediate.
+  // lock
   void SetReadyCallback(void* id, int64 count, BufferReadyCallback ready_callback);
+  // lock
   void CancelCallback(void* id);
-
+  // lock
   bool CheckReady(int64 count);
 
-  int64 CountNoLock() const;
-  void FireCallbackNoLock(int64 reach_count);
 
   bool quiting_;
 
@@ -129,7 +143,6 @@ private:
   int64 reader_front_count_;
   int64 reader_back_count_;
 
-  mutable base::Lock lock_;
   DISALLOW_COPY_AND_ASSIGN(SequencedBulkBufferBase);
 };
 
@@ -192,8 +205,6 @@ private:
   // find bulk which have the most small of the bigger or equal count 
   bool FindBulk(BulkPtrType* bluck_ptr, int64* bluck_count, int64 count);
 
-  base::Lock lock_;
-
   bool over_write_;
 
   bool keep_if_no_reader_;
@@ -203,6 +214,40 @@ private:
 
   DISALLOW_COPY_AND_ASSIGN(SequencedBulkBuffer);
 };
+
+template<typename BulkPtrType>
+bool SequencedBulkBuffer<BulkPtrType>::RecycleOne() {
+  base::AutoLock lock(lock_);
+
+  DCHECK(over_write_);
+  int64 min_value;
+  int64 max_value;
+  bool valid = GetReaderMinMax(&min_value, &max_value);
+  // no reader by all bulk may be ref in process module
+  if (!valid) {
+    return false;
+  }
+  // recycle no be reader first
+  std::list<BulkPieceType>::iterator it = buffer_queue_.begin();
+  while(it != buffer_queue_.end()) {
+    if (it->count > max_value) {
+      it->bulk = NULL;
+      buffer_queue_.erase(it);
+      return true;
+    }
+    ++it;
+  }
+  it = buffer_queue_.begin();
+  while(it != buffer_queue_.end()) {
+    if (it->count > min_value && it->count <= max_value) {
+      it->bulk = NULL;
+      buffer_queue_.erase(it);
+      return true;
+    }
+    ++it;
+  }
+  return false;
+}
 
 
 template<typename BulkPtrType>
@@ -243,7 +288,7 @@ bool SequencedBulkBuffer<BulkPtrType>::GetBluk(Reader* reader,
   bool ret = FindBulk(&out_ptr, &out_count, count);
   if (ret) {
     // auto release no used buffer
-    UpdateReaderCount(reader, count);
+    UpdateReaderCount(reader, out_count);
     MayReleaseBuffer();
 
     if (bluck_ptr) {
@@ -262,10 +307,10 @@ template<typename BulkPtrType>
 void SequencedBulkBuffer<BulkPtrType>::PushBluk(BulkPtrType bulk_ptr) {
   {
   base::AutoLock lock(lock_);
-  BulkPieceType bulk  = { bulk_ptr, Count() + 1};
+  BulkPieceType bulk  = { bulk_ptr, CountNoLock() + 1};
   buffer_queue_.push_back(bulk);
   IncCount();
-  FireCallback(Count());
+  FireCallbackNoLock(CountNoLock());
   // if no reader, just release it.
   MayReleaseBuffer();
   }
@@ -276,7 +321,7 @@ bool SequencedBulkBuffer<BulkPtrType>::FindBulk(BulkPtrType* bluck_ptr,
                                                 int64* bluck_count, 
                                                 int64 count) {
   // bulk no in queue now
-  if (Count() < count) {
+  if (CountNoLock() < count) {
     return false;
   }
   for (std::list<BulkPieceType>::iterator it = buffer_queue_.begin();
@@ -288,7 +333,7 @@ bool SequencedBulkBuffer<BulkPtrType>::FindBulk(BulkPtrType* bluck_ptr,
       return true;
     }
   }
-  return true;
+  return false;
 }
 
 template<typename BulkPtrType>
@@ -302,7 +347,7 @@ bool SequencedBulkBuffer<BulkPtrType>::Reader::GetBluk(BulkPtrType* bluck_ptr,
   }
   // update count.
   DCHECK(Count() <= out_count);
-  Skip(1);
+  set_count(out_count + 1);
 
   if (bluck_ptr) {
     *bluck_ptr = out_ptr;
