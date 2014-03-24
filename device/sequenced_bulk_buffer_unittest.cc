@@ -129,6 +129,7 @@ namespace {
 enum ThreadReaderTestType {
   kFullSpeed,
   kWaitTimeout,
+  kAsync,
 };
 
 class ThreadReader {
@@ -140,10 +141,13 @@ public:
       : bulk_queue_(bulk_queue) 
       , thread_num_(thread_num)
       , finish_thread_num_(0)
-      , event_(true, false) {
+      , start_thread_num_(0)
+      , event_(true, false)
+      , start_event_(true, false) {
    switch (test_type) {
    case kFullSpeed: FullSpeed(num); break;
    case kWaitTimeout: WaitTimeout(num); break;
+   case kAsync: Async(num); break;
    default: NOTREACHED();
    };
   }
@@ -152,6 +156,26 @@ public:
 
   void WaitForFinish() {
     event_.Wait();
+    event_.Reset();
+  }
+
+  void WaitForStart() {
+    start_event_.Wait();
+    start_event_.Reset();
+  }
+
+  void ReaderStart() {
+    bool notify = false; 
+    {
+      AutoLock lock(lock_);
+      ++start_thread_num_;
+      if (start_thread_num_ == thread_num_) {
+        notify = true;
+      }
+    }
+    if (notify) {
+      start_event_.Signal();
+    }
   }
 
   void ReaderFinish() {
@@ -169,7 +193,6 @@ public:
   }
 
   void WaitTimeout(int bulk_num) {
-    event_.Reset();
     for (int i = 0; i < thread_num_; ++i) {
       Thread* temp = new Thread("BulkReader");
       threads_.push_back(temp);
@@ -180,8 +203,8 @@ public:
   }
 
   void WaitTimeoutReader(int num) {
-
     TestBulkQueue::Reader queue_reader(bulk_queue_);
+    ReaderStart();
     for (int i = 0; i < num; ++i) {
       TestBulkHandle read_bulk;
       int64 read_count;
@@ -199,7 +222,6 @@ public:
   }
 
   void FullSpeed(int bulk_num) {
-    event_.Reset();
     for (int i = 0; i < thread_num_; ++i) {
       Thread* temp = new Thread("BulkReader");
       threads_.push_back(temp);
@@ -211,6 +233,7 @@ public:
 
   void FullSpeedReader(int num) {
     TestBulkQueue::Reader queue_reader(bulk_queue_);
+    ReaderStart();
     for (int i = 0; i < num; ++i) {
       TestBulkHandle read_bulk;
       int64 read_count;
@@ -223,11 +246,57 @@ public:
     ReaderFinish();
   }
 
+  void Async(int bulk_num) {
+    for (int i = 0; i < thread_num_; ++i) {
+      Thread* temp = new Thread("BulkReader");
+      threads_.push_back(temp);
+      temp->Start();
+      temp->message_loop()->PostTask(FROM_HERE, 
+        Bind(&ThreadReader::AsyncReader, Unretained(this), bulk_num));
+    }
+  }
+
+  void AsyncReader(int num) {
+    TestBulkQueue::Reader* queue_reader = new TestBulkQueue::Reader(bulk_queue_);
+    ReaderStart();
+
+    MessageLoop::current()->PostTask(FROM_HERE,
+        Bind(&ThreadReader::AsyncReaderLoop, 
+            Unretained(this), -1, num, queue_reader));
+  }
+
+  void AsyncReaderLoop(int i, int num, TestBulkQueue::Reader* queue_reader) {
+    // check last read
+    if (i != -1) {
+      TestBulkHandle read_bulk;
+      int64 read_count;
+      // read first so count add 1
+      EXPECT_EQ(queue_reader->Count(), i + 1);
+      bool ret = queue_reader->GetResult(&read_bulk, &read_count);
+      EXPECT_TRUE(ret);
+      EXPECT_EQ(read_count, i);
+      EXPECT_EQ(read_bulk->i, i);
+    }
+    ++i;
+    if (i == num) {
+      delete queue_reader;
+      ReaderFinish();
+      return;
+    }
+    queue_reader->set_have_data_callback(
+        Bind(&ThreadReader::AsyncReaderLoop, 
+             Unretained(this), i, num, queue_reader));
+    queue_reader->CallbackOnReady();
+  }
+
+
 private:
   scoped_refptr<TestBulkQueue> bulk_queue_;
   base::WaitableEvent event_;
+  base::WaitableEvent start_event_;
   base::Lock lock_;
   int thread_num_;
+  int start_thread_num_;
   int finish_thread_num_;
 
   ScopedVector<Thread> threads_;
@@ -252,6 +321,21 @@ TEST(SequencedBulkBufferTest, FullSpeedReader) {
   thread_reader.WaitForFinish();
 }
 
+TEST(SequencedBulkBufferTest, FullSpeedReaderWaitStart) {
+  scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
+  ThreadReader thread_reader(kFullSpeed, bulk_queue, 1000, 10);
+
+  thread_reader.WaitForStart();
+
+  for (int i = 0; i < 1020; ++i) {
+    TestBulkHandle test_bulk = new TestBulk();
+    test_bulk->i = i;
+    bulk_queue->PushBluk(test_bulk);
+  }
+  thread_reader.WaitForFinish();
+  EXPECT_EQ(bulk_queue->bulk_num(), 20);
+}
+
 TEST(SequencedBulkBufferTest, WaitTimeout) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kWaitTimeout, bulk_queue, 10, 10);
@@ -266,6 +350,41 @@ TEST(SequencedBulkBufferTest, WaitTimeout) {
     test_bulk->i = i;
     bulk_queue->PushBluk(test_bulk);
     base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(110));
+  }
+  thread_reader.WaitForFinish();
+}
+
+
+TEST(SequencedBulkBufferTest, WaitTimeoutWaitStart) {
+  scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
+  ThreadReader thread_reader(kWaitTimeout, bulk_queue, 10, 10);
+
+  thread_reader.WaitForStart();
+
+  for (int i = 0; i < 12; ++i) {
+    TestBulkHandle test_bulk = new TestBulk();
+    test_bulk->i = i;
+    bulk_queue->PushBluk(test_bulk);
+    base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(110));
+  }
+  thread_reader.WaitForFinish();
+
+  EXPECT_EQ(bulk_queue->bulk_num(), 2);
+}
+
+TEST(SequencedBulkBufferTest, AsyncReader) {
+  scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
+  ThreadReader thread_reader(kAsync, bulk_queue, 1000, 10);
+
+  // HACK keep the bulk before each reader start.
+  // or may only one first start, and read to empty. other reader start
+  // and bulk lost.
+  TestBulkQueue::Reader queue_reader1(bulk_queue);
+
+  for (int i = 0; i < 1000; ++i) {
+    TestBulkHandle test_bulk = new TestBulk();
+    test_bulk->i = i;
+    bulk_queue->PushBluk(test_bulk);
   }
   thread_reader.WaitForFinish();
 }

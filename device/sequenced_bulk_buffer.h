@@ -10,6 +10,7 @@
 #include "base/sequenced_task_runner.h"
 #include "base/synchronization/waitable_event.h"
 #include "base/synchronization/lock.h"
+#include "base/memory/weak_ptr.h"
 
 // TODO need restart push bulk after bulk full.
 // this add in memory pool callback.
@@ -34,6 +35,9 @@ public:
 
     bool IsQuit() const { return quiting_; }
 
+    // async
+    void CallbackOnReady();
+
   protected:
     ReaderBase(SequencedBulkBufferBase* buffer);
     ~ReaderBase();
@@ -51,16 +55,19 @@ public:
     // true for finish false for timeout
     bool WaitTimeoutForReady(base::TimeDelta delta);
 
-    // async
-    void CallbackOnReady();
-
   private:
     // for sync
     void OnWaitReady(int64 count, bool quit);
 
     // for async
-    void OnBufferReady(base::SequencedTaskRunner* runner, int64 count, bool quit);
+    void OnBufferReady(base::SequencedTaskRunner* runner, 
+                        // pass weak_ptr, so all weak_ptr flag create on task thread
+                        base::WeakPtr<ReaderBase> weak_ptr, 
+                        int64 count, bool quit);
 
+    void CallHaveData();
+
+    base::WeakPtrFactory<ReaderBase> weak_ptr_;
     BufferHaveDataCallback have_data_;
     int64 count_;
     base::WaitableEvent event_;
@@ -183,6 +190,9 @@ public:
     // call in other thread
     // return false mean timeout or quit, ptr and count are no touch
     bool WaitTimeoutGetBulk(BulkPtrType* bluck_ptr, int64* bluck_count, base::TimeDelta delta);
+
+    // Async callback get Result
+    bool GetResult(BulkPtrType* bluck_ptr, int64* bluck_count);
 
   private:
     SequencedBulkBuffer* buffer() {
@@ -353,6 +363,22 @@ bool SequencedBulkBuffer<BulkPtrType>::GetBlukNoLock(Reader* reader,
     }
   }
   return ret;
+}
+
+
+template<typename BulkPtrType>
+bool SequencedBulkBuffer<BulkPtrType>::Reader::GetResult(BulkPtrType* bluck_ptr, 
+                                                         int64* bluck_count) {
+  if (IsQuit()) {
+    return false;
+  }
+  if (bluck_ptr) {
+    *bluck_ptr = temp_ptr_;
+  }
+  if (bluck_count) {
+    *bluck_count = temp_count_;
+  }
+  return true;
 }
 
 template<typename BulkPtrType>

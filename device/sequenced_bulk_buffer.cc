@@ -63,15 +63,20 @@ void SequencedBulkBufferBase::ReaderBase::OnWaitReady(int64 count, bool quit) {
 void SequencedBulkBufferBase::ReaderBase::CallbackOnReady() {
   CHECK(!IsQuit());
 
+  // HACK init the weak in the callback MessageLoop.
+  // or OnBufferReady() will init it on wrong thread.
+ 
   base::SequencedTaskRunner* runner = MessageLoopProxy::current();
   DCHECK(runner) << "need runner for async OnBufferReady call";
   buffer_->SetReadyCallback(this, Count(),
       base::Bind(&SequencedBulkBufferBase::ReaderBase::OnBufferReady, 
-                 base::Unretained(this),
-                 runner));
+                 Unretained(this),
+                 runner,
+                 weak_ptr_.GetWeakPtr()));
 }
 
 void SequencedBulkBufferBase::ReaderBase::OnBufferReady(SequencedTaskRunner* runner, 
+                                                        WeakPtr<ReaderBase> weak_ptr,
                                                         int64 count, 
                                                         bool quit) {
   quiting_ = quit;
@@ -79,7 +84,19 @@ void SequencedBulkBufferBase::ReaderBase::OnBufferReady(SequencedTaskRunner* run
     GetBulk();
   }
   if (!have_data_.is_null()) {
-    runner->PostTask(FROM_HERE, have_data_);
+    runner->PostTask(FROM_HERE, 
+        Bind(&SequencedBulkBufferBase::ReaderBase::CallHaveData, 
+            // use weak_ptr_ so if reader is destroy when call callback.
+            // the callback is no be called.
+            weak_ptr));
+  }
+}
+
+
+void SequencedBulkBufferBase::ReaderBase::CallHaveData() {
+  if (!have_data_.is_null()) {
+    have_data_.Run();
+    // may be delete after this.
   }
 }
 
@@ -265,7 +282,8 @@ SequencedBulkBufferBase::ReaderBase::ReaderBase(SequencedBulkBufferBase* buffer)
     : buffer_(buffer)
     , count_(0)
     , event_(true, false)
-    , quiting_(false) {
+    , quiting_(false)
+    , weak_ptr_(this) {
   DCHECK(buffer);
   buffer->RegisterReader(this, count_);
 }
