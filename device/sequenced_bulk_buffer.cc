@@ -6,46 +6,57 @@
 
 using namespace base;
 
-void SequencedBulkBufferBase::ReaderBase::WaitForReady() {
+bool SequencedBulkBufferBase::ReaderBase::WaitForReady() {
   CHECK(!IsQuit());
 
-  bool ret = buffer_->CheckReady(Count());
+  bool ret = buffer_->CheckReady(Count(), 
+      Bind(&SequencedBulkBufferBase::ReaderBase::GetBulk, Unretained(this)));
   // no need to wait if ready
   if (ret) {
-    return;
+    return !IsQuit();
   }
   buffer_->SetReadyCallback(this, Count(),
-      base::Bind(&SequencedBulkBufferBase::ReaderBase::OnWaitReady, 
-                 base::Unretained(this)));
+      Bind(&SequencedBulkBufferBase::ReaderBase::OnWaitReady, 
+           Unretained(this)));
   event_.Wait();
   event_.Reset();
+  return !IsQuit();
 }
 
 bool SequencedBulkBufferBase::ReaderBase::WaitTimeoutForReady(TimeDelta delta) {
   CHECK(!IsQuit());
 
-  bool ret = buffer_->CheckReady(Count());
+  bool ret = buffer_->CheckReady(Count(),
+      Bind(&SequencedBulkBufferBase::ReaderBase::GetBulk, Unretained(this)));
   // no need to wait if ready
   if (ret) {
-    return true;
+    return !IsQuit();
   }
   buffer_->SetReadyCallback(this, Count(),
     base::Bind(&SequencedBulkBufferBase::ReaderBase::OnWaitReady, 
     base::Unretained(this)));
   ret = event_.TimedWait(delta);
   if (!ret) {
-    buffer_->CancelCallback(this);
-    if (event_.IsSignaled()) {
+    bool called = !buffer_->CancelCallback(this);
+    // be call in TimeWait() false and CancelCallback()
+    if (called) {
+      event_.Wait();
       event_.Reset();
+      return !IsQuit();
     }
+    return false;
+    // normal event trigger
   } else {
     event_.Reset();
+    return !IsQuit();
   }
-  return ret;
 }
 
 void SequencedBulkBufferBase::ReaderBase::OnWaitReady(int64 count, bool quit) {
   quiting_ = quit;
+  if (!quit) {
+    GetBulk();
+  }
   event_.Signal();
 }
 
@@ -64,7 +75,9 @@ void SequencedBulkBufferBase::ReaderBase::OnBufferReady(SequencedTaskRunner* run
                                                         int64 count, 
                                                         bool quit) {
   quiting_ = quit;
- 
+  if (!quit) {
+    GetBulk();
+  }
   if (!have_data_.is_null()) {
     runner->PostTask(FROM_HERE, have_data_);
   }
@@ -80,12 +93,6 @@ void SequencedBulkBufferBase::Quit() {
   FireCallbackNoLock(CountNoLock());
 }
 
-
-bool SequencedBulkBufferBase::CheckReady(int64 count) {
-  base::AutoLock lock(lock_);
-  return count <= CountNoLock();
-}
-
 void SequencedBulkBufferBase::SetReadyCallback(void* id, 
                                                int64 count, 
                                                BufferReadyCallback ready_callback) {
@@ -94,7 +101,7 @@ void SequencedBulkBufferBase::SetReadyCallback(void* id,
 
   ReadyCallbackMap::iterator it = callback_map_.find(id);
 
-  DCHECK(it == callback_map_.end());
+  DCHECK(it == callback_map_.end()) << "one reader one callback";
   ReadyCallbackRecord record = { ready_callback, count, };
   callback_map_.insert(std::make_pair(static_cast<uint8*>(id), record));
 
@@ -102,7 +109,7 @@ void SequencedBulkBufferBase::SetReadyCallback(void* id,
   }
   }
 
-void SequencedBulkBufferBase::CancelCallback(void* id) {
+bool SequencedBulkBufferBase::CancelCallback(void* id) {
   {
   base::AutoLock lock(lock_);
 
@@ -110,9 +117,10 @@ void SequencedBulkBufferBase::CancelCallback(void* id) {
 
   // callback may just fire, before Cancelcallback
   if (it == callback_map_.end()) {
-    return;
+    return false;
   }
   callback_map_.erase(it);
+  return true;
   }
 }
 

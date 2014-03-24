@@ -53,7 +53,7 @@ TEST(SequencedBulkBufferTest, OneReaderAndSkip) {
     TestBulkHandle read_bulk;
     int64 read_count;
     EXPECT_EQ(queue_reader.Count(), i*3);
-    queue_reader.GetBluk(&read_bulk, &read_count);
+    queue_reader.GetBlukSameThread(&read_bulk, &read_count);
     queue_reader.Skip(2);
     EXPECT_EQ(read_count, i*3);
     EXPECT_EQ(read_bulk->i, i*3);
@@ -74,7 +74,7 @@ TEST(SequencedBulkBufferTest, OneReaderCacheLeft) {
     TestBulkHandle read_bulk;
     int64 read_count;
     EXPECT_EQ(queue_reader.Count(), i);
-    queue_reader.GetBluk(&read_bulk, &read_count);
+    queue_reader.GetBlukSameThread(&read_bulk, &read_count);
     EXPECT_EQ(read_count, i);
     EXPECT_EQ(read_bulk->i, i);
   }
@@ -94,7 +94,7 @@ TEST(SequencedBulkBufferTest, TwoReaderCacheLeft) {
     TestBulkHandle read_bulk;
     int64 read_count;
     EXPECT_EQ(queue_reader1.Count(), i);
-    queue_reader1.GetBluk(&read_bulk, &read_count);
+    queue_reader1.GetBlukSameThread(&read_bulk, &read_count);
     EXPECT_EQ(read_count, i);
     EXPECT_EQ(read_bulk->i, i);
   }
@@ -102,7 +102,7 @@ TEST(SequencedBulkBufferTest, TwoReaderCacheLeft) {
     TestBulkHandle read_bulk;
     int64 read_count;
     EXPECT_EQ(queue_reader2.Count(), i);
-    queue_reader2.GetBluk(&read_bulk, &read_count);
+    queue_reader2.GetBlukSameThread(&read_bulk, &read_count);
     EXPECT_EQ(read_count, i);
     EXPECT_EQ(read_bulk->i, i);
   }
@@ -113,11 +113,11 @@ TEST(SequencedBulkBufferTest, TwoReaderCacheLeft) {
     TestBulkHandle read_bulk;
     int64 read_count;
     EXPECT_EQ(queue_reader1.Count(), i);
-    queue_reader1.GetBluk(&read_bulk, &read_count);
+    queue_reader1.GetBlukSameThread(&read_bulk, &read_count);
     EXPECT_EQ(read_count, i);
     EXPECT_EQ(read_bulk->i, i);
     EXPECT_EQ(queue_reader2.Count(), i);
-    queue_reader2.GetBluk(&read_bulk, &read_count);
+    queue_reader2.GetBlukSameThread(&read_bulk, &read_count);
     EXPECT_EQ(read_count, i);
     EXPECT_EQ(read_bulk->i, i);
   }
@@ -180,6 +180,7 @@ public:
   }
 
   void WaitTimeoutReader(int num) {
+
     TestBulkQueue::Reader queue_reader(bulk_queue_);
     for (int i = 0; i < num; ++i) {
       TestBulkHandle read_bulk;
@@ -187,9 +188,9 @@ public:
       EXPECT_EQ(queue_reader.Count(), i);
       bool ret = false;
       while (!ret) {
-       ret = queue_reader.WaitTimeoutForReady(TimeDelta::FromMilliseconds(100));
+       ret = queue_reader.WaitTimeoutGetBulk(&read_bulk, &read_count, 
+         TimeDelta::FromMilliseconds(100));
       }
-      ret = queue_reader.GetBluk(&read_bulk, &read_count);
       EXPECT_TRUE(ret);
       EXPECT_EQ(read_count, i);
       EXPECT_EQ(read_bulk->i, i);
@@ -214,8 +215,7 @@ public:
       TestBulkHandle read_bulk;
       int64 read_count;
       EXPECT_EQ(queue_reader.Count(), i);
-      queue_reader.WaitForReady();
-      bool ret = queue_reader.GetBluk(&read_bulk, &read_count);
+      bool ret = queue_reader.WaitGetBulk(&read_bulk, &read_count);
       EXPECT_TRUE(ret);
       EXPECT_EQ(read_count, i);
       EXPECT_EQ(read_bulk->i, i);
@@ -239,25 +239,116 @@ TEST(SequencedBulkBufferTest, FullSpeedReader) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kFullSpeed, bulk_queue, 1000, 10);
 
-  for (int i = 0; i < 1020; ++i) {
+  // HACK keep the bulk before each reader start.
+  // or may only one first start, and read to empty. other reader start
+  // and bulk lost.
+  TestBulkQueue::Reader queue_reader1(bulk_queue);
+
+  for (int i = 0; i < 1000; ++i) {
     TestBulkHandle test_bulk = new TestBulk();
     test_bulk->i = i;
     bulk_queue->PushBluk(test_bulk);
   }
   thread_reader.WaitForFinish();
-  EXPECT_EQ(20, bulk_queue->bulk_num());
 }
 
 TEST(SequencedBulkBufferTest, WaitTimeout) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kWaitTimeout, bulk_queue, 10, 10);
 
-  for (int i = 0; i < 12; ++i) {
+  // HACK keep the bulk before each reader start.
+  // or may only one first start, and read to empty. other reader start
+  // and bulk lost.
+  TestBulkQueue::Reader queue_reader1(bulk_queue);
+
+  for (int i = 0; i < 10; ++i) {
     TestBulkHandle test_bulk = new TestBulk();
     test_bulk->i = i;
     bulk_queue->PushBluk(test_bulk);
     base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(110));
   }
   thread_reader.WaitForFinish();
-  EXPECT_EQ(2, bulk_queue->bulk_num());
+}
+
+TEST(SequencedBulkBufferTest, TwoReaderAndRecycle) {
+  scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(true, false);
+  TestBulkQueue::Reader queue_reader1(bulk_queue);
+  TestBulkQueue::Reader queue_reader2(bulk_queue);
+  for (int i = 0; i < 100; ++i) {
+    TestBulkHandle test_bulk = new TestBulk();
+    test_bulk->i = i;
+    bulk_queue->PushBluk(test_bulk);
+  }
+  for (int i = 0; i < 10; ++i) {
+    TestBulkHandle read_bulk;
+    int64 read_count;
+    EXPECT_EQ(queue_reader1.Count(), i);
+    queue_reader1.GetBlukSameThread(&read_bulk, &read_count);
+    EXPECT_EQ(read_count, i);
+    EXPECT_EQ(read_bulk->i, i);
+  }
+  for (int i = 0; i < 20; ++i) {
+    TestBulkHandle read_bulk;
+    int64 read_count;
+    EXPECT_EQ(queue_reader2.Count(), i);
+    queue_reader2.GetBlukSameThread(&read_bulk, &read_count);
+    EXPECT_EQ(read_count, i);
+    EXPECT_EQ(read_bulk->i, i);
+  }
+  // last skip no pass to queue
+  EXPECT_EQ(100 - 10, bulk_queue->bulk_num());
+
+  
+  bool ret = bulk_queue->RecycleOne();
+  EXPECT_TRUE(ret);
+  TestBulkHandle read_bulk;
+  int64 read_count;
+  EXPECT_EQ(queue_reader2.Count(), 20);
+  ret = queue_reader2.GetBlukSameThread(&read_bulk, &read_count);
+  EXPECT_TRUE(ret);
+  EXPECT_EQ(read_count, 21);
+  EXPECT_EQ(read_bulk->i, 21);
+  
+  for (int i = 22; i < 99; ++i) {
+    bool ret = bulk_queue->RecycleOne();
+    EXPECT_TRUE(ret);
+  }
+
+  EXPECT_EQ(queue_reader2.Count(), 22);
+  ret = queue_reader2.GetBlukSameThread(&read_bulk, &read_count);
+  EXPECT_TRUE(ret);
+  EXPECT_EQ(read_count, 99);
+  EXPECT_EQ(read_bulk->i, 99);
+
+  EXPECT_EQ(queue_reader2.Count(), 100);
+  ret = queue_reader2.GetBlukSameThread(&read_bulk, &read_count);
+  EXPECT_FALSE(ret);
+
+  ret = bulk_queue->RecycleOne();
+  EXPECT_TRUE(ret);
+
+  EXPECT_EQ(queue_reader1.Count(), 10);
+  ret = queue_reader1.GetBlukSameThread(&read_bulk, &read_count);
+  EXPECT_TRUE(ret);
+  EXPECT_EQ(read_count, 11);
+  EXPECT_EQ(read_bulk->i, 11);
+
+  for (int i = 12; i < 20; ++i) {
+    bool ret = bulk_queue->RecycleOne();
+    EXPECT_TRUE(ret);
+  }
+
+  EXPECT_EQ(queue_reader1.Count(), 12);
+  ret = queue_reader1.GetBlukSameThread(&read_bulk, &read_count);
+  EXPECT_TRUE(ret);
+  EXPECT_EQ(read_count, 21);
+  EXPECT_EQ(read_bulk->i, 21);
+
+  // recycle 99
+  ret = bulk_queue->RecycleOne();
+  EXPECT_TRUE(ret);
+
+  EXPECT_EQ(queue_reader1.Count(), 22);
+  ret = queue_reader1.GetBlukSameThread(&read_bulk, &read_count);
+  EXPECT_FALSE(ret);
 }

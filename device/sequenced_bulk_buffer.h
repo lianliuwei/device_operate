@@ -25,17 +25,8 @@ public:
     int64 Count() const { return count_; }
     void Skip(int64 n) { count_ += n; }
 
-    // IMPORTANT: after wait GetBulk() may fault, 
-    // because the bulk may be free or recycle.
-    // sync wait
-    void WaitForReady();
-    // true for finish false for timeout
-    bool WaitTimeoutForReady(base::TimeDelta delta);
 
-    // async
-    void CallbackOnReady();
-
-    // can not change when in async wait. 
+    // can not change when in async wait.
     // callback no nest in OnBufferReady()
     void set_have_data_callback(BufferHaveDataCallback have_data) {
       have_data_ = have_data;
@@ -50,6 +41,18 @@ public:
     void set_count(int64 n) { count_ = n; }
 
     scoped_refptr<SequencedBulkBufferBase> buffer_;
+
+    // this call in Lock
+    virtual void GetBulk() = 0;
+
+    // call GetBulk when ready
+    // sync wait
+    bool WaitForReady();
+    // true for finish false for timeout
+    bool WaitTimeoutForReady(base::TimeDelta delta);
+
+    // async
+    void CallbackOnReady();
 
   private:
     // for sync
@@ -67,7 +70,7 @@ public:
   };
 
   SequencedBulkBufferBase();
-  
+
   // lock
   void Quit();
 
@@ -116,9 +119,13 @@ private:
   // lock
   void SetReadyCallback(void* id, int64 count, BufferReadyCallback ready_callback);
   // lock
-  void CancelCallback(void* id);
+  // return true if callback no call yet
+  // false if callback is fire already
+  bool CancelCallback(void* id);
   // lock
-  bool CheckReady(int64 count);
+  // have bulk that count >= count.
+  // call ready when return true
+  virtual bool CheckReady(int64 count, const base::Closure& ready) = 0;
 
 
   bool quiting_;
@@ -167,12 +174,26 @@ public:
 
     // return true if bluck get, bluck_count >= last_count
     // if bluck_count > last_count mean data lost by overwrite.
-    bool GetBluk(BulkPtrType* bluck_ptr, int64* bluck_count);
+    bool GetBlukSameThread(BulkPtrType* bluck_ptr, int64* bluck_count);
 
-  private: 
-    SequencedBulkBuffer* buffer() { 
+    // call in other thread
+    // false when need to quit
+    bool WaitGetBulk(BulkPtrType* bluck_ptr, int64* bluck_count);
+
+    // call in other thread
+    // return false mean timeout or quit, ptr and count are no touch
+    bool WaitTimeoutGetBulk(BulkPtrType* bluck_ptr, int64* bluck_count, base::TimeDelta delta);
+
+  private:
+    SequencedBulkBuffer* buffer() {
       return static_cast<SequencedBulkBuffer*>(buffer_.get());
     }
+
+    // implement ReaderBase
+    virtual void GetBulk();
+
+    BulkPtrType temp_ptr_;
+    int64 temp_count_;
 
     DISALLOW_COPY_AND_ASSIGN(Reader);
   };
@@ -182,14 +203,14 @@ public:
     , keep_if_no_reader_(keep_if_no_reader) {}
 
   bool GetBluk(Reader* reader, BulkPtrType* bluck_ptr, int64* bluck_count, int64 count);
-  
+  bool GetBlukNoLock(Reader* reader, BulkPtrType* bluck_ptr, int64* bluck_count, int64 count);
   // write method
   // this will inc bulk count.
   void PushBluk(BulkPtrType bulk);
 
-  int bulk_num() { 
+  int bulk_num() {
     base::AutoLock lock(lock_);
-    return buffer_queue_.size(); 
+    return buffer_queue_.size();
   }
 
   // recycle one is for over-write mode, recycle no be read buffer first
@@ -199,10 +220,10 @@ public:
 
 private:
   // these method no lock
-  // 
+  //
   // Release the buffer the all reader read.
   void MayReleaseBuffer();
-  // find bulk which have the most small of the bigger or equal count 
+  // find bulk which have the most small of the bigger or equal count
   bool FindBulk(BulkPtrType* bluck_ptr, int64* bluck_count, int64 count);
 
   bool over_write_;
@@ -211,9 +232,20 @@ private:
 
   std::list<BulkPieceType> buffer_queue_;
 
+  // implement SequencedBulkBufferBase
+  virtual bool CheckReady(int64 count, const base::Closure& ready);
 
   DISALLOW_COPY_AND_ASSIGN(SequencedBulkBuffer);
 };
+
+template<typename BulkPtrType>
+void SequencedBulkBuffer<BulkPtrType>::Reader::GetBulk() {
+  bool ret = buffer()->GetBlukNoLock(this, &temp_ptr_, &temp_count_, Count());
+  DCHECK(ret);
+  // update count.
+  DCHECK(Count() <= temp_count_);
+  set_count(temp_count_ + 1);
+}
 
 template<typename BulkPtrType>
 bool SequencedBulkBuffer<BulkPtrType>::RecycleOne() {
@@ -249,7 +281,6 @@ bool SequencedBulkBuffer<BulkPtrType>::RecycleOne() {
   return false;
 }
 
-
 template<typename BulkPtrType>
 void SequencedBulkBuffer<BulkPtrType>::MayReleaseBuffer() {
   int64 min_value;
@@ -277,8 +308,8 @@ void SequencedBulkBuffer<BulkPtrType>::MayReleaseBuffer() {
 
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::GetBluk(Reader* reader, 
-                                               BulkPtrType* bluck_ptr, int64* bluck_count, 
+bool SequencedBulkBuffer<BulkPtrType>::GetBluk(Reader* reader,
+                                               BulkPtrType* bluck_ptr, int64* bluck_count,
                                                int64 count) {
   {
   base::AutoLock lock(lock_);
@@ -302,6 +333,27 @@ bool SequencedBulkBuffer<BulkPtrType>::GetBluk(Reader* reader,
   }
 }
 
+template<typename BulkPtrType>
+bool SequencedBulkBuffer<BulkPtrType>::GetBlukNoLock(Reader* reader,
+                                                     BulkPtrType* bluck_ptr, int64* bluck_count,
+                                                     int64 count) {
+  BulkPtrType out_ptr;
+  int64 out_count;
+  bool ret = FindBulk(&out_ptr, &out_count, count);
+  if (ret) {
+    // auto release no used buffer
+    UpdateReaderCount(reader, out_count);
+    MayReleaseBuffer();
+
+    if (bluck_ptr) {
+      *bluck_ptr = out_ptr;
+    }
+    if (bluck_count) {
+      *bluck_count = out_count;
+    }
+  }
+  return ret;
+}
 
 template<typename BulkPtrType>
 void SequencedBulkBuffer<BulkPtrType>::PushBluk(BulkPtrType bulk_ptr) {
@@ -317,8 +369,8 @@ void SequencedBulkBuffer<BulkPtrType>::PushBluk(BulkPtrType bulk_ptr) {
 }
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::FindBulk(BulkPtrType* bluck_ptr, 
-                                                int64* bluck_count, 
+bool SequencedBulkBuffer<BulkPtrType>::FindBulk(BulkPtrType* bluck_ptr,
+                                                int64* bluck_count,
                                                 int64 count) {
   // bulk no in queue now
   if (CountNoLock() < count) {
@@ -337,8 +389,8 @@ bool SequencedBulkBuffer<BulkPtrType>::FindBulk(BulkPtrType* bluck_ptr,
 }
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::Reader::GetBluk(BulkPtrType* bluck_ptr, 
-                                                       int64* bluck_count) {
+bool SequencedBulkBuffer<BulkPtrType>::Reader::GetBlukSameThread(BulkPtrType* bluck_ptr,
+                                                                 int64* bluck_count) {
   BulkPtrType out_ptr;
   int64 out_count;
   bool ret = buffer()->GetBluk(this, &out_ptr, &out_count, Count());
@@ -359,3 +411,55 @@ bool SequencedBulkBuffer<BulkPtrType>::Reader::GetBluk(BulkPtrType* bluck_ptr,
   return true;
 }
 
+
+template<typename BulkPtrType>
+bool SequencedBulkBuffer<BulkPtrType>::Reader::WaitGetBulk(BulkPtrType* bluck_ptr,
+                                                           int64* bluck_count) {
+  bool ret = WaitForReady();
+
+  if (!ret) {
+    return false;
+  }
+  if (bluck_ptr) {
+    *bluck_ptr = temp_ptr_;
+  }
+  if (bluck_count) {
+    *bluck_count = temp_count_;
+  }
+  return true;
+}
+
+template<typename BulkPtrType>
+bool SequencedBulkBuffer<BulkPtrType>::Reader::WaitTimeoutGetBulk(BulkPtrType* bluck_ptr,
+                                                                  int64* bluck_count,
+                                                                  base::TimeDelta delta) {
+  bool ret = WaitTimeoutForReady(delta);
+
+  if (!ret) {
+    return false;
+  }
+
+  if (bluck_ptr) {
+    *bluck_ptr = temp_ptr_;
+  }
+  if (bluck_count) {
+    *bluck_count = temp_count_;
+  }
+  return true;
+}
+template<typename BulkPtrType>
+bool SequencedBulkBuffer<BulkPtrType>::CheckReady(int64 count, const base::Closure& ready) {
+  base::AutoLock lock(lock_);
+  if (count > CountNoLock()) {
+    return false;
+  }
+  if (buffer_queue_.size() == 0) {
+    return false;
+  }
+  BulkPieceType last_bulk = buffer_queue_.back();
+  bool ret = last_bulk.count >= count;
+  if (ret) {
+    ready.Run();
+  }
+  return ret;
+}
