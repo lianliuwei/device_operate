@@ -419,6 +419,22 @@ TEST(SequencedBulkBufferTest, AsyncReader) {
   thread_reader.WaitForFinish();
 }
 
+TEST(SequencedBulkBufferTest, AsyncReaderWaitStart) {
+  scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
+  ThreadReader thread_reader(kAsync, bulk_queue, 1000, 10);
+
+  thread_reader.WaitForStart();
+
+  for (int i = 0; i < 1020; ++i) {
+    TestBulkHandle test_bulk = new TestBulk();
+    test_bulk->i = i;
+    bulk_queue->PushBluk(test_bulk);
+  }
+  thread_reader.WaitForFinish();
+
+  EXPECT_EQ(bulk_queue->bulk_num(), 20);
+}
+
 TEST(SequencedBulkBufferTest, QuitReader) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kQuit, bulk_queue, 1000, 10);
