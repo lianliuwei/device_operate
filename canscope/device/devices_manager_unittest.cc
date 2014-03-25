@@ -4,6 +4,7 @@
 #include "base/json/json_string_value_serializer.h"
 #include "base/json/json_file_value_serializer.h"
 #include "base/json/json_reader.h"
+#include "base/string_number_conversions.h"
 
 #include "common/common_thread.h"
 
@@ -20,6 +21,7 @@
 #include "canscope/device/scoped_device_property_commit.h"
 #include "canscope/device/devices_manager.h"
 #include "canscope/device/canscope_device_constants.h"
+#include "canscope/test/speed_meter.h"
 
 using namespace std;
 using namespace base;
@@ -81,7 +83,7 @@ public:
   virtual ~DevicesManagerTest() {}
 
   static void SetUpTestCase() {
-    ON_CALL(g_DeviceThreadMock.Get(), 
+    ON_CALL(g_DeviceThreadMock.Get(),
         IsDeviceThread()).WillByDefault(Invoke(&ActionIsDeviceThread));
     new TestProcess();
     GetTestProcess()->Init();
@@ -107,7 +109,7 @@ protected:
 
 private:
   virtual void SetUp() {
-    scoped_refptr<SingleThreadTaskRunner> device_thread = 
+    scoped_refptr<SingleThreadTaskRunner> device_thread =
       CommonThread::GetMessageLoopProxyForThread(common::CommonThread::DEVICE);
     DevicesManager::Create(device_thread, false, false, false);
     finder_ = new CANScopeDeviceFinder(device_thread, true);
@@ -120,12 +122,12 @@ private:
       return;
     device_path_ = device_list[0];
     DevicesManager::Get()->OpenDevice(device_path_);
-    CommonThread::PostTask(CommonThread::DEVICE, FROM_HERE, 
+    CommonThread::PostTask(CommonThread::DEVICE, FROM_HERE,
         Bind(&DevicesManagerTest::InitDeviceManager, Unretained(this)));
     event_.Wait();
     if (manager_.get() == NULL)
       return;
-    registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_START_DESTROY, 
+    registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_START_DESTROY,
         Source<DeviceManager>(manager_.get()));
   }
 
@@ -144,8 +146,8 @@ private:
     event_.Signal();
   }
 
-  virtual void Observe(int type, 
-                       const NotificationSource& source, 
+  virtual void Observe(int type,
+                       const NotificationSource& source,
                        const NotificationDetails& details) {
     if (type == NOTIFICATION_DEVICE_MANAGER_START_DESTROY) {
       manager_ = NULL;
@@ -158,12 +160,6 @@ private:
   WaitableEvent event_;
   NotificationRegistrar registrar_;
 };
-
-void DevicesManagerTest::GetOscRawData() {
-  CommonThread::PostDelayedTask(CommonThread::UI, FROM_HERE, 
-    Bind(&DevicesManagerTest::StopDeviceManager, Unretained(this)),
-    base::TimeDelta::FromSeconds(3));
-}
 
 void DevicesManagerTest::GetValueTest() {
   ASSERT_TRUE(manager_.get() != NULL) << "no Devices Finded";
@@ -191,20 +187,37 @@ void DevicesManagerTest::GetValueTest() {
 
   CANScopeDeviceManagerHandle::GetInstance(manager_)->DestroyHandle();
 
-  CommonThread::PostTask(CommonThread::UI, FROM_HERE, 
+  CommonThread::PostTask(CommonThread::UI, FROM_HERE,
       Bind(&DevicesManagerTest::StopDeviceManager, Unretained(this)));
 }
 
-
-TEST_F(DevicesManagerTest, GetOscRawData) {
-  ASSERT_TRUE(manager_.get() != NULL) << "no Devices Finded";
-  CommonThread::PostTask(CommonThread::UI, FROM_HERE, 
-      Bind(&DevicesManagerTest::GetOscRawData, Unretained(this)));
-  GetTestProcess()->MainMessageLoopRun();
+TEST_F(DevicesManagerTest, GetOscRawDataSpeed) {
+  ASSERT_TRUE(manager_.get() != NULL) << "no Devices Found";
+  scoped_refptr<OscRawDataQueue> data_queue =
+      manager_->runner()->osc_data->RawDataQueue();
+  OscRawDataQueue::Reader reader(data_queue);
+  OscRawDataHandle raw_data;
+  int64 num;
+  SpeedMeter meter(TimeDelta::FromSeconds(1));
+  while (true) {
+    bool ret = reader.WaitGetBulk(&raw_data, &num);
+//     if (ret) {
+//       LOG(INFO) << "Get Raw Data"
+//         << " detail: " << base::HexEncode(raw_data->data() + 1000, 200);
+//     }
+    meter.set_size(raw_data->size());
+    if (meter.DeltaPass()) {
+      cout << meter.FormatSpeedAndTotal() << endl;
+    }
+   if (meter.total_count() > 1000) {
+     break;
+   }
+  }
+  StopDeviceManager();
 }
 
 TEST_F(DevicesManagerTest, GetValue) {
- CommonThread::PostTask(CommonThread::UI, FROM_HERE, 
+ CommonThread::PostTask(CommonThread::UI, FROM_HERE,
       Bind(&DevicesManagerTest::GetValueTest, Unretained(this)));
   GetTestProcess()->MainMessageLoopRun();
 }

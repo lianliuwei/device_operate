@@ -2,6 +2,8 @@
 
 #include "base/memory/ref_counted.h"
 
+#include "device/memory_usage_pool.h"
+
 #include "canscope/device/osc_device_property.h"
 #include "canscope/device/config_manager.h"
 // for DeviceType
@@ -35,23 +37,33 @@ typedef scoped_refptr<OscRawDataDeviceConfig> OscRawDataDeviceConfigHandle;
 class OscRawData : public base::RefCountedThreadSafe<OscRawData> {
 public:
   OscRawData(DeviceType type, OscRawDataDeviceConfigHandle property);
-  OscRawData(int size, OscRawDataDeviceConfigHandle property);
 
   int size() const;
   int chnl_size() const;
   uint8* data();
   const uint8* data() const;
- 
-  const OscDeviceProperty* property() const;
+  DeviceType type() const { return type_; }
+
   OscDeviceProperty* property();
+  const OscDeviceProperty* property() const;
 
   int id() const;
 
-private:
-  friend class base::RefCountedThreadSafe<OscRawData>;
-  ~OscRawData() {}
+protected:
+  OscRawData(uint8* raw_data, int size, bool own, DeviceType type, OscRawDataDeviceConfigHandle property);
 
-  std::vector<uint8> raw_data_;
+  void set_data(uint8* data, int size);
+
+  friend class base::RefCountedThreadSafe<OscRawData>;
+  virtual ~OscRawData();
+
+private:
+  // test only
+  OscRawData(int size, OscRawDataDeviceConfigHandle property);
+
+  uint8* raw_data_;
+  int size_;
+  bool own_;
   DeviceType type_;
 
   OscRawDataDeviceConfigHandle property_;
@@ -61,9 +73,24 @@ private:
 
 typedef scoped_refptr<OscRawData> OscRawDataHandle;
 
-// move to canscope_device.h
-inline size_t DeviceTypeDataSize(DeviceType type) {
-  return 2000 * 2;
-}
 
+// check IsAllocOk Ofter ctor, if no alloc ok, this object is invalid. just destroy it.
+class PooledOscRawData : public OscRawData {
+public:
+  PooledOscRawData(DeviceType type, 
+                   OscRawDataDeviceConfigHandle property, 
+                   scoped_refptr<MemoryUsagePool> pool);
+
+  bool IsAllocOK() const { return alloc_ok_; }
+  void AllocAgain();
+
+private:
+  virtual ~PooledOscRawData();
+
+  scoped_refptr<MemoryUsagePool> pool_;
+
+  bool alloc_ok_;
+
+  DISALLOW_COPY_AND_ASSIGN(PooledOscRawData);
+};
 } // namespace canscope

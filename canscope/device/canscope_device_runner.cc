@@ -6,7 +6,6 @@
 
 #include "canscope/device/canscope_device_manager.h"
 #include "canscope/device/devices_manager.h"
-#include "canscope/device/canscope_data_collecter_callback.h"
 
 using namespace base;
 
@@ -15,7 +14,7 @@ namespace canscope {
 CANScopeRunner::CANScopeRunner(CANScopeDeviceManager* canscope)
     : canscope_(canscope)
     , inited_(false)
-    // when runner is create the device is online, 
+    // when runner is create the device is online,
     // or this obj will be destroy immediate
     , status_(kOnline) {
 
@@ -30,8 +29,7 @@ void CANScopeRunner::Init(string16 device_path) {
   device_path_ = device_path;
 
   // create osc Data
-  osc_data = new OscDataCollecter(Bind(&OscDataCollected), 
-      canscope_->device_delegate(), canscope_->osc_device());
+  osc_data = new OscDataCollecter(canscope_->device_delegate(), canscope_->osc_device());
   scoped_refptr<SingleThreadTaskRunner> run_thread = canscope_->run_thread();
   osc_data->set_run_thread(run_thread);
 }
@@ -98,7 +96,7 @@ device::Error CANScopeRunner::InitDeviceImpl(string16 device_path) {
   // pro use different FPGA file.
   fpga_file = fpga_file.Append(
       device_info_.IsProVersion() ? L"CANScopePro.dll" : L"CANScope.dll");
-  ret = file_util::ReadFileToString(fpga_file, &content); 
+  ret = file_util::ReadFileToString(fpga_file, &content);
   if (!ret) {
     usb_port->CloseDevice();
     return device::ERR_DEVICE_LOADFPGAFILE;
@@ -149,7 +147,7 @@ void CANScopeRunner::ReRunAll() {
 
 canscope::DeviceType CANScopeRunner::GetDeviceType() {
   DCHECK(inited_);
-  return device_info_.GetDeviceType(); 
+  return device_info_.GetDeviceType();
 }
 
 } // namespace canscope

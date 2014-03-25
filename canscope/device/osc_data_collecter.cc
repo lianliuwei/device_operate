@@ -82,15 +82,19 @@ void OscDataCollecter::DoCollect(LoopState* loop_state) {
     }
     SleepMs(kOscCollectUpdateStateInterval);
   }
-  OscRawDataHandle raw_data = 
-      new OscRawData(osc_device_->device_type(), LastConfig());
+  OscRawDataHandle raw_data;
+  bool ret = AllocOscRawData(&raw_data, osc_device_->device_type(), LastConfig());
+
+  if (!ret) {
+    LOG(WARNING) << "OscRawData pool full. may other part memory leak OscRawData";
+    // TODO notify something
+    return;
+  }
 
   error = ReadData(raw_data);
   CHECK_DEVICE(error);
   
-  if (!call_back_.is_null()) {
-    call_back_.Run(raw_data);
-  }
+  queue_->PushBulk(raw_data);
 
   next_state_ = STATE_COLLECT;
   *loop_state = !IsSingle() ? NEXT_LOOP : STOP;
@@ -141,19 +145,36 @@ OscRawDataDeviceConfigHandle OscDataCollecter::LastConfig() {
   return last_config_;
 }
 
-OscDataCollecter::OscDataCollecter(DataCollectedCallback call_back, 
-                                   UsbPortDeviceDelegate* device_delegate, 
+OscDataCollecter::OscDataCollecter(UsbPortDeviceDelegate* device_delegate, 
                                    OscDevice* osc_device)
-    : call_back_(call_back)
-    , device_delegate_(device_delegate)
+    : device_delegate_(device_delegate)
     , osc_device_(osc_device)
     , next_state_(STATE_LOAD_CALIBRATE)
-    , rv_(OK) {
-  SetFreq(20);
+    , rv_(OK)
+    , pool_(new MemoryUsagePool(kOscMemoryUsage))
+    // over write no keep
+    , queue_(new OscRawDataQueue(true, false)) {
+  SetFreq(kOscMaxFreq);
 }
 
 UsbPort* OscDataCollecter::usb_port() {
   return device_delegate_->usb_port_ptr();
+}
+
+bool OscDataCollecter::AllocOscRawData(OscRawDataHandle* raw_data, 
+                                       DeviceType type, 
+                                       OscRawDataDeviceConfigHandle config) {
+  scoped_refptr<PooledOscRawData> pool_raw_data 
+      = new PooledOscRawData(type, config, pool_);
+  while (!pool_raw_data->IsAllocOK()) {
+    bool ret = queue_->RecycleOne();
+    if (!ret) {
+      return false;
+    }
+    pool_raw_data->AllocAgain();
+  }
+  *raw_data = pool_raw_data;
+  return true;
 }
 
 } // namespace canscope

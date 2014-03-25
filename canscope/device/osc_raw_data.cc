@@ -21,14 +21,40 @@ int OscRawDataDeviceConfig::id() const {
 
 OscRawData::OscRawData(DeviceType type, OscRawDataDeviceConfigHandle property)
     : property_(property)
-    , raw_data_(DeviceTypeDataSize(type)) {
+    , own_(true)
+    , type_(type) {
   property_->DetachFromThread();
+  size_ = DeviceTypeDataSize(type);
+  raw_data_ = new uint8[size_];
+}
+
+OscRawData::OscRawData(int size, OscRawDataDeviceConfigHandle property) 
+    : property_(property)
+    , own_(true) {
+  // type are invalid
+  size_ = size;
+  raw_data_ = new uint8[size];
+}
+
+OscRawData::OscRawData(uint8* raw_data, int size, bool own, 
+                       DeviceType type, OscRawDataDeviceConfigHandle property)
+    : property_(property)
+    , raw_data_(raw_data)
+    , size_(size)
+    , own_(own_)
+    , type_(type) {
+}
+
+OscRawData::~OscRawData() {
+  if (own_) {
+    delete[] raw_data_;
+    raw_data_ = NULL;
+  }
 }
 
 int OscRawData::size() const {
-  return static_cast<int>(raw_data_.size());
+  return size_;
 }
-
 
 int OscRawData::chnl_size() const {
   return size() / 2;
@@ -53,5 +79,39 @@ OscDeviceProperty* OscRawData::property() {
 int OscRawData::id() const {
   return property_->id();
 }
+
+void OscRawData::set_data(uint8* data, int size) {
+  raw_data_ = data;
+  size_ = size;
+}
+
+
+PooledOscRawData::PooledOscRawData(DeviceType type, 
+                                   OscRawDataDeviceConfigHandle property, 
+                                   scoped_refptr<MemoryUsagePool> pool)
+    : OscRawData(NULL, 0, false, type, property)
+    , pool_(pool)
+    , alloc_ok_(false) {
+  AllocAgain();
+}
+
+void PooledOscRawData::AllocAgain() {
+  DCHECK(alloc_ok_ == false);
+  int size = DeviceTypeDataSize(type());
+  uint8* data = pool_->Alloc(size);
+  alloc_ok_ = data != NULL;
+  if (alloc_ok_) {
+    set_data(data, size);
+  }
+}
+
+PooledOscRawData::~PooledOscRawData() {
+  if (alloc_ok_) {
+    pool_->Free(data());
+    set_data(NULL, 0);
+  }
+}
+
+
 
 } // namespace canscope

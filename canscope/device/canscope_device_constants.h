@@ -10,6 +10,8 @@ const int kOscCollectUpdateStateInterval = 20;
 const bool kDefaultAutoInitDevice = true;
 const bool kDefaultStartOnDeviceOnline = true;
 const bool kDefaultRerunOnbackOnline = true;
+const int kOscMemoryUsage = 100 * 1024* 1024; // 100MB
+const int kOscMaxFreq = 30; // real speed can be very high > 500
 
 // TODO move to canscope_device_util.h
 inline void SleepMs(int64 ms) {

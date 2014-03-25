@@ -1,6 +1,8 @@
 #pragma once
 
 #include "device/register_memory.h"
+#include "device/sequenced_bulk_queue.h"
+#include "device/memory_usage_pool.h"
 
 #include "canscope/device_errors.h"
 #include "canscope/device/data_collecter.h"
@@ -12,13 +14,12 @@ namespace canscope {
 class UsbPort;
 class UsbPortDeviceDelegate;
 
+typedef SequencedBulkQueue<OscRawDataHandle> OscRawDataQueue;
+
 // implement as state machine
 class OscDataCollecter : public DataCollecter {
 public:
-  typedef base::Callback<void(OscRawDataHandle)> DataCollectedCallback;
-
-  OscDataCollecter(DataCollectedCallback call_back, 
-                   UsbPortDeviceDelegate* device_delegate, 
+  OscDataCollecter(UsbPortDeviceDelegate* device_delegate, 
                    OscDevice* osc_device);
   
   enum State {
@@ -26,7 +27,8 @@ public:
     STATE_COLLECT,
     STATE_NONE,
   };
-
+  // 
+  scoped_refptr<OscRawDataQueue> RawDataQueue() { return queue_; }
 private:
   virtual ~OscDataCollecter() {}
 
@@ -35,7 +37,6 @@ private:
 
   bool calibrated;
   
-
   device::Error DoLoop();
   void DoLoadCalibrate(LoopState* loop_state);
   void DoCollect(LoopState* loop_state);
@@ -49,6 +50,10 @@ private:
 
   bool IsCollected();
 
+
+  bool AllocOscRawData(OscRawDataHandle* raw_data, 
+                       DeviceType type, 
+                       OscRawDataDeviceConfigHandle config);
 
   bool WriteDevice(::device::RegisterMemory* memory);
   bool ReadDevice(::device::RegisterMemory* memory);
@@ -66,7 +71,9 @@ private:
   device::Error rv_;
 
   TriggerStateRegister trigger_state_;
-  DataCollectedCallback call_back_;
+
+  scoped_refptr<MemoryUsagePool> pool_;
+  scoped_refptr<OscRawDataQueue> queue_;
 };
 
 } // namespace canscope
