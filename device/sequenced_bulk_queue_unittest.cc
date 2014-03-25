@@ -5,7 +5,7 @@
 #include "base/bind.h"
 #include "base/memory/scoped_vector.h"
 
-#include "device/sequenced_bulk_buffer.h"
+#include "device/sequenced_bulk_queue.h"
 
 using namespace base;
 
@@ -17,10 +17,10 @@ public:
 
 typedef scoped_refptr<TestBulk> TestBulkHandle;
 
-typedef SequencedBulkBuffer<TestBulkHandle> TestBulkQueue;
+typedef SequencedBulkQueue<TestBulkHandle> TestBulkQueue;
 }
 
-TEST(SequencedBulkBufferTest, NoCache) {
+TEST(SequencedBulkQueueTest, NoCache) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, false);
   for (int i = 0; i < 100; ++i) {
     TestBulkHandle test_bulk = new TestBulk();
@@ -30,7 +30,7 @@ TEST(SequencedBulkBufferTest, NoCache) {
   EXPECT_EQ(0, bulk_queue->bulk_num());
 }
 
-TEST(SequencedBulkBufferTest, OneReaderCacheAll) {
+TEST(SequencedBulkQueueTest, OneReaderCacheAll) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, false);
   TestBulkQueue::Reader queue_reader(bulk_queue);
   for (int i = 0; i < 100; ++i) {
@@ -41,7 +41,7 @@ TEST(SequencedBulkBufferTest, OneReaderCacheAll) {
   EXPECT_EQ(100, bulk_queue->bulk_num());
 }
 
-TEST(SequencedBulkBufferTest, OneReaderAndSkip) {
+TEST(SequencedBulkQueueTest, OneReaderAndSkip) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, false);
   TestBulkQueue::Reader queue_reader(bulk_queue);
   for (int i = 0; i < 100; ++i) {
@@ -62,7 +62,7 @@ TEST(SequencedBulkBufferTest, OneReaderAndSkip) {
   EXPECT_EQ(100 - 10*3 + 2, bulk_queue->bulk_num());
 }
 
-TEST(SequencedBulkBufferTest, OneReaderCacheLeft) {
+TEST(SequencedBulkQueueTest, OneReaderCacheLeft) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, false);
   TestBulkQueue::Reader queue_reader(bulk_queue);
   for (int i = 0; i < 100; ++i) {
@@ -81,7 +81,7 @@ TEST(SequencedBulkBufferTest, OneReaderCacheLeft) {
   EXPECT_EQ(100 - 50, bulk_queue->bulk_num());
 }
 
-TEST(SequencedBulkBufferTest, TwoReaderCacheLeft) {
+TEST(SequencedBulkQueueTest, TwoReaderCacheLeft) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, false);
   TestBulkQueue::Reader queue_reader1(bulk_queue);
   TestBulkQueue::Reader queue_reader2(bulk_queue);
@@ -334,7 +334,7 @@ private:
 };
 }
 
-TEST(SequencedBulkBufferTest, FullSpeedReader) {
+TEST(SequencedBulkQueueTest, FullSpeedReader) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kFullSpeed, bulk_queue, 1000, 10);
 
@@ -351,7 +351,7 @@ TEST(SequencedBulkBufferTest, FullSpeedReader) {
   thread_reader.WaitForFinish();
 }
 
-TEST(SequencedBulkBufferTest, FullSpeedReaderWaitStart) {
+TEST(SequencedBulkQueueTest, FullSpeedReaderWaitStart) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kFullSpeed, bulk_queue, 1000, 10);
 
@@ -366,7 +366,7 @@ TEST(SequencedBulkBufferTest, FullSpeedReaderWaitStart) {
   EXPECT_EQ(bulk_queue->bulk_num(), 20);
 }
 
-TEST(SequencedBulkBufferTest, WaitTimeout) {
+TEST(SequencedBulkQueueTest, WaitTimeout) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kWaitTimeout, bulk_queue, 10, 10);
 
@@ -385,7 +385,7 @@ TEST(SequencedBulkBufferTest, WaitTimeout) {
 }
 
 
-TEST(SequencedBulkBufferTest, WaitTimeoutWaitStart) {
+TEST(SequencedBulkQueueTest, WaitTimeoutWaitStart) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kWaitTimeout, bulk_queue, 10, 10);
 
@@ -402,7 +402,7 @@ TEST(SequencedBulkBufferTest, WaitTimeoutWaitStart) {
   EXPECT_EQ(bulk_queue->bulk_num(), 2);
 }
 
-TEST(SequencedBulkBufferTest, AsyncReader) {
+TEST(SequencedBulkQueueTest, AsyncReader) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kAsync, bulk_queue, 1000, 10);
 
@@ -419,7 +419,7 @@ TEST(SequencedBulkBufferTest, AsyncReader) {
   thread_reader.WaitForFinish();
 }
 
-TEST(SequencedBulkBufferTest, AsyncReaderWaitStart) {
+TEST(SequencedBulkQueueTest, AsyncReaderWaitStart) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kAsync, bulk_queue, 1000, 10);
 
@@ -435,7 +435,7 @@ TEST(SequencedBulkBufferTest, AsyncReaderWaitStart) {
   EXPECT_EQ(bulk_queue->bulk_num(), 20);
 }
 
-TEST(SequencedBulkBufferTest, QuitReader) {
+TEST(SequencedBulkQueueTest, QuitReader) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
   ThreadReader thread_reader(kQuit, bulk_queue, 1000, 10);
 
@@ -453,7 +453,7 @@ TEST(SequencedBulkBufferTest, QuitReader) {
   thread_reader.WaitForFinish();
 }
 
-TEST(SequencedBulkBufferTest, TwoReaderAndRecycle) {
+TEST(SequencedBulkQueueTest, TwoReaderAndRecycle) {
   scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(true, false);
   TestBulkQueue::Reader queue_reader1(bulk_queue);
   TestBulkQueue::Reader queue_reader2(bulk_queue);

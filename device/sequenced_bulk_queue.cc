@@ -1,4 +1,4 @@
-#include "device/sequenced_bulk_buffer.h"
+#include "device/sequenced_bulk_queue.h"
 
 #include "base/location.h"
 #include "base/bind.h"
@@ -6,34 +6,34 @@
 
 using namespace base;
 
-bool SequencedBulkBufferBase::ReaderBase::WaitForReady() {
+bool SequencedBulkQueueBase::ReaderBase::WaitForReady() {
   CHECK(!IsQuit());
 
   bool ret = buffer_->CheckReady(Count(), 
-      Bind(&SequencedBulkBufferBase::ReaderBase::GetBulk, Unretained(this)));
+      Bind(&SequencedBulkQueueBase::ReaderBase::GetBulk, Unretained(this)));
   // no need to wait if ready
   if (ret) {
     return !IsQuit();
   }
   buffer_->SetReadyCallback(this, Count(),
-      Bind(&SequencedBulkBufferBase::ReaderBase::OnWaitReady, 
+      Bind(&SequencedBulkQueueBase::ReaderBase::OnWaitReady, 
            Unretained(this)));
   event_.Wait();
   event_.Reset();
   return !IsQuit();
 }
 
-bool SequencedBulkBufferBase::ReaderBase::WaitTimeoutForReady(TimeDelta delta) {
+bool SequencedBulkQueueBase::ReaderBase::WaitTimeoutForReady(TimeDelta delta) {
   CHECK(!IsQuit());
 
   bool ret = buffer_->CheckReady(Count(),
-      Bind(&SequencedBulkBufferBase::ReaderBase::GetBulk, Unretained(this)));
+      Bind(&SequencedBulkQueueBase::ReaderBase::GetBulk, Unretained(this)));
   // no need to wait if ready
   if (ret) {
     return !IsQuit();
   }
   buffer_->SetReadyCallback(this, Count(),
-    base::Bind(&SequencedBulkBufferBase::ReaderBase::OnWaitReady, 
+    base::Bind(&SequencedBulkQueueBase::ReaderBase::OnWaitReady, 
     base::Unretained(this)));
   ret = event_.TimedWait(delta);
   if (!ret) {
@@ -52,7 +52,7 @@ bool SequencedBulkBufferBase::ReaderBase::WaitTimeoutForReady(TimeDelta delta) {
   }
 }
 
-void SequencedBulkBufferBase::ReaderBase::OnWaitReady(int64 count, bool quit) {
+void SequencedBulkQueueBase::ReaderBase::OnWaitReady(int64 count, bool quit) {
   quiting_ = quit;
   if (!quit) {
     GetBulk();
@@ -60,7 +60,7 @@ void SequencedBulkBufferBase::ReaderBase::OnWaitReady(int64 count, bool quit) {
   event_.Signal();
 }
 
-void SequencedBulkBufferBase::ReaderBase::CallbackOnReady() {
+void SequencedBulkQueueBase::ReaderBase::CallbackOnReady() {
   CHECK(!IsQuit());
 
   // HACK init the weak in the callback MessageLoop.
@@ -69,13 +69,13 @@ void SequencedBulkBufferBase::ReaderBase::CallbackOnReady() {
   base::SequencedTaskRunner* runner = MessageLoopProxy::current();
   DCHECK(runner) << "need runner for async OnBufferReady call";
   buffer_->SetReadyCallback(this, Count(),
-      base::Bind(&SequencedBulkBufferBase::ReaderBase::OnBufferReady, 
+      base::Bind(&SequencedBulkQueueBase::ReaderBase::OnBufferReady, 
                  Unretained(this),
                  runner,
                  weak_ptr_.GetWeakPtr()));
 }
 
-void SequencedBulkBufferBase::ReaderBase::OnBufferReady(SequencedTaskRunner* runner, 
+void SequencedBulkQueueBase::ReaderBase::OnBufferReady(SequencedTaskRunner* runner, 
                                                         WeakPtr<ReaderBase> weak_ptr,
                                                         int64 count, 
                                                         bool quit) {
@@ -85,7 +85,7 @@ void SequencedBulkBufferBase::ReaderBase::OnBufferReady(SequencedTaskRunner* run
   }
   if (!have_data_.is_null()) {
     runner->PostTask(FROM_HERE, 
-        Bind(&SequencedBulkBufferBase::ReaderBase::CallHaveData, 
+        Bind(&SequencedBulkQueueBase::ReaderBase::CallHaveData, 
             // use weak_ptr_ so if reader is destroy when call callback.
             // the callback is no be called.
             weak_ptr));
@@ -93,14 +93,14 @@ void SequencedBulkBufferBase::ReaderBase::OnBufferReady(SequencedTaskRunner* run
 }
 
 
-void SequencedBulkBufferBase::ReaderBase::CallHaveData() {
+void SequencedBulkQueueBase::ReaderBase::CallHaveData() {
   if (!have_data_.is_null()) {
     have_data_.Run();
     // may be delete after this.
   }
 }
 
-void SequencedBulkBufferBase::Quit() {
+void SequencedBulkQueueBase::Quit() {
  {
   base::AutoLock lock(lock_);
 
@@ -110,7 +110,7 @@ void SequencedBulkBufferBase::Quit() {
   FireCallbackNoLock(CountNoLock());
 }
 
-void SequencedBulkBufferBase::SetReadyCallback(void* id, 
+void SequencedBulkQueueBase::SetReadyCallback(void* id, 
                                                int64 count, 
                                                BufferReadyCallback ready_callback) {
   {
@@ -126,7 +126,7 @@ void SequencedBulkBufferBase::SetReadyCallback(void* id,
   }
   }
 
-bool SequencedBulkBufferBase::CancelCallback(void* id) {
+bool SequencedBulkQueueBase::CancelCallback(void* id) {
   {
   base::AutoLock lock(lock_);
 
@@ -142,7 +142,7 @@ bool SequencedBulkBufferBase::CancelCallback(void* id) {
 }
 
 
-void SequencedBulkBufferBase::FireCallbackNoLock(int64 reach_count) {
+void SequencedBulkQueueBase::FireCallbackNoLock(int64 reach_count) {
   if (quiting_) {
     for (ReadyCallbackMap::iterator it = callback_map_.begin();
       it != callback_map_.end();
@@ -165,21 +165,21 @@ void SequencedBulkBufferBase::FireCallbackNoLock(int64 reach_count) {
   }
 }
 
-int64 SequencedBulkBufferBase::Count() const {
+int64 SequencedBulkQueueBase::Count() const {
   base::AutoLock lock(lock_);
   return count_ - 1;
 }
 
 
-int64 SequencedBulkBufferBase::CountNoLock() const {
+int64 SequencedBulkQueueBase::CountNoLock() const {
   return count_ - 1;
 }
 
-void SequencedBulkBufferBase::IncCount() {
+void SequencedBulkQueueBase::IncCount() {
   ++count_;
 }
 
-void SequencedBulkBufferBase::RegisterReader(ReaderBase* reader, int64 start_count) {
+void SequencedBulkQueueBase::RegisterReader(ReaderBase* reader, int64 start_count) {
 {
   base::AutoLock lock(lock_);
   // start_count mean no read yet
@@ -203,7 +203,7 @@ void SequencedBulkBufferBase::RegisterReader(ReaderBase* reader, int64 start_cou
   }
 }
 
-void SequencedBulkBufferBase::UnRegisterReader(ReaderBase* reader) {
+void SequencedBulkQueueBase::UnRegisterReader(ReaderBase* reader) {
   {
   base::AutoLock lock(lock_);
 
@@ -232,7 +232,7 @@ void SequencedBulkBufferBase::UnRegisterReader(ReaderBase* reader) {
   }
 }
 
-void SequencedBulkBufferBase::UpdateReaderCount(ReaderBase* reader, int64 count) {
+void SequencedBulkQueueBase::UpdateReaderCount(ReaderBase* reader, int64 count) {
 
   ReaderCountMap::iterator it = count_map_.find(reader);
   DCHECK(it != count_map_.end());
@@ -256,19 +256,19 @@ void SequencedBulkBufferBase::UpdateReaderCount(ReaderBase* reader, int64 count)
   reader_min_ = min_value;
 }
 
-int64 SequencedBulkBufferBase::ReaderMin() {
+int64 SequencedBulkQueueBase::ReaderMin() {
   return reader_min_;
 }
 
-int64 SequencedBulkBufferBase::ReaderMax() {
+int64 SequencedBulkQueueBase::ReaderMax() {
   return reader_max_;
 }
 
-int SequencedBulkBufferBase::ReaderNum() {
+int SequencedBulkQueueBase::ReaderNum() {
   return count_map_.size();
 }
 
-bool SequencedBulkBufferBase::GetReaderMinMax(int64* min_value, int64* max_value) {
+bool SequencedBulkQueueBase::GetReaderMinMax(int64* min_value, int64* max_value) {
   if (min_value) {
     *min_value = reader_min_;
   }
@@ -278,7 +278,7 @@ bool SequencedBulkBufferBase::GetReaderMinMax(int64* min_value, int64* max_value
   return count_map_.size() != 0;
 }
 
-SequencedBulkBufferBase::ReaderBase::ReaderBase(SequencedBulkBufferBase* buffer)
+SequencedBulkQueueBase::ReaderBase::ReaderBase(SequencedBulkQueueBase* buffer)
     : buffer_(buffer)
     , count_(0)
     , event_(true, false)
@@ -288,12 +288,12 @@ SequencedBulkBufferBase::ReaderBase::ReaderBase(SequencedBulkBufferBase* buffer)
   buffer->RegisterReader(this, count_);
 }
 
-SequencedBulkBufferBase::ReaderBase::~ReaderBase() {
+SequencedBulkQueueBase::ReaderBase::~ReaderBase() {
   buffer_->CancelCallback(this);
   buffer_->UnRegisterReader(this);
 }
 
-SequencedBulkBufferBase::SequencedBulkBufferBase()
+SequencedBulkQueueBase::SequencedBulkQueueBase()
     : reader_min_(-1)
     , reader_max_(-1)
     , count_(0)
@@ -301,7 +301,7 @@ SequencedBulkBufferBase::SequencedBulkBufferBase()
 
 }
 
-SequencedBulkBufferBase::~SequencedBulkBufferBase() {
+SequencedBulkQueueBase::~SequencedBulkQueueBase() {
   CHECK(count_map_.size() == 0);
   CHECK(callback_map_.size() == 0);
 }

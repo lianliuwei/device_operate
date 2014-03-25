@@ -30,8 +30,8 @@
         'register_property.h',
         'memory_frame_pool.h',
         'memory_frame_pool.cc',
-        'sequenced_bulk_buffer.h',
-        'sequenced_bulk_buffer.cc',
+        'sequenced_bulk_queue.h',
+        'sequenced_bulk_queue.cc',
         'memory_usage_pool.h',
         'memory_usage_pool.cc',
       ], 
@@ -48,7 +48,7 @@
         'uint32_sub_bind_unittest.cc',
         'memory_usage_pool_unittest.cc',
         'memory_frame_pool_unittest.cc',
-        'sequenced_bulk_buffer_unittest.cc',
+        'sequenced_bulk_queue_unittest.cc',
       ],
       
       'include_dirs': [
