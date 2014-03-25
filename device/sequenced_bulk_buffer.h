@@ -154,8 +154,8 @@ private:
   ReaderCountMap count_map_;
 
   // reader current_count_ range
-  int64 reader_front_count_;
-  int64 reader_back_count_;
+  int64 reader_min_;
+  int64 reader_max_;
 
   DISALLOW_COPY_AND_ASSIGN(SequencedBulkBufferBase);
 };
@@ -179,20 +179,20 @@ public:
     Reader(SequencedBulkBuffer* seq) : ReaderBase(seq) {}
     ~Reader() {}
 
-    // return true if bluck get, bluck_count >= last_count
-    // if bluck_count > last_count mean data lost by overwrite.
-    bool GetBlukSameThread(BulkPtrType* bluck_ptr, int64* bluck_count);
+    // return true if bulk get, bulk_count >= last_count
+    // if buck_count > last_count mean data lost by overwrite.
+    bool GetBulkSameThread(BulkPtrType* bulk_ptr, int64* bulk_count);
 
     // call in other thread
     // false when need to quit
-    bool WaitGetBulk(BulkPtrType* bluck_ptr, int64* bluck_count);
+    bool WaitGetBulk(BulkPtrType* bulk_ptr, int64* bulk_count);
 
     // call in other thread
     // return false mean timeout or quit, ptr and count are no touch
-    bool WaitTimeoutGetBulk(BulkPtrType* bluck_ptr, int64* bluck_count, base::TimeDelta delta);
+    bool WaitTimeoutGetBulk(BulkPtrType* bulk_ptr, int64* bulk_count, base::TimeDelta delta);
 
     // Async callback get Result
-    bool GetResult(BulkPtrType* bluck_ptr, int64* bluck_count);
+    bool GetResult(BulkPtrType* bulk_ptr, int64* bulk_count);
 
   private:
     SequencedBulkBuffer* buffer() {
@@ -212,11 +212,11 @@ public:
     : over_write_(over_write)
     , keep_if_no_reader_(keep_if_no_reader) {}
 
-  bool GetBluk(Reader* reader, BulkPtrType* bluck_ptr, int64* bluck_count, int64 count);
-  bool GetBlukNoLock(Reader* reader, BulkPtrType* bluck_ptr, int64* bluck_count, int64 count);
+  bool GetBulk(Reader* reader, BulkPtrType* bulk_ptr, int64* bulk_count, int64 count);
+  bool GetBulkNoLock(Reader* reader, BulkPtrType* bulk_ptr, int64* bulk_count, int64 count);
   // write method
   // this will inc bulk count.
-  void PushBluk(BulkPtrType bulk);
+  void PushBulk(BulkPtrType bulk);
 
   int bulk_num() {
     base::AutoLock lock(lock_);
@@ -234,7 +234,7 @@ private:
   // Release the buffer the all reader read.
   void MayReleaseBuffer();
   // find bulk which have the most small of the bigger or equal count
-  bool FindBulk(BulkPtrType* bluck_ptr, int64* bluck_count, int64 count);
+  bool FindBulk(BulkPtrType* bulk_ptr, int64* bulk_count, int64 count);
 
   bool over_write_;
 
@@ -250,7 +250,7 @@ private:
 
 template<typename BulkPtrType>
 void SequencedBulkBuffer<BulkPtrType>::Reader::GetBulk() {
-  bool ret = buffer()->GetBlukNoLock(this, &temp_ptr_, &temp_count_, Count());
+  bool ret = buffer()->GetBulkNoLock(this, &temp_ptr_, &temp_count_, Count());
   DCHECK(ret);
   // update count.
   DCHECK(Count() <= temp_count_);
@@ -318,8 +318,8 @@ void SequencedBulkBuffer<BulkPtrType>::MayReleaseBuffer() {
 
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::GetBluk(Reader* reader,
-                                               BulkPtrType* bluck_ptr, int64* bluck_count,
+bool SequencedBulkBuffer<BulkPtrType>::GetBulk(Reader* reader,
+                                               BulkPtrType* bulk_ptr, int64* bulk_count,
                                                int64 count) {
   {
   base::AutoLock lock(lock_);
@@ -332,11 +332,11 @@ bool SequencedBulkBuffer<BulkPtrType>::GetBluk(Reader* reader,
     UpdateReaderCount(reader, out_count);
     MayReleaseBuffer();
 
-    if (bluck_ptr) {
-      *bluck_ptr = out_ptr;
+    if (bulk_ptr) {
+      *bulk_ptr = out_ptr;
     }
-    if (bluck_count) {
-      *bluck_count = out_count;
+    if (bulk_count) {
+      *bulk_count = out_count;
     }
   }
   return ret;
@@ -344,8 +344,8 @@ bool SequencedBulkBuffer<BulkPtrType>::GetBluk(Reader* reader,
 }
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::GetBlukNoLock(Reader* reader,
-                                                     BulkPtrType* bluck_ptr, int64* bluck_count,
+bool SequencedBulkBuffer<BulkPtrType>::GetBulkNoLock(Reader* reader,
+                                                     BulkPtrType* bulk_ptr, int64* bulk_count,
                                                      int64 count) {
   BulkPtrType out_ptr;
   int64 out_count;
@@ -355,11 +355,11 @@ bool SequencedBulkBuffer<BulkPtrType>::GetBlukNoLock(Reader* reader,
     UpdateReaderCount(reader, out_count);
     MayReleaseBuffer();
 
-    if (bluck_ptr) {
-      *bluck_ptr = out_ptr;
+    if (bulk_ptr) {
+      *bulk_ptr = out_ptr;
     }
-    if (bluck_count) {
-      *bluck_count = out_count;
+    if (bulk_count) {
+      *bulk_count = out_count;
     }
   }
   return ret;
@@ -367,22 +367,22 @@ bool SequencedBulkBuffer<BulkPtrType>::GetBlukNoLock(Reader* reader,
 
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::Reader::GetResult(BulkPtrType* bluck_ptr, 
-                                                         int64* bluck_count) {
+bool SequencedBulkBuffer<BulkPtrType>::Reader::GetResult(BulkPtrType* bulk_ptr, 
+                                                         int64* bulk_count) {
   if (IsQuit()) {
     return false;
   }
-  if (bluck_ptr) {
-    *bluck_ptr = temp_ptr_;
+  if (bulk_ptr) {
+    *bulk_ptr = temp_ptr_;
   }
-  if (bluck_count) {
-    *bluck_count = temp_count_;
+  if (bulk_count) {
+    *bulk_count = temp_count_;
   }
   return true;
 }
 
 template<typename BulkPtrType>
-void SequencedBulkBuffer<BulkPtrType>::PushBluk(BulkPtrType bulk_ptr) {
+void SequencedBulkBuffer<BulkPtrType>::PushBulk(BulkPtrType bulk_ptr) {
   {
   base::AutoLock lock(lock_);
   BulkPieceType bulk  = { bulk_ptr, CountNoLock() + 1};
@@ -395,8 +395,8 @@ void SequencedBulkBuffer<BulkPtrType>::PushBluk(BulkPtrType bulk_ptr) {
 }
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::FindBulk(BulkPtrType* bluck_ptr,
-                                                int64* bluck_count,
+bool SequencedBulkBuffer<BulkPtrType>::FindBulk(BulkPtrType* bulk_ptr,
+                                                int64* bulk_count,
                                                 int64 count) {
   // bulk no in queue now
   if (CountNoLock() < count) {
@@ -406,8 +406,8 @@ bool SequencedBulkBuffer<BulkPtrType>::FindBulk(BulkPtrType* bluck_ptr,
        it != buffer_queue_.end();
        ++it) {
     if (it->count >= count) {
-      *bluck_ptr = it->bulk;
-      *bluck_count = it->count;
+      *bulk_ptr = it->bulk;
+      *bulk_count = it->count;
       return true;
     }
   }
@@ -415,11 +415,11 @@ bool SequencedBulkBuffer<BulkPtrType>::FindBulk(BulkPtrType* bluck_ptr,
 }
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::Reader::GetBlukSameThread(BulkPtrType* bluck_ptr,
-                                                                 int64* bluck_count) {
+bool SequencedBulkBuffer<BulkPtrType>::Reader::GetBulkSameThread(BulkPtrType* bulk_ptr,
+                                                                 int64* bulk_count) {
   BulkPtrType out_ptr;
   int64 out_count;
-  bool ret = buffer()->GetBluk(this, &out_ptr, &out_count, Count());
+  bool ret = buffer()->GetBulk(this, &out_ptr, &out_count, Count());
   if (!ret) {
     return false;
   }
@@ -427,11 +427,11 @@ bool SequencedBulkBuffer<BulkPtrType>::Reader::GetBlukSameThread(BulkPtrType* bl
   DCHECK(Count() <= out_count);
   set_count(out_count + 1);
 
-  if (bluck_ptr) {
-    *bluck_ptr = out_ptr;
+  if (bulk_ptr) {
+    *bulk_ptr = out_ptr;
   }
-  if (bluck_count) {
-    *bluck_count = out_count;
+  if (bulk_count) {
+    *bulk_count = out_count;
   }
 
   return true;
@@ -439,25 +439,25 @@ bool SequencedBulkBuffer<BulkPtrType>::Reader::GetBlukSameThread(BulkPtrType* bl
 
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::Reader::WaitGetBulk(BulkPtrType* bluck_ptr,
-                                                           int64* bluck_count) {
+bool SequencedBulkBuffer<BulkPtrType>::Reader::WaitGetBulk(BulkPtrType* bulk_ptr,
+                                                           int64* bulk_count) {
   bool ret = WaitForReady();
 
   if (!ret) {
     return false;
   }
-  if (bluck_ptr) {
-    *bluck_ptr = temp_ptr_;
+  if (bulk_ptr) {
+    *bulk_ptr = temp_ptr_;
   }
-  if (bluck_count) {
-    *bluck_count = temp_count_;
+  if (bulk_count) {
+    *bulk_count = temp_count_;
   }
   return true;
 }
 
 template<typename BulkPtrType>
-bool SequencedBulkBuffer<BulkPtrType>::Reader::WaitTimeoutGetBulk(BulkPtrType* bluck_ptr,
-                                                                  int64* bluck_count,
+bool SequencedBulkBuffer<BulkPtrType>::Reader::WaitTimeoutGetBulk(BulkPtrType* bulk_ptr,
+                                                                  int64* bulk_count,
                                                                   base::TimeDelta delta) {
   bool ret = WaitTimeoutForReady(delta);
 
@@ -465,14 +465,15 @@ bool SequencedBulkBuffer<BulkPtrType>::Reader::WaitTimeoutGetBulk(BulkPtrType* b
     return false;
   }
 
-  if (bluck_ptr) {
-    *bluck_ptr = temp_ptr_;
+  if (bulk_ptr) {
+    *bulk_ptr = temp_ptr_;
   }
-  if (bluck_count) {
-    *bluck_count = temp_count_;
+  if (bulk_count) {
+    *bulk_count = temp_count_;
   }
   return true;
 }
+
 template<typename BulkPtrType>
 bool SequencedBulkBuffer<BulkPtrType>::CheckReady(int64 count, const base::Closure& ready) {
   base::AutoLock lock(lock_);

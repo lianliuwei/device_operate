@@ -187,18 +187,18 @@ void SequencedBulkBufferBase::RegisterReader(ReaderBase* reader, int64 start_cou
 
   // first one
   if (count_map_.size() == 0) {
-    reader_front_count_ = reader_back_count_ = count;
+    reader_min_ = reader_max_ = count;
   }
 
   ReaderCountMap::iterator it = count_map_.find(reader);
   DCHECK(it == count_map_.end());
   count_map_.insert(std::make_pair(reader, count));
 
-  if (count > reader_back_count_) {
-    reader_back_count_ = count;
+  if (count > reader_max_) {
+    reader_max_ = count;
   }
-  if (count < reader_front_count_) {
-    reader_front_count_ = count;
+  if (count < reader_min_) {
+    reader_min_ = count;
   }
   }
 }
@@ -227,8 +227,8 @@ void SequencedBulkBufferBase::UnRegisterReader(ReaderBase* reader) {
         max_value = it->second;
       }
   }
-  reader_front_count_ = min_value;
-  reader_back_count_ = max_value;
+  reader_min_ = min_value;
+  reader_max_ = max_value;
   }
 }
 
@@ -242,8 +242,8 @@ void SequencedBulkBufferBase::UpdateReaderCount(ReaderBase* reader, int64 count)
   DCHECK(it->second <= count);
 
   it->second = count;
-  if (count > reader_back_count_) {
-    reader_back_count_ = count;
+  if (count > reader_max_) {
+    reader_max_ = count;
   }
   int64 min_value = count;
   for (ReaderCountMap::iterator it = count_map_.begin();
@@ -253,15 +253,15 @@ void SequencedBulkBufferBase::UpdateReaderCount(ReaderBase* reader, int64 count)
       min_value = it->second;
     }
   }
-  reader_front_count_ = min_value;
+  reader_min_ = min_value;
 }
 
 int64 SequencedBulkBufferBase::ReaderMin() {
-  return reader_front_count_;
+  return reader_min_;
 }
 
 int64 SequencedBulkBufferBase::ReaderMax() {
-  return reader_back_count_;
+  return reader_max_;
 }
 
 int SequencedBulkBufferBase::ReaderNum() {
@@ -270,10 +270,10 @@ int SequencedBulkBufferBase::ReaderNum() {
 
 bool SequencedBulkBufferBase::GetReaderMinMax(int64* min_value, int64* max_value) {
   if (min_value) {
-    *min_value = reader_front_count_;
+    *min_value = reader_min_;
   }
   if (max_value) {
-    *max_value = reader_back_count_;
+    *max_value = reader_max_;
   }
   return count_map_.size() != 0;
 }
@@ -294,8 +294,8 @@ SequencedBulkBufferBase::ReaderBase::~ReaderBase() {
 }
 
 SequencedBulkBufferBase::SequencedBulkBufferBase()
-    : reader_front_count_(-1)
-    , reader_back_count_(-1)
+    : reader_min_(-1)
+    , reader_max_(-1)
     , count_(0)
     , quiting_(false) {
 
