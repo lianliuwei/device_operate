@@ -130,6 +130,7 @@ enum ThreadReaderTestType {
   kFullSpeed,
   kWaitTimeout,
   kAsync,
+  kQuit,
 };
 
 class ThreadReader {
@@ -148,6 +149,7 @@ public:
    case kFullSpeed: FullSpeed(num); break;
    case kWaitTimeout: WaitTimeout(num); break;
    case kAsync: Async(num); break;
+   case kQuit: Quit(); break;
    default: NOTREACHED();
    };
   }
@@ -289,6 +291,34 @@ public:
     queue_reader->CallbackOnReady();
   }
 
+  void Quit() {
+    for (int i = 0; i < thread_num_; ++i) {
+      Thread* temp = new Thread("BulkReader");
+      threads_.push_back(temp);
+      temp->Start();
+      temp->message_loop()->PostTask(FROM_HERE, 
+        Bind(&ThreadReader::QuitReader, Unretained(this)));
+    }
+  }
+
+  void QuitReader() {
+    TestBulkQueue::Reader queue_reader(bulk_queue_);
+    ReaderStart();
+    int i = 0;
+    while (1) {
+      TestBulkHandle read_bulk;
+      int64 read_count;
+      EXPECT_EQ(queue_reader.Count(), i);
+      bool ret = queue_reader.WaitGetBulk(&read_bulk, &read_count);
+      if (!ret) {
+        ReaderFinish();
+        return;
+      }
+      EXPECT_EQ(read_count, i);
+      EXPECT_EQ(read_bulk->i, i);
+      ++i;
+    }
+  }
 
 private:
   scoped_refptr<TestBulkQueue> bulk_queue_;
@@ -386,6 +416,24 @@ TEST(SequencedBulkBufferTest, AsyncReader) {
     test_bulk->i = i;
     bulk_queue->PushBluk(test_bulk);
   }
+  thread_reader.WaitForFinish();
+}
+
+TEST(SequencedBulkBufferTest, QuitReader) {
+  scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
+  ThreadReader thread_reader(kQuit, bulk_queue, 1000, 10);
+
+  // HACK keep the bulk before each reader start.
+  // or may only one first start, and read to empty. other reader start
+  // and bulk lost.
+  TestBulkQueue::Reader queue_reader1(bulk_queue);
+
+  for (int i = 0; i < 500; ++i) {
+    TestBulkHandle test_bulk = new TestBulk();
+    test_bulk->i = i;
+    bulk_queue->PushBluk(test_bulk);
+  }
+  bulk_queue->Quit();
   thread_reader.WaitForFinish();
 }
 
