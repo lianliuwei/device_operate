@@ -79,9 +79,6 @@ uint8 CMP_LOW(VoltRange range, double trig_volt, double offset_volt) {
   return static_cast<uint8>((trig_volt + offset_volt)/div_volt * 31.25 + 127);
 }
 
-int DeviceK(DeviceType device_type) {
-  return device_type == DT_CS1203 ? 8 : 2;
-}
 
 double CalibrateInfo::Voffset(double offset) {
   return VCal_base + (offset) / Kcal;

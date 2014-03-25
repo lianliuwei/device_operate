@@ -16,10 +16,6 @@ class ConfigManager;
 
 namespace canscope {
 
-// X K point of Device
-int DeviceK(DeviceType device_type);
-
-
 struct CalibrateInfo {
   uint32 N1;
   double Kcal;
