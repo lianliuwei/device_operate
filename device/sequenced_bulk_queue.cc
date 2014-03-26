@@ -1,10 +1,154 @@
 #include "device/sequenced_bulk_queue.h"
 
+#include <vector>
+
 #include "base/location.h"
 #include "base/bind.h"
 #include "base/message_loop_proxy.h"
+#include "base/threading/thread_restrictions.h"
 
 using namespace base;
+
+namespace {
+// return 0 mean timeout
+size_t TimedWaitMany(WaitableEvent** events, size_t count, const TimeDelta& max_time) {
+  base::ThreadRestrictions::AssertWaitAllowed();
+  HANDLE handles[MAXIMUM_WAIT_OBJECTS];
+  CHECK_LE(static_cast<int>(count), MAXIMUM_WAIT_OBJECTS)
+      << "Can only wait on " << MAXIMUM_WAIT_OBJECTS << " with WaitMany";
+  DCHECK(max_time >= TimeDelta::FromMicroseconds(0));
+  
+  // Be careful here.  TimeDelta has a precision of microseconds, but this API
+  // is in milliseconds.  If there are 5.5ms left, should the delay be 5 or 6?
+  // It should be 6 to avoid returning too early.
+  double timeout = ceil(max_time.InMillisecondsF());
+
+  for (size_t i = 0; i < count; ++i)
+    handles[i] = events[i]->handle();
+
+  // The cast is safe because count is small - see the CHECK above.
+  DWORD result =
+      WaitForMultipleObjects(static_cast<DWORD>(count),
+                             handles,
+                             FALSE,      // don't wait for all the objects
+                             static_cast<DWORD>(timeout));
+  if (result == WAIT_TIMEOUT) {
+    return 0;
+  } else if (result >= WAIT_OBJECT_0 + count) {
+    DLOG_GETLASTERROR(FATAL) << "WaitForMultipleObjects failed";
+    return 0;
+  }
+
+  return result - WAIT_OBJECT_0;
+}
+
+}
+
+
+void SequencedBulkQueueBase::WaitForManyReader::Wait() {
+  DCHECK(wait_list_.size());
+  bool ret;
+  // new wait result
+  finish_list_.clear();
+  std::set<ReaderBase*> need_check;
+  for (std::set<ReaderBase*>::iterator it = wait_list_.begin();
+       it != wait_list_.end();
+       ++it) {
+    ret = (*it)->WaitFront();
+    if (ret) {
+      finish_list_.insert(*(it));
+    } else {
+      need_check.insert(*(it));
+    }
+  }
+  if (need_check.size() == 0) {
+    return;
+  }
+  std::vector<WaitableEvent*> event_list;
+  event_list.reserve(need_check.size());
+  for (std::set<ReaderBase*>::iterator it = need_check.begin();
+       it != need_check.end();
+       ++it) {
+      event_list.push_back(&((*it)->event_));
+  }
+  size_t index = WaitableEvent::WaitMany(&(event_list[0]), event_list.size());
+  for (std::set<ReaderBase*>::iterator it = need_check.begin();
+       it != need_check.end();
+       ++it) {
+    ret = (*it)->WaitBack();
+    if (ret) {
+      finish_list_.insert(*(it));
+    }
+  }
+}
+
+bool SequencedBulkQueueBase::WaitForManyReader::WaitTimeout(base::TimeDelta delta) {
+  DCHECK(wait_list_.size());
+  bool ret;
+  // new wait result
+  finish_list_.clear();
+  std::set<ReaderBase*> need_check;
+  for (std::set<ReaderBase*>::iterator it = wait_list_.begin();
+       it != wait_list_.end();
+       ++it) {
+    ret = (*it)->WaitFront();
+    if (ret) {
+      finish_list_.insert(*(it));
+    } else {
+      need_check.insert(*(it));
+    }
+  }
+  if (need_check.size() == 0) {
+    return true;
+  }
+  std::vector<WaitableEvent*> event_list;
+  event_list.reserve(need_check.size());
+  for (std::set<ReaderBase*>::iterator it = need_check.begin();
+       it != need_check.end();
+       ++it) {
+      event_list.push_back(&((*it)->event_));
+  }
+  size_t index = TimedWaitMany(&(event_list[0]), event_list.size(), delta);
+  bool is_timeout = true;
+  for (std::set<ReaderBase*>::iterator it = need_check.begin();
+       it != need_check.end();
+       ++it) {
+    ret = (*it)->WaitBack();
+    if (ret) {
+      finish_list_.insert(*(it));
+      is_timeout = false;
+    }
+  }
+  return !is_timeout;
+}
+
+bool SequencedBulkQueueBase::ReaderBase::WaitFront() {
+  CHECK(!IsQuit());
+
+  bool ret = buffer_->CheckReady(Count(), 
+    Bind(&SequencedBulkQueueBase::ReaderBase::GetBulk, Unretained(this)));
+  // no need to wait if ready
+  if (ret) {
+    return true;
+  }
+  buffer_->SetReadyCallback(this, Count(),
+    Bind(&SequencedBulkQueueBase::ReaderBase::OnWaitReady, 
+    Unretained(this)));
+ return false;
+}
+
+bool SequencedBulkQueueBase::ReaderBase::WaitBack() {
+  bool called = !buffer_->CancelCallback(this);
+  // be call in TimeWait() false and CancelCallback()
+  if (called) {
+    event_.Wait();
+    event_.Reset();
+    return true;
+  } else {
+    event_.Reset();
+    return false;
+  }
+}
 
 bool SequencedBulkQueueBase::ReaderBase::WaitForReady() {
   CHECK(!IsQuit());
@@ -13,7 +157,7 @@ bool SequencedBulkQueueBase::ReaderBase::WaitForReady() {
       Bind(&SequencedBulkQueueBase::ReaderBase::GetBulk, Unretained(this)));
   // no need to wait if ready
   if (ret) {
-    return !IsQuit();
+    return true;
   }
   buffer_->SetReadyCallback(this, Count(),
       Bind(&SequencedBulkQueueBase::ReaderBase::OnWaitReady, 
@@ -30,7 +174,7 @@ bool SequencedBulkQueueBase::ReaderBase::WaitTimeoutForReady(TimeDelta delta) {
       Bind(&SequencedBulkQueueBase::ReaderBase::GetBulk, Unretained(this)));
   // no need to wait if ready
   if (ret) {
-    return !IsQuit();
+    return true;
   }
   buffer_->SetReadyCallback(this, Count(),
     base::Bind(&SequencedBulkQueueBase::ReaderBase::OnWaitReady, 

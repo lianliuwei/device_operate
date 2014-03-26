@@ -8,6 +8,7 @@
 #include "device/sequenced_bulk_queue.h"
 
 using namespace base;
+using namespace std;
 
 namespace {
 struct TestBulk : public base::RefCountedThreadSafe<TestBulk> {
@@ -534,4 +535,120 @@ TEST(SequencedBulkQueueTest, TwoReaderAndRecycle) {
   EXPECT_EQ(queue_reader1.Count(), 22);
   ret = queue_reader1.GetBulkSameThread(&read_bulk, &read_count);
   EXPECT_FALSE(ret);
+}
+
+namespace {
+enum ThreadQueueTestType {
+  kWaitAll,
+};
+
+class ThreadQueue {
+public:
+  ThreadQueue(ThreadQueueTestType test_type, 
+              const vector<TestBulkQueue*>& bulk_queue, 
+              int num)
+      : finish_thread_num_(0)
+      , event_(true, false)
+      , thread_num_(bulk_queue.size()) {
+   switch (test_type) {
+   case kWaitAll: WaitAllTask(bulk_queue, num); break;
+   default: NOTREACHED();
+   };
+  }
+
+  ~ThreadQueue() {}
+
+  void WaitForFinish() {
+    event_.Wait();
+    event_.Reset();
+  }
+
+
+  void QueueFinish() {
+    bool notify = false; 
+    {
+    AutoLock lock(lock_);
+    ++finish_thread_num_;
+    if (finish_thread_num_ == thread_num_) {
+      notify = true;
+    }
+    }
+    if (notify) {
+      event_.Signal();
+    }
+  }
+
+  void WaitAllTask(const vector<TestBulkQueue*>& bulk_queue, int bulk_num) {
+    for (size_t i = 0; i < bulk_queue.size(); ++i) {
+      Thread* temp = new Thread("BulkReader");
+      threads_.push_back(temp);
+      temp->Start();
+      temp->message_loop()->PostTask(FROM_HERE, 
+        Bind(&ThreadQueue::WaitAllQueue, Unretained(this), 
+            scoped_refptr<TestBulkQueue>(bulk_queue[i]), bulk_num));
+    }
+  }
+
+  void WaitAllQueue(scoped_refptr<TestBulkQueue> queue, int num) {
+    
+    for (int i = 0; i < num; ++i) {
+      TestBulkHandle test_bulk = new TestBulk();
+      test_bulk->i = i;
+      queue->PushBulk(test_bulk);
+    }
+    QueueFinish();
+  }
+
+
+private:
+  base::WaitableEvent event_;
+  base::Lock lock_;
+  int finish_thread_num_;
+  int thread_num_;
+
+  ScopedVector<Thread> threads_;
+  DISALLOW_COPY_AND_ASSIGN(ThreadQueue);
+};
+}
+
+TEST(SequencedBulkQueueTest, WaitManyTest) {
+  static const int queue_num = 10;
+  int read_count[queue_num] =  { 0, };
+
+  vector<TestBulkQueue*> bulk_queues;
+  ScopedVector<TestBulkQueue::Reader> reader_queues;
+
+  SequencedBulkQueueBase::WaitForManyReader wait_for;
+
+  for (int i = 0; i < queue_num; ++i) {
+    scoped_refptr<TestBulkQueue> bulk_queue = new TestBulkQueue(false, true);
+    bulk_queues.push_back(bulk_queue.get());
+    TestBulkQueue::Reader* queue_reader = new TestBulkQueue::Reader(bulk_queue); 
+    reader_queues.push_back(queue_reader);
+    wait_for.AddReader(queue_reader);
+  }
+  int bulk_num = 1000;
+
+  ThreadQueue thread_queue(kWaitAll, bulk_queues, bulk_num);
+
+  int total = 0;  
+  while (total < bulk_num * queue_num) {
+    wait_for.Wait();
+
+    bool have_finish = false;
+    for (int i = 0; i < queue_num; ++i) {
+      TestBulkQueue::Reader* queue_reader = reader_queues[i];
+      if (wait_for.IsReaderFinish(queue_reader)) {
+        ++total;
+        ++read_count[i];
+        have_finish = true;
+      }
+    }
+    EXPECT_TRUE(have_finish);
+  }
+  for (int i = 0; i < queue_num; ++i) {
+    EXPECT_EQ(read_count[i], bulk_num);
+  }
+  
+  thread_queue.WaitForFinish();
 }

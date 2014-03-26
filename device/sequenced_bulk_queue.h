@@ -2,6 +2,7 @@
 
 #include <map>
 #include <list>
+#include <set>
 
 #include "base/memory/ref_counted.h"
 #include "base/time.h"
@@ -20,6 +21,30 @@ class SequencedBulkQueueBase : public base::RefCountedThreadSafe<SequencedBulkQu
   typedef base::Callback<void(void)> BufferHaveDataCallback;
 
 public:
+  class ReaderBase;
+
+  class WaitForManyReader {
+  public:
+    WaitForManyReader() {}
+    ~WaitForManyReader() {}
+
+    void AddReader(ReaderBase* reader) { wait_list_.insert(reader); }
+    void RemoveReader(ReaderBase* reader) { wait_list_.erase(reader); }
+
+    void Wait();
+
+    // return true wait success, return false timeout
+    bool WaitTimeout(base::TimeDelta delta);
+
+    // last wait result, finish include quit
+    bool IsReaderFinish(ReaderBase* reader) { 
+      return finish_list_.find(reader) != finish_list_.end(); }
+
+  private:
+    std::set<ReaderBase*> wait_list_;
+    std::set<ReaderBase*> finish_list_;
+  };
+
   class ReaderBase {
   public:
     // the count need to read
@@ -66,6 +91,11 @@ public:
                         int64 count, bool quit);
 
     void CallHaveData();
+
+    // for wait more then one reader
+    friend class WaitForManyReader;
+    bool WaitFront();
+    bool WaitBack();
 
     base::WeakPtrFactory<ReaderBase> weak_ptr_;
     BufferHaveDataCallback have_data_;
@@ -319,8 +349,8 @@ void SequencedBulkQueue<BulkPtrType>::MayReleaseBuffer() {
 
 template<typename BulkPtrType>
 bool SequencedBulkQueue<BulkPtrType>::GetBulk(Reader* reader,
-                                               BulkPtrType* bulk_ptr, int64* bulk_count,
-                                               int64 count) {
+                                              BulkPtrType* bulk_ptr, int64* bulk_count,
+                                              int64 count) {
   {
   base::AutoLock lock(lock_);
 
@@ -345,8 +375,8 @@ bool SequencedBulkQueue<BulkPtrType>::GetBulk(Reader* reader,
 
 template<typename BulkPtrType>
 bool SequencedBulkQueue<BulkPtrType>::GetBulkNoLock(Reader* reader,
-                                                     BulkPtrType* bulk_ptr, int64* bulk_count,
-                                                     int64 count) {
+                                                    BulkPtrType* bulk_ptr, int64* bulk_count,
+                                                    int64 count) {
   BulkPtrType out_ptr;
   int64 out_count;
   bool ret = FindBulk(&out_ptr, &out_count, count);
@@ -368,7 +398,7 @@ bool SequencedBulkQueue<BulkPtrType>::GetBulkNoLock(Reader* reader,
 
 template<typename BulkPtrType>
 bool SequencedBulkQueue<BulkPtrType>::Reader::GetResult(BulkPtrType* bulk_ptr, 
-                                                         int64* bulk_count) {
+                                                        int64* bulk_count) {
   if (IsQuit()) {
     return false;
   }
