@@ -12,8 +12,8 @@
 #include "testing/gmock/include/gmock/gmock.h"
 
 #include "canscope/test/test_process.h"
-#include "canscope/device/canscope_device_manager.h"
-#include "canscope/device/canscope_device_manager_handle.h"
+#include "canscope/device/canscope_device.h"
+#include "canscope/device/canscope_device_handle.h"
 #include "canscope/canscope_notification_types.h"
 #include "canscope/device/canscope_device_property_constants.h"
 #include "canscope/device/device_thread_mock.h"
@@ -104,7 +104,7 @@ protected:
   DevicePropertyObserverMock* mock_;
   scoped_refptr<CANScopeDeviceFinder> finder_;
   string16 device_path_;
-  scoped_refptr<CANScopeDeviceManager> manager_;
+  scoped_refptr<CANScopeDevice> manager_;
 
 
 private:
@@ -163,8 +163,8 @@ private:
 
 void DevicesManagerTest::GetValueTest() {
   ASSERT_TRUE(manager_.get() != NULL) << "no Devices Finded";
-  CANScopeDeviceManagerHandle::Create(manager_);
- OscDeviceHandle* handle = CANScopeDeviceManagerHandle::GetInstance(manager_)->
+  CANScopeDeviceHandle::Create(manager_);
+ OscDeviceHandle* handle = CANScopeDeviceHandle::GetInstance(manager_)->
     osc_device_handle();
 
   EXPECT_EQ(k8V, handle->volt_range_can_h.value());
@@ -185,7 +185,7 @@ void DevicesManagerTest::GetValueTest() {
   EXPECT_DOUBLE_EQ(0.0, handle->trigger_volt.value());
   EXPECT_DOUBLE_EQ(1.0, handle->time_param.value());
 
-  CANScopeDeviceManagerHandle::GetInstance(manager_)->DestroyHandle();
+  CANScopeDeviceHandle::GetInstance(manager_)->DestroyHandle();
 
   CommonThread::PostTask(CommonThread::UI, FROM_HERE,
       Bind(&DevicesManagerTest::StopDeviceManager, Unretained(this)));

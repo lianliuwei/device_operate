@@ -14,11 +14,11 @@ class MessageLoopProxy;
 
 namespace canscope {
 
-class CANScopeDeviceManager : public DeviceManager {
+class CANScopeDevice : public DeviceManager {
 public:
 
   // no thread safety, call on Device Thread only.
-  static CANScopeDeviceManager* Create(
+  static CANScopeDevice* Create(
       scoped_refptr<base::SingleThreadTaskRunner> runner);
 
   OscDevice* osc_device() {
@@ -48,8 +48,8 @@ private:
   virtual void DestroyImpl() OVERRIDE;
   virtual void DeleteDeviceImpl() OVERRIDE;
 
-  CANScopeDeviceManager(scoped_refptr<base::SingleThreadTaskRunner> device_loop);
-  virtual ~CANScopeDeviceManager() {}
+  CANScopeDevice(scoped_refptr<base::SingleThreadTaskRunner> device_loop);
+  virtual ~CANScopeDevice() {}
 
   UsbPortDeviceDelegate device_delegate_;
 
@@ -58,7 +58,7 @@ private:
 
   CANScopeRunner runner_;
 
-  DISALLOW_COPY_AND_ASSIGN(CANScopeDeviceManager);
+  DISALLOW_COPY_AND_ASSIGN(CANScopeDevice);
 };
 
 }

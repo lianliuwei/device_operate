@@ -1,4 +1,4 @@
-#include "canscope/device/canscope_device_manager.h"
+#include "canscope/device/canscope_device.h"
 
 #include <string>
 
@@ -16,38 +16,38 @@ using namespace base;
 
 namespace canscope {
 
-CANScopeDeviceManager* CANScopeDeviceManager::Create(
+CANScopeDevice* CANScopeDevice::Create(
     scoped_refptr<base::SingleThreadTaskRunner> runner) {
   DCHECK(runner->BelongsToCurrentThread());
-  CANScopeDeviceManager* device = new CANScopeDeviceManager(runner);
+  CANScopeDevice* device = new CANScopeDevice(runner);
   NotifyAll(NOTIFICATION_DEVICE_MANAGER_CREATED, 
-      Source<CANScopeDeviceManager>(device), 
+      Source<CANScopeDevice>(device), 
       NotificationService::NoDetails());
   return device;
 }
 
-void CANScopeDeviceManager::DestroyImpl() {
+void CANScopeDevice::DestroyImpl() {
   NotifyAll(NOTIFICATION_DEVICE_MANAGER_START_DESTROY, 
-      Source<CANScopeDeviceManager>(this), 
+      Source<CANScopeDevice>(this), 
       NotificationService::NoDetails());
 }
 
-void CANScopeDeviceManager::DeleteDeviceImpl() {
+void CANScopeDevice::DeleteDeviceImpl() {
   DCHECK(run_thread()->BelongsToCurrentThread());
   NotifyAll(NOTIFICATION_DEVICE_MANAGER_DESTROYED, 
-      Source<CANScopeDeviceManager>(this), 
+      Source<CANScopeDevice>(this), 
       NotificationService::NoDetails());
 
   delete this;
 }
 
-CANScopeDeviceManager::CANScopeDeviceManager(
+CANScopeDevice::CANScopeDevice(
     scoped_refptr<base::SingleThreadTaskRunner> device_loop)
     : DeviceManager(device_loop)
     , osc_device_(&device_delegate_, &osc_device_config_)
     , runner_(this) {}
 
-void CANScopeDeviceManager::Init(base::Value* value) {
+void CANScopeDevice::Init(base::Value* value) {
   DCHECK(value);
   DCHECK(value->IsType(Value::TYPE_DICTIONARY));
   DictionaryValue* dict_value;
@@ -63,7 +63,7 @@ void CANScopeDeviceManager::Init(base::Value* value) {
   osc_device_.Init();
 }
 
-void CANScopeDeviceManager::LoadConfig(base::Value* value) {
+void CANScopeDevice::LoadConfig(base::Value* value) {
   DCHECK(value);
   DCHECK(value->IsType(Value::TYPE_DICTIONARY));
   DictionaryValue* dict_value;
@@ -78,7 +78,7 @@ void CANScopeDeviceManager::LoadConfig(base::Value* value) {
   osc_device_.LoadFromConfig();
 }
 
-base::DictionaryValue* CANScopeDeviceManager::SaveConfig() {
+base::DictionaryValue* CANScopeDevice::SaveConfig() {
   scoped_ptr<DictionaryValue> dict_value(new DictionaryValue);
   string key(kOscDevice);
   ConfigManager::Config config = osc_device_config_.GetLast();
@@ -87,7 +87,7 @@ base::DictionaryValue* CANScopeDeviceManager::SaveConfig() {
   return dict_value.release();
 }
 
-void CANScopeDeviceManager::DeviceTypeDetected(DeviceType type) {
+void CANScopeDevice::DeviceTypeDetected(DeviceType type) {
   osc_device_.set_device_type(type);
 }
 

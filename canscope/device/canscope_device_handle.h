@@ -3,17 +3,17 @@
 #include "common/notification/notification_observer.h"
 #include "common/notification/notification_registrar.h"
 
-#include "canscope/device/canscope_device_manager.h"
+#include "canscope/device/canscope_device.h"
 #include "canscope/device/osc_device_handle.h"
 
 namespace canscope {
 
-class CANScopeDeviceManagerHandle : public common::NotificationObserver {
+class CANScopeDeviceHandle : public common::NotificationObserver {
 public:
   // each messageloop thread has at most one DeviceManagerHandle
-  static CANScopeDeviceManagerHandle* GetInstance(CANScopeDeviceManager* manager);
+  static CANScopeDeviceHandle* GetInstance(CANScopeDevice* manager);
   
-  static CANScopeDeviceManagerHandle* Create(CANScopeDeviceManager* manager);
+  static CANScopeDeviceHandle* Create(CANScopeDevice* manager);
 
   // receive manager destroy notify
   // or user call this.
@@ -28,16 +28,16 @@ private:
 
   void Init();
 
-  CANScopeDeviceManagerHandle(CANScopeDeviceManager* manager);
-  virtual ~CANScopeDeviceManagerHandle();
+  CANScopeDeviceHandle(CANScopeDevice* manager);
+  virtual ~CANScopeDeviceHandle();
 
   common::NotificationRegistrar registrar_;
 
   scoped_ptr<OscDeviceHandle> osc_device_handle_;
 
-  scoped_refptr<CANScopeDeviceManager> device_manager_;
+  scoped_refptr<CANScopeDevice> device_manager_;
 
-  DISALLOW_COPY_AND_ASSIGN(CANScopeDeviceManagerHandle);
+  DISALLOW_COPY_AND_ASSIGN(CANScopeDeviceHandle);
 };
 
 } // namespace canscope

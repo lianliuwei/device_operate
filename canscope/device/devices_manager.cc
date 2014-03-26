@@ -163,8 +163,8 @@ bool DevicesManager::OpenDeviceImpl(string16 device_path, bool notify) {
     if (status == kOnline || status == kOffline)
       return false;
   }
-  scoped_refptr<CANScopeDeviceManager> device = 
-      CANScopeDeviceManager::Create(run_thread_);
+  scoped_refptr<CANScopeDevice> device = 
+      CANScopeDevice::Create(run_thread_);
   CANScopeRunner* runner = device->runner();
   runner->Init(device_path);
   runner->auto_init_device = kDefaultAutoInitDevice;
@@ -197,7 +197,7 @@ bool DevicesManager::OpenDeviceImpl(string16 device_path, bool notify) {
 
 bool DevicesManager::CloseDeviceImpl(string16 device_path, bool notify) {
   DCHECK(run_thread_->BelongsToCurrentThread());
-  scoped_refptr<CANScopeDeviceManager> device;  
+  scoped_refptr<CANScopeDevice> device;  
   {
     base::AutoLock lock(lock_);
     DeviceStatusMap::iterator it =  device_to_status_.find(device_path);
@@ -288,7 +288,7 @@ DeviceStatus DevicesManager::GetDeviceStatus(string16 device_path) const {
   return it->second;
 }
 
-scoped_refptr<CANScopeDeviceManager> DevicesManager::GetDeviceManager(string16 device_path) const {
+scoped_refptr<CANScopeDevice> DevicesManager::GetDeviceManager(string16 device_path) const {
   base::AutoLock lock(lock_);
   PathDeviceMap::const_iterator device_it = path_to_device_.find(device_path);
   if (device_it == path_to_device_.end()) {
@@ -309,6 +309,5 @@ std::vector<string16> DevicesManager::GetDeviceList() {
   }
   return devices;
 }
-
 
 } // namespace canscope

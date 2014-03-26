@@ -6,14 +6,14 @@
 #include "base/observer_list_threadsafe.h"
 
 #include "canscope/device/threaded_loop_run.h"
-#include "canscope/device/canscope_device_manager.h"
+#include "canscope/device/canscope_device.h"
 #include "canscope/device/devices_manager_observer.h"
 
 namespace canscope {
 
 
-// all Open Close CANScopeDeviceManager must through CANScopeDeviceFinder
-// or must add CANScopeDeviceManager Destroy observer
+// all Open Close CANScopeDevice must through CANScopeDeviceFinder
+// or must add CANScopeDevice Destroy observer
 // 
 // Enum Devices and Check Devices online when offine.
 class DevicesManager : public base::RefCountedThreadSafe<DevicesManager> {
@@ -46,7 +46,7 @@ public:
   void OpenDevice(string16 device_path);
   void CloseDevice(string16 device_path);
   DeviceStatus GetDeviceStatus(string16 device_path) const;
-  scoped_refptr<CANScopeDeviceManager> GetDeviceManager(string16 device_path) const;   
+  scoped_refptr<CANScopeDevice> GetDeviceManager(string16 device_path) const;   
 
   
   scoped_refptr<base::SingleThreadTaskRunner> run_thread() const {
@@ -82,7 +82,7 @@ private:
   typedef std::map<string16, DeviceStatus> DeviceStatusMap;
   DeviceStatusMap device_to_status_;
 
-  typedef std::map<string16, scoped_refptr<CANScopeDeviceManager>> PathDeviceMap;
+  typedef std::map<string16, scoped_refptr<CANScopeDevice>> PathDeviceMap;
   PathDeviceMap path_to_device_;
 
   scoped_refptr<ObserverListThreadSafe<DevicesManagerObserver>> observer_list_;

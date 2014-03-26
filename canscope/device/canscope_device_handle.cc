@@ -1,4 +1,4 @@
-#include "canscope/device/canscope_device_manager_handle.h"
+#include "canscope/device/canscope_device_handle.h"
 
 #include <map>
 
@@ -15,7 +15,7 @@ using namespace canscope;
 
 namespace {
 
-typedef map<CANScopeDeviceManager*, CANScopeDeviceManagerHandle*> HandleMap;
+typedef map<CANScopeDevice*, CANScopeDeviceHandle*> HandleMap;
 
 base::LazyInstance<
   base::ThreadLocalPointer<HandleMap> > 
@@ -25,8 +25,8 @@ base::LazyInstance<
 namespace canscope {
 
 // static
-CANScopeDeviceManagerHandle* CANScopeDeviceManagerHandle::GetInstance(
-    CANScopeDeviceManager* manager) {
+CANScopeDeviceHandle* CANScopeDeviceHandle::GetInstance(
+    CANScopeDevice* manager) {
   HandleMap* handle_map = handle_tls_ptr.Pointer()->Get();
   HandleMap::iterator it = handle_map->find(manager);
 
@@ -34,8 +34,8 @@ CANScopeDeviceManagerHandle* CANScopeDeviceManagerHandle::GetInstance(
 }
 
 // static
-CANScopeDeviceManagerHandle* CANScopeDeviceManagerHandle::Create(
-    CANScopeDeviceManager* manager) {
+CANScopeDeviceHandle* CANScopeDeviceHandle::Create(
+    CANScopeDevice* manager) {
   DCHECK(manager);
   HandleMap* handle_map = handle_tls_ptr.Pointer()->Get();
   if (!handle_map) {
@@ -45,14 +45,14 @@ CANScopeDeviceManagerHandle* CANScopeDeviceManagerHandle::Create(
   HandleMap::iterator it = handle_map->find(manager);
   DCHECK(it == handle_map->end()) 
       << "one thread at most has one DeviceManagerHandle per DeviceManager";
-  CANScopeDeviceManagerHandle* handle = new CANScopeDeviceManagerHandle(manager);
+  CANScopeDeviceHandle* handle = new CANScopeDeviceHandle(manager);
   handle_map->insert(make_pair(manager, handle));
   
   handle->Init();
   return handle;
 }
 
-void CANScopeDeviceManagerHandle::DestroyHandle() { 
+void CANScopeDeviceHandle::DestroyHandle() { 
   HandleMap* handle_map = handle_tls_ptr.Pointer()->Get();
   HandleMap::iterator it = handle_map->find(device_manager_.get());
   DCHECK(it != handle_map->end()) << "Handle no register in handle map";
@@ -68,25 +68,25 @@ void CANScopeDeviceManagerHandle::DestroyHandle() {
   }
 }
 
-CANScopeDeviceManagerHandle::CANScopeDeviceManagerHandle(
-    CANScopeDeviceManager* manager)
+CANScopeDeviceHandle::CANScopeDeviceHandle(
+    CANScopeDevice* manager)
     : device_manager_(manager) {
   DCHECK(manager);
   registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_START_DESTROY, 
-      common::Source<CANScopeDeviceManager>(manager));
+      common::Source<CANScopeDevice>(manager));
 }
 
-void CANScopeDeviceManagerHandle::Observe(int type, 
+void CANScopeDeviceHandle::Observe(int type, 
                                           const common::NotificationSource& source, 
                                           const common::NotificationDetails& details) {
   DestroyHandle();
 }
 
-void CANScopeDeviceManagerHandle::Init() {
+void CANScopeDeviceHandle::Init() {
   osc_device_handle_.reset(new OscDeviceHandle(device_manager_->osc_device()));
 }
 
-CANScopeDeviceManagerHandle::~CANScopeDeviceManagerHandle() {
+CANScopeDeviceHandle::~CANScopeDeviceHandle() {
   device_manager_ = NULL;
 }
 

@@ -9,8 +9,8 @@
 
 namespace canscope {
 
-// all Open Close CANScopeDeviceManager must through CANScopeDeviceFinder
-// or must add CANScopeDeviceManager Destroy observer
+// all Open Close CANScopeDevice must through CANScopeDeviceFinder
+// or must add CANScopeDevice Destroy observer
 // 
 // Enum Devices and Check Devices online when offine.
 class CANScopeDeviceFinder : public ThreadedLoopRun {
