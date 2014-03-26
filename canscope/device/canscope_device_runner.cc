@@ -4,14 +4,14 @@
 #include "base/path_service.h"
 #include "base/file_util.h"
 
-#include "canscope/device/canscope_device_manager.h"
+#include "canscope/device/canscope_device.h"
 #include "canscope/device/devices_manager.h"
 
 using namespace base;
 
 namespace canscope {
 
-CANScopeRunner::CANScopeRunner(CANScopeDeviceManager* canscope)
+CANScopeRunner::CANScopeRunner(CANScopeDevice* canscope)
     : canscope_(canscope)
     , inited_(false)
     // when runner is create the device is online,
