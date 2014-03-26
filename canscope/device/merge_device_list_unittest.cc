@@ -1,6 +1,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 #include "canscope/device/canscope_device_finder.h"
+#include "canscope/device/devices_manager_observer.h"
 
 #include "base/vlog.h"
 
