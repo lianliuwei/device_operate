@@ -5,7 +5,7 @@
 #include "base/file_util.h"
 
 #include "canscope/device/usb/usb_port.h"
-#include "canscope/device/usb/device_info.h"
+#include "canscope/device/register/device_info.h"
 
 using namespace canscope;
 
