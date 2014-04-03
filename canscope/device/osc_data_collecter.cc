@@ -5,8 +5,9 @@
 #include "canscope/device/register/scope_ctrl_register.h"
 #include "canscope/device/register/canscope_device_register_constants.h"
 
-using namespace canscope::device;
+using namespace base;
 using namespace device;
+using namespace canscope::device;
 
 namespace canscope {
 
@@ -20,9 +21,19 @@ DataCollecter::LoopState OscDataCollecter::OnLoopRun() {
       case STATE_LOAD_CALIBRATE:
         DoLoadCalibrate(&loop_state);
         break;
+      
+      case STATE_PRE_COLLECT:
+        DoPreCollect(&loop_state);
+        break;
+
+      case STATE_CHECK_COLLECT:
+        DoCheckCollect(&loop_state);
+        break;
+      
       case STATE_COLLECT:
         DoCollect(&loop_state);
         break;
+      
       default:
         NOTREACHED();
         return STOP;
@@ -38,7 +49,7 @@ void OscDataCollecter::DoLoadCalibrate(LoopState* loop_state) {
   // TODO add load Calibrate
   calibrated = true;
 
-  next_state_ = STATE_COLLECT;
+  next_state_ = STATE_PRE_COLLECT;
   *loop_state = IMMEDIATE;
   return;
 }
@@ -46,6 +57,7 @@ void OscDataCollecter::DoLoadCalibrate(LoopState* loop_state) {
 void OscDataCollecter::SaveError(Error error) {
   rv_ = error;
   // TODO may be save current stack
+  LOG(INFO) << "OscDataCollecter stop by: " << ErrorToString(error);
 }
 
 void OscDataCollecter::DeviceOffine() {
@@ -63,31 +75,59 @@ do { \
   } \
 } while (0)
 
-// TODO collect algorithm is wrong, is depend on trigger config
-// add a new state for long time wait for trigger trig : AutoTime is large
-void OscDataCollecter::DoCollect(LoopState* loop_state) {
+void OscDataCollecter::DoPreCollect(LoopState* loop_state) {
   *loop_state = STOP;
 
   Error error = OK;
   error = StartScope();
   CHECK_DEVICE(error);
+  
+  bool limit_time_ = GetLimitTime(&time_delta_);
+  start_time_ = Time::Now();
+  next_state_ = STATE_CHECK_COLLECT;
+  *loop_state = IMMEDIATE;
+}
+
+void OscDataCollecter::DoCheckCollect(LoopState* loop_state) {
+  *loop_state = STOP;
+
+  Error error = OK;
+  
+  if (limit_time_) {
+    if (Time::Now() - start_time_ > time_delta_) {
+      CHECK_DEVICE(ERR_OSC_DEVICE_TIMEOUT_NOTTRIG);
+    }
+  }
+
   for (int i = 0; i < kOscCollectUpdateStateCount; ++i) {
     error = UpdateTriggerState();
     CHECK_DEVICE(error);
-    if (IsCollected())
-      break;
+    if (IsCollected()) {
+      next_state_ = STATE_COLLECT;
+      *loop_state = IMMEDIATE;
+      return;
+    }
     if (i == kOscCollectUpdateStateCount - 1) {
       DeviceOffine();
       return;
     }
     SleepMs(kOscCollectUpdateStateInterval);
   }
+  *loop_state = NEXT_LOOP;
+}
+
+void OscDataCollecter::DoCollect(LoopState* loop_state) {
+  *loop_state = STOP;
+
+  Error error = OK;
+
   OscRawDataHandle raw_data;
   bool ret = AllocOscRawData(&raw_data, osc_device_->device_type(), LastConfig());
 
   if (!ret) {
     LOG(WARNING) << "OscRawData pool full. may other part memory leak OscRawData";
     // TODO notify something
+    *loop_state = NEXT_LOOP;
     return;
   }
 
@@ -175,6 +215,18 @@ bool OscDataCollecter::AllocOscRawData(OscRawDataHandle* raw_data,
   }
   *raw_data = pool_raw_data;
   return true;
+}
+
+bool OscDataCollecter::GetLimitTime(base::TimeDelta* time_delta) {
+  if (osc_device_->trigger_mode.value() == kAuto) {
+    *time_delta = TimeDelta::FromMicroseconds(osc_device_->time_param.value());
+    // use mini 
+    if ((*time_delta) < TimeDelta::FromMilliseconds(kOscCollectMiniTimeLimit)) {
+      *time_delta = TimeDelta::FromMilliseconds(kOscCollectMiniTimeLimit);
+    }
+    return true;
+  }
+  return false;
 }
 
 } // namespace canscope

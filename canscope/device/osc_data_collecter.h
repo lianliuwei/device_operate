@@ -1,5 +1,7 @@
 #pragma once
 
+#include "base/time.h"
+
 #include "device/register_memory.h"
 #include "device/sequenced_bulk_queue.h"
 #include "device/memory_usage_pool.h"
@@ -24,11 +26,14 @@ public:
   
   enum State {
     STATE_LOAD_CALIBRATE,
+    STATE_PRE_COLLECT,
+    STATE_CHECK_COLLECT,
     STATE_COLLECT,
     STATE_NONE,
   };
   // 
   scoped_refptr<OscRawDataQueue> RawDataQueue() { return queue_; }
+
 private:
   virtual ~OscDataCollecter() {}
 
@@ -39,9 +44,14 @@ private:
   
   device::Error DoLoop();
   void DoLoadCalibrate(LoopState* loop_state);
+  void DoPreCollect(LoopState* loop_state);
+  void DoCheckCollect(LoopState* loop_state);
   void DoCollect(LoopState* loop_state);
+
   void SaveError(device::Error error);
   void DeviceOffine();
+
+  bool GetLimitTime(base::TimeDelta* time_delta);
 
   // update property.
   device::Error UpdateTriggerState();
@@ -50,7 +60,6 @@ private:
 
   bool IsCollected();
 
-
   bool AllocOscRawData(OscRawDataHandle* raw_data, 
                        DeviceType type, 
                        OscRawDataDeviceConfigHandle config);
@@ -58,6 +67,7 @@ private:
   bool WriteDevice(::device::RegisterMemory* memory);
   bool ReadDevice(::device::RegisterMemory* memory);
   device::Error ReadData(OscRawDataHandle raw_data);
+  
 
   State next_state_;
 
@@ -74,6 +84,10 @@ private:
 
   scoped_refptr<MemoryUsagePool> pool_;
   scoped_refptr<OscRawDataQueue> queue_;
+
+  bool limit_time_;
+  base::TimeDelta time_delta_;
+  base::Time start_time_;
 };
 
 } // namespace canscope

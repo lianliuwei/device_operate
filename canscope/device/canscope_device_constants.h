@@ -7,6 +7,7 @@ namespace canscope {
 const int kEnumDevicesInterval = 1000;
 const int kOscCollectUpdateStateCount = 5;
 const int kOscCollectUpdateStateInterval = 20;
+const int kOscCollectMiniTimeLimit = 300; // ms
 const bool kDefaultAutoInitDevice = true;
 const bool kDefaultStartOnDeviceOnline = true;
 const bool kDefaultRerunOnbackOnline = true;
