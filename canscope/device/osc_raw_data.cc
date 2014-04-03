@@ -52,20 +52,9 @@ OscRawData::~OscRawData() {
   }
 }
 
-int OscRawData::size() const {
-  return size_;
-}
 
 int OscRawData::chnl_size() const {
   return size() / 2;
-}
-
-const uint8* OscRawData::data() const {
-  return &raw_data_[0];
-}
-
-uint8* OscRawData::data() {
-  return &raw_data_[0];
 }
 
 const OscDeviceProperty* OscRawData::property() const {

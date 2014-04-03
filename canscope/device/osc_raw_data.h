@@ -38,10 +38,10 @@ class OscRawData : public base::RefCountedThreadSafe<OscRawData> {
 public:
   OscRawData(DeviceType type, OscRawDataDeviceConfigHandle property);
 
-  int size() const;
+  int size() const { return size_; }
   int chnl_size() const;
-  uint8* data();
-  const uint8* data() const;
+  uint8* data() { return raw_data_; }
+  const uint8* data() const { return raw_data_; }
   DeviceType type() const { return type_; }
 
   OscDeviceProperty* property();
