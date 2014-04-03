@@ -108,18 +108,17 @@ bool SequencedBulkQueueBase::WaitForManyReader::WaitTimeout(base::TimeDelta delt
        ++it) {
       event_list.push_back(&((*it)->event_));
   }
+
   size_t index = TimedWaitMany(&(event_list[0]), event_list.size(), delta);
-  bool is_timeout = true;
   for (std::set<ReaderBase*>::iterator it = need_check.begin();
        it != need_check.end();
        ++it) {
     ret = (*it)->WaitBack();
     if (ret) {
       finish_list_.insert(*(it));
-      is_timeout = false;
     }
   }
-  return !is_timeout;
+  return finish_list_.size() != 0;
 }
 
 bool SequencedBulkQueueBase::ReaderBase::WaitFront() {
