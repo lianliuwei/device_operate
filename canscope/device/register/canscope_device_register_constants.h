@@ -26,6 +26,17 @@ static const uint32 kDeviceInfoSize = kDeviceInfoEnvTempOffset + 0x2 + 0x12;
 
 // EP1
 static const uint32 kBaseAddr = 0x82000000;
+// sja1000 register
+static const uint32 kSJA1000Addr = kBaseAddr + 0x0;
+static const uint32 kSJABtrOffset = 0x0;
+static const uint32 kSJASlientOffset = 0x2;
+static const uint32 kSJAFrameDataOffset = 0x4;
+static const uint32 kSJASendStateOffset = 0x14;
+static const uint32 kSJASAlcOffset = kSJASendStateOffset;
+static const uint32 kSJASEccOffset = kSJASendStateOffset + 1;
+static const uint32 kSJAIntOffset = kSJASendStateOffset + 2;
+static const uint32 kSJAStateOffset = kSJASendStateOffset + 3;
+static const int kSJA1000Size = kSJASendStateOffset + 0x4;
 // soft diff register
 static const uint32 kSoftDiffAddr = kBaseAddr + 0xC0;
 static const uint32 kSysCfgOffset = 0x3;
