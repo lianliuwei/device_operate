@@ -53,6 +53,12 @@ static const uint32 kChZerohCanhOffset = 0x18;
 static const uint32 kChZerohCanlOffset = 0x19;
 static const uint32 kChZerohCandiffOffset = 0x1A;
 static const int kSoftDiffSize = kChZerohCandiffOffset + 0x1 + 0x1;
+// frame storage register
+static const uint32 kFrameStorageAddr = kBaseAddr + 0x100;
+static const uint32 kFrameDepthOffset = 0x0;
+static const uint32 kFrameNumOffset = 0x4;
+static const uint32 kFrameOverFlowOffset = 0x8;
+static const int kFrameStorageSize = kFrameOverFlowOffset + 0x4;
 // analog ctrl register
 static const uint32 kAnalogCtrlAddr = kBaseAddr + 0x140;
 static const uint32 kGainCh1Offset = 0x8;
