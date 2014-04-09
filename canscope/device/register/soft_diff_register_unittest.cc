@@ -8,7 +8,8 @@ using namespace canscope;
 
 TEST(SoftDiffRegisterTest, SetContentAndCheckProperty) {
   uint8 soft_diff_content[0x1C] 
-      = {0x0, 0X1, 0x2, // reserve
+      = {0x00, 0X14, // sja_btr
+         0x2, // reserve
          0x80, // sys_cfg
          0x4, 0x5, 0x6, 0x7, // reserve
          4, // CAN-H sens
@@ -21,8 +22,8 @@ TEST(SoftDiffRegisterTest, SetContentAndCheckProperty) {
          0, // reserve
          1, // diff-ctrl
          2, 3, 4,  // reserve
-         5, // filtering
-         6, 7, 8,// reserve
+         5, 0, // fil_div
+         7, 8,// reserve
          0x1, // CAN-H zero h
          0x3, // CAN-L zero h
          0x5, // CAN-DIFF zero h
@@ -32,6 +33,7 @@ TEST(SoftDiffRegisterTest, SetContentAndCheckProperty) {
   memcpy(soft_diff.memory.buffer(), soft_diff_content, 
       arraysize(soft_diff_content));
 
+  EXPECT_EQ(0x1400, soft_diff.sja_btr.value());
   EXPECT_EQ(true, soft_diff.sys_cfg.value());
   EXPECT_EQ(4, soft_diff.ch_sens_canh.value());
   EXPECT_EQ(16, soft_diff.ch_sens_canl.value());
@@ -40,6 +42,6 @@ TEST(SoftDiffRegisterTest, SetContentAndCheckProperty) {
   EXPECT_EQ(0x0304, soft_diff.ch_zero_canl.value());
   EXPECT_EQ(0x0506, soft_diff.ch_zero_candiff.value());
   EXPECT_EQ(true, soft_diff.diff_ctrl.value());
-  EXPECT_EQ(5, soft_diff.filtering.value());
+  EXPECT_EQ(5, soft_diff.fil_div.value());
 
 }

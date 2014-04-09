@@ -10,6 +10,7 @@ class SoftDiffRegister {
 public:
   ::device::RegisterMemory memory;
 
+  Uint16Bind sja_btr;
   BoolBind  sys_cfg;
   Uint8Bind ch_sens_canh;
   Uint8Bind ch_sens_canl;
@@ -19,7 +20,7 @@ public:
   Uint16SplitBind ch_zero_canl;
   Uint16SplitBind ch_zero_candiff;
   
-  Uint8Bind filtering;
+  Uint16Bind fil_div;
   BoolBind diff_ctrl;
 
   SoftDiffRegister();

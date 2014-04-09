@@ -39,6 +39,7 @@ static const uint32 kSJAStateOffset = kSJASendStateOffset + 3;
 static const int kSJA1000Size = kSJASendStateOffset + 0x4;
 // soft diff register
 static const uint32 kSoftDiffAddr = kBaseAddr + 0xC0;
+static const uint32 kSjaBtrOffset = 0x0;
 static const uint32 kSysCfgOffset = 0x3;
 static const uint32 kChSensCanhOffset = 0x8;
 static const uint32 kChSensCanlOffset = 0x9;
