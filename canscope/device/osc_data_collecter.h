@@ -42,7 +42,6 @@ private:
 
   bool calibrated;
   
-  device::Error DoLoop();
   void DoLoadCalibrate(LoopState* loop_state);
   void DoPreCollect(LoopState* loop_state);
   void DoCheckCollect(LoopState* loop_state);
