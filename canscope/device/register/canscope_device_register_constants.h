@@ -37,6 +37,14 @@ static const uint32 kSJASEccOffset = kSJASendStateOffset + 1;
 static const uint32 kSJAIntOffset = kSJASendStateOffset + 2;
 static const uint32 kSJAStateOffset = kSJASendStateOffset + 3;
 static const int kSJA1000Size = kSJASendStateOffset + 0x4;
+// wave storage register
+static const uint32 kWaveStorageAddr = kBaseAddr + 0x80;
+static const uint32 kFrameLenOffset = kWaveStorageAddr + 0x4;
+static const uint32 kWaveStartOffset = kWaveStorageAddr + 0x8;
+static const uint32 kWEaveEndOffset = kWaveStorageAddr + 0xC;
+static const uint32 kDivCoreOffset = kWaveStorageAddr + 0x10;
+static const uint32 KWaveLostOffset = kWaveStorageAddr + 0x14;
+static const int kWaveStorageSize = KWaveLostOffset + 0x4;
 // soft diff register
 static const uint32 kSoftDiffAddr = kBaseAddr + 0xC0;
 static const uint32 kSjaBtrOffset = 0x0;
