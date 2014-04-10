@@ -39,11 +39,11 @@ static const uint32 kSJAStateOffset = kSJASendStateOffset + 3;
 static const int kSJA1000Size = kSJASendStateOffset + 0x4;
 // wave storage register
 static const uint32 kWaveStorageAddr = kBaseAddr + 0x80;
-static const uint32 kFrameLenOffset = kWaveStorageAddr + 0x4;
-static const uint32 kWaveStartOffset = kWaveStorageAddr + 0x8;
-static const uint32 kWEaveEndOffset = kWaveStorageAddr + 0xC;
-static const uint32 kDivCoreOffset = kWaveStorageAddr + 0x10;
-static const uint32 KWaveLostOffset = kWaveStorageAddr + 0x14;
+static const uint32 kFrameLenOffset = 0x4;
+static const uint32 kWaveStartOffset = 0x8;
+static const uint32 kWEaveEndOffset = 0xC;
+static const uint32 kDivCoreOffset = 0x10;
+static const uint32 KWaveLostOffset = 0x14;
 static const int kWaveStorageSize = KWaveLostOffset + 0x4;
 // soft diff register
 static const uint32 kSoftDiffAddr = kBaseAddr + 0xC0;
@@ -67,6 +67,12 @@ static const uint32 kFrameDepthOffset = 0x0;
 static const uint32 kFrameNumOffset = 0x4;
 static const uint32 kFrameOverFlowOffset = 0x8;
 static const int kFrameStorageSize = kFrameOverFlowOffset + 0x4;
+// wave read ctrl register
+static const uint32 kWaveReadCtrlAddr = kBaseAddr + 0x110;
+static const uint32 kReadStartOffset = 0x0;
+static const uint32 kSectionStartOffset = 0x4;
+static const uint32 kSectionEndOffset = 0x8;
+static const int kWaveReadCtrlSize = kSectionEndOffset + 0x4;
 // analog ctrl register
 static const uint32 kAnalogCtrlAddr = kBaseAddr + 0x140;
 static const uint32 kGainCh1Offset = 0x8;
@@ -103,6 +109,21 @@ static const int kTrigger2Size = kTrigTimeOffset + 0x4;
 static const uint32 kScopeCtrlAddr = kBaseAddr + 0x210;
 static const uint32 kScopeCtrlOffset = 0x0;
 static const int kScopeCtrlSize = kScopeCtrlOffset + 0x4;
+// fpga send register
+static const uint32 kFpgaSendAddr = kBaseAddr + 0x800;
+static const uint32 kBtrDivOffset = 0x0;
+static const uint32 kBitNumOffset = 0x2;
+static const uint32 kSendNumOffset = 0x3;
+static const uint32 kFpgaSendFrameDataOffset = 0x4;
+static const uint32 kAckBitOffset = 0x18;
+static const uint32 kAckOffset = 0x19;
+static const uint32 kSendStateOffset = 0x1C;
+static const uint32 kAckStateOffset = 0x1C;
+static const uint32 kDstbStartOffset = 0x20;
+static const uint32 kDstbEndOffset = 0x22;
+static const uint32 kDstbDataOffset = 0x24;
+static const uint32 kDstbOffset = 0x38;
+static const int kFpgaSendSize = kDstbOffset + 0x4;
 
 // EP2
 
