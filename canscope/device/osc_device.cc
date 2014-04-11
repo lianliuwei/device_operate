@@ -147,7 +147,6 @@ void OscDevice::SetSoftDiff(Chnl chnl) {
   } else {
     NOTREACHED();
   }
-  soft_diff_.filtering.set_value(5);
   soft_diff_.diff_ctrl.set_value(GetDiffCtrl(diff_ctrl.value()));
 }
 

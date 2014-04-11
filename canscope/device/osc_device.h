@@ -68,7 +68,7 @@ public:
   canscope::DeviceType device_type() const { return device_type_; }
 
 private:
-  // DeviceBase
+  // implement DeviceBase
   virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { return &prefs_; }
 
   // set register according to property
