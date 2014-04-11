@@ -26,5 +26,13 @@ extern const char kOscTriggerSens[];
 extern const char kOscCompare[];
 extern const char kOscTriggerVolt[];
 extern const char kOscTimeParam[];
+// FrameDevice
+extern const char kFrameDevice[];
+extern const char kFrameDeviceEnable[];
+extern const char kFrameAckEnable[];
+extern const char kFrameSjaBtr[];
+extern const char kFrameFrameStoragePercent[];
+extern const char kFrameBitSampleRate[];
+extern const char kFrameBit[];
 
 }; // namespace canscope

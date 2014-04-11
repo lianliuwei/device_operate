@@ -13,7 +13,8 @@ const bool kDefaultStartOnDeviceOnline = true;
 const bool kDefaultRerunOnbackOnline = true;
 const int kOscMemoryUsage = 100 * 1024* 1024; // 100MB
 const int kOscMaxFreq = 30; // real speed can be very high > 500
-
+const int kMaxBaudRate = 100*1000*1000; // 100M
+const int kFrameSize = 48;
 // TODO move to canscope_device_util.h
 inline void SleepMs(int64 ms) {
   base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(ms));
@@ -34,6 +35,16 @@ inline int DeviceK(DeviceType device_type) {
 inline size_t DeviceTypeDataSize(DeviceType type) {
   // two chnl
   return DeviceK(type) * 1000 * 2;
+}
+
+inline uint32 DeviceStorageSize(DeviceType type) {
+  return 512 * 1024 * 1024;
+}
+
+// (Bit/S)=100000000/((FIL_DIV+1)*16)
+inline uint16 BaudRateToFilDiv(int baud_rate) {
+  DCHECK(baud_rate > 0);
+  return (kMaxBaudRate / baud_rate) / 16 - 1;
 }
 
 }; // namespace canscope
