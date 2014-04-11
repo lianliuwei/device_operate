@@ -33,6 +33,14 @@ void SJA1000Register::set_frame_data(const FrameData& data) {
   memcpy(memory.PtrByRelative(kSJAFrameDataOffset), &(data.data), sizeof(data.data));
 }
 
+int SJA1000Register::SysOffset() const {
+  return kSJABtrOffset;
+}
+
+int SJA1000Register::SysSize() const {
+  return 4;
+}
+
 } // namespace canscope
 
 

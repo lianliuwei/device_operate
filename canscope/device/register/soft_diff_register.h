@@ -26,6 +26,14 @@ public:
   SoftDiffRegister();
   ~SoftDiffRegister() {}
 
+  // sys range
+  int SysOffset() const;
+  int SysSize() const;
+  
+  // fil_div range
+  int FilDivOffset() const;
+  int FilDivSize() const;
+
 private:
   DISALLOW_COPY_AND_ASSIGN(SoftDiffRegister);
 };

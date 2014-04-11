@@ -26,4 +26,22 @@ SoftDiffRegister::SoftDiffRegister()
 
 }
 
+int SoftDiffRegister::SysOffset() const {
+  return kSjaBtrOffset;
+}
+
+int SoftDiffRegister::SysSize() const {
+  return 4;
+}
+
+int SoftDiffRegister::FilDivOffset() const {
+  return kFilteringOffset;
+}
+
+int SoftDiffRegister::FilDivSize() const {
+  return 2;
+}
+
+
+
 } // namespace canscope

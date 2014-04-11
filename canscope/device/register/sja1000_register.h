@@ -34,6 +34,10 @@ public:
   SJA1000Register();
   ~SJA1000Register() {}
 
+  // sys range
+  int SysOffset() const;
+  int SysSize() const;
+
 private:
   DISALLOW_COPY_AND_ASSIGN(SJA1000Register);
 };
