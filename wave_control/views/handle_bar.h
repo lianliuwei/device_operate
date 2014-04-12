@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+
 #include "wave_control/views/handle_bar_model_observer.h"
 #include "wave_control/views/handle.h"
 

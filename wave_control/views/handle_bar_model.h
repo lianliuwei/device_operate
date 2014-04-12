@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/string16.h"
+#include "ui/gfx/image/image.h"
 
 class HandleBarModelObserver;
 
@@ -24,7 +25,7 @@ public:
   // mode of how to displayed the Text and Icon, may be Text only, Icon only,
   // Text and Icon.
   // TODO can using gfx/image replace?
-  virtual SkBitmap GetIcon(int ID) = 0;
+  virtual const gfx::Image& GetIcon(int ID) = 0;
 
   // get the offset of the Handle, the handle is to represent the offset of the
   // a specific range in pixel. the Icon and Text offset to the offset is 

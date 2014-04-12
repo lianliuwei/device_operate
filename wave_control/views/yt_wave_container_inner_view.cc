@@ -25,7 +25,7 @@ public:
   virtual int GetID(int index) { return index; } // index == id
   virtual string16 GetText(int ID);
   virtual SkColor GetColor(int ID);
-  virtual SkBitmap GetIcon(int ID);
+  virtual const gfx::Image& GetIcon(int ID);
   virtual int GetOffset(int ID);
   virtual bool IsEnable(int ID) { return true; }
   virtual bool IsVisible(int ID);
@@ -69,7 +69,7 @@ SkColor HorizOffsetBar::GetColor(int ID) {
   return wave_group_->horizontal_at(ID)->color();
 }
 
-SkBitmap HorizOffsetBar::GetIcon(int ID) {
+const gfx::Image& HorizOffsetBar::GetIcon(int ID) {
   return wave_group_->horizontal_at(ID)->icon();
 }
 
@@ -110,7 +110,7 @@ public:
   virtual int GetID(int index) { return index; } // index == id
   virtual string16 GetText(int ID);
   virtual SkColor GetColor(int ID);
-  virtual SkBitmap GetIcon(int ID);
+  virtual const gfx::Image& GetIcon(int ID);
   virtual int GetOffset(int ID);
   virtual bool IsEnable(int ID) { return true; }
   virtual bool IsVisible(int ID);
@@ -192,7 +192,7 @@ SkColor TriggerBar::GetColor(int ID) {
   return wave_group_->trigger_at(ID)->color();
 }
 
-SkBitmap TriggerBar::GetIcon(int ID) {
+const gfx::Image& TriggerBar::GetIcon(int ID) {
   return wave_group_->trigger_at(ID)->icon();
 }
 
@@ -256,7 +256,7 @@ public:
   virtual int GetID(int index) { return index; } // index == id
   virtual string16 GetText(int ID);
   virtual SkColor GetColor(int ID);
-  virtual SkBitmap GetIcon(int ID);
+  virtual const gfx::Image& GetIcon(int ID);
   virtual int GetOffset(int ID);
   virtual bool IsEnable(int ID) { return true; }
   virtual bool IsVisible(int ID);
@@ -372,7 +372,7 @@ SkColor WaveBar::GetColor(int ID) {
   }
 }
 
-SkBitmap WaveBar::GetIcon(int ID) {
+const gfx::Image& WaveBar::GetIcon(int ID) {
   if (ID < wave_group_->vertical_count()) {
     return wave_group_->vertical_at(ID)->icon();
   } else {
@@ -485,6 +485,10 @@ void YTWaveVisitor::AddWave(Wave* wave) {
 void YTWaveVisitor::RemoveWave(Wave* wave) {
   type_ = kRemoveWave;
   wave->Accept(this);
+}
+
+void YTWaveVisitor::SetAxis(Wave* wave) {
+  type_ = kSetAxis;
 }
 
 void YTWaveVisitor::VisitOscWave(OscWave* wave) {
@@ -700,5 +704,13 @@ void YTWaveContainerInnerView::UpdateAxis() {
   Wave* wave = container_->GetSelectWave();
   YTWaveVisitor visitor(this);
   visitor.SetAxis(wave);
+}
+
+void YTWaveContainerInnerView::SelectWave(Wave* wave) {
+  container_->SelectWave(wave);
+}
+
+gfx::Transform YTWaveContainerInnerView::SimpleAnaWaveTransform(SimpleAnaWave* ana_wave) {
+  return gfx::Transform();
 }
 

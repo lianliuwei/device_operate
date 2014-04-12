@@ -8,6 +8,7 @@ public:
   // implement WaveContainer
   virtual YTWaveContainer* AsYTWaveContainer() { return this; }
   virtual void Accept(WaveContainerVisitor* visitor);
+  virtual Type type_id() { return WaveContainer::kYT; }
 
   // caller take ownership
   virtual OscWaveGroup* CreateOscWaveGroup();

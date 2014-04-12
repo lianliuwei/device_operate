@@ -2,8 +2,8 @@
 
 #include "base/string16.h"
 #include "base/supports_user_data.h"
+#include "ui/gfx/image/image.h"
 #include "third_party/skia/include/core/SkColor.h"
-#include "third_party/skia/include/core/SkBitmap.h"
 
 class WaveControl;
 class WaveContainer;
@@ -35,7 +35,7 @@ public:
 
   virtual string16 name() = 0;
   virtual SkColor color() = 0;
-  virtual SkBitmap icon() = 0;
+  virtual const gfx::Image& icon() = 0;
 
 private:
   WaveControl* wave_control_;

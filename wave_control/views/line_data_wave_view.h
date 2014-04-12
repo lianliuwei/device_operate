@@ -38,7 +38,7 @@ public:
   AnaWaveData* line_data() const;
 
   void set_data_transform(const gfx::Transform& data_transform);
-  gfx::Transform data_transform();
+  gfx::Transform data_transform() { return data_transform_; }
 
 private:
   virtual void OnPaint(gfx::Canvas* canvas) OVERRIDE;

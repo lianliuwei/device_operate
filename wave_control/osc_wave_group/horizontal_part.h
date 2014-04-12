@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ui/gfx/image/image.h"
+
 #include "wave_control/wave_range.h"
 
 class OscWave;
@@ -9,7 +11,7 @@ public:
   virtual SkColor color() = 0;
   virtual bool show() = 0;
   virtual string16 text() = 0;
-  virtual SkBitmap icon() = 0;
+  virtual const gfx::Image& icon() = 0;
 
   virtual WaveRange range() = 0;
   virtual WaveRange offset_range() = 0;

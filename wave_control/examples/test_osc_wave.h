@@ -52,7 +52,7 @@ public:
   // implement wave
   virtual string16 name();
   virtual SkColor color();
-  virtual SkBitmap icon();
+  virtual const gfx::Image& icon();
 
   // implement OscWave
   virtual AnaWaveData& Data();
@@ -94,7 +94,7 @@ public:
 public:
   string16 name_;
   SkColor color_;
-  SkBitmap icon_;
+  gfx::Image icon_;
   scoped_ptr<TestAnaData> wave_data_;
   scoped_refptr<Horiz> horiz_;
   scoped_refptr<Vertical> vertical_;

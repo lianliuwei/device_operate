@@ -9,29 +9,32 @@ enum AnaWaveShowStyle {
 
 class SimpleAnaWave : public Wave {
 public:
+  SimpleAnaWave() {}
+  virtual ~SimpleAnaWave() {}
+
   // implement wave
   virtual SimpleAnaWave* AsSimpleAnaWave() OVERRIDE { return this; }
+  virtual Type type_id() const OVERRIDE { return kSimpleAna; }
 
-  AnaWaveData& Data();
+  virtual AnaWaveData& Data() = 0;
 
   // just for save the range, so no notify to the view.
   // all change is done be the view.
-  WaveRange vertical_range();
-  void set_vertical_range(const WaveRange& wave_range);
-  double vertical_offset();
-  void set_vertical_offset(double offset);
+  virtual WaveRange vertical_range() = 0;
+  virtual void set_vertical_range(const WaveRange& wave_range) = 0;
+  virtual double vertical_offset() = 0;
+  virtual void set_vertical_offset(double offset) = 0;
 
-  WaveRange horizontal_range();
-  void set_horizontal_range(const WaveRange& wave_range);
-  double horizontal_offset();
-  void set_horizontal_offset(double offset);
+  virtual WaveRange horizontal_range() = 0;
+  virtual void set_horizontal_range(const WaveRange& wave_range) = 0;
+  virtual double horizontal_offset() = 0;
+  virtual void set_horizontal_offset(double offset) = 0;
 
   // command
   // for do FFT.
-  void DoRangeCommand(int command_id, WaveRange range);
+  virtual void DoRangeCommand(int command_id, WaveRange range) = 0;
  
-  void DoCommand(int command_id);
-
+  virtual void DoCommand(int command_id) = 0;
 
 private:
 

@@ -2,11 +2,14 @@
   'type': 'executable',
   'dependencies': [
     '<(DEPTH)/base/base.gyp:base',
+    '<(DEPTH)/base/base.gyp:base_i18n',
     '<(DEPTH)/skia/skia.gyp:skia',
     '<(DEPTH)/ui/ui.gyp:ui',
     '<(DEPTH)/ui/ui.gyp:ui_resources',
     '<(DEPTH)/chrome/chrome_resources.gyp:packed_resources',
     '<(DEPTH)/ui/views/views.gyp:views',
+    '<(DEPTH)/third_party/icu/icu.gyp:icui18n',
+    '<(DEPTH)/third_party/icu/icu.gyp:icuuc', '<(DEPTH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
   ],
   'include_dirs': [
    '../..',
@@ -30,8 +33,8 @@
       },
       'msvs_settings': {
         'VCLinkerTool': {
-          #   2 == /SUBSYSTEM:CONSOLE
-          'SubSystem': '2',
+          #   1 == /SUBSYSTEM:CONSOLE
+          'SubSystem': '1',
         },
       }, 
     }],

@@ -1,5 +1,10 @@
 #include "wave_control/views/wave_control_view_factory.h"
 
+#include "base/memory/singleton.h"
+
+WaveControlViewFactory* WaveControlViewFactory::GetInstance() {
+  return Singleton<WaveControlViewFactory>::get();
+}
 
 WaveControlView* WaveControlViewFactory::Create(WaveControl* wave_control) {
   DCHECK(wave_control);

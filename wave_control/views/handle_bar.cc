@@ -125,9 +125,14 @@ void HandleBar::SetHandle(Handle* handle, int ID) {
   handle->SetHoverColor(color);
   handle->ClearMaxTextSize(); // so can be small
   handle->SetText(model_->GetText(ID));
-  handle->SetIcon(model_->GetIcon(ID));
-  handle->SetHoverIcon(model_->GetIcon(ID));
-  handle->SetPushedIcon(model_->GetIcon(ID));
+  const gfx::Image image = model_->GetIcon(ID);
+  if (!image.IsEmpty()) {
+    const gfx::ImageSkia* skia = image.ToImageSkia();
+    handle->SetIcon(*skia);
+    handle->SetHoverIcon(*skia);
+    handle->SetPushedIcon(*skia);
+  }
+  
   handle->set_tag(ID);
   handle->set_icon_placement(TextButton::ICON_ON_LEFT);
   handle->set_alignment(TextButton::ALIGN_CENTER);

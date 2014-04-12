@@ -1,6 +1,6 @@
 #include "wave_control/views/wave_control_view.h"
 
-#include "views/layout/box_layout.h"
+#include "ui/views/layout/box_layout.h"
 
 #include "wave_control/views/wave_control_view_factory.h"
 #include "wave_control/views/wave_control_views_constants.h"

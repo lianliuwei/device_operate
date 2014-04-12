@@ -21,7 +21,7 @@ public:
     kXY,
   };
 
-  Type type_id();
+  virtual Type type_id() = 0;
 
   virtual YTWaveContainer* AsYTWaveContainer() { return NULL; }
   virtual YLWaveContainer* AsYLWaveContainer() { return NULL; }

@@ -52,6 +52,33 @@ void OscWaveGroup::NotifyTriggerMoved(int id) {
   FOR_EACH_OBSERVER(OscWaveGroupObserver, trigger_observer_, OnPartMoved(id));
 }
 
+void OscWaveGroup::NotifyHorizontalGroupChanged() {
+  FOR_EACH_OBSERVER(OscWaveGroupObserver, horizontal_observer_, OnPartGroupChanged());
+}
+
+void OscWaveGroup::NotifyHorizontalChanged(int id) {
+  FOR_EACH_OBSERVER(OscWaveGroupObserver, horizontal_observer_, OnPartChanged(id));
+
+}
+
+void OscWaveGroup::NotifyHorizontalMoved(int id) {
+  FOR_EACH_OBSERVER(OscWaveGroupObserver, horizontal_observer_, OnPartMoved(id));
+
+}
+
+void OscWaveGroup::NotifyVerticalGroupChanged() {
+  FOR_EACH_OBSERVER(OscWaveGroupObserver, vertical_observer_, OnPartGroupChanged());
+
+}
+
+void OscWaveGroup::NotifyVerticalChanged(int id) {
+  FOR_EACH_OBSERVER(OscWaveGroupObserver, vertical_observer_, OnPartChanged(id));
+}
+
+void OscWaveGroup::NotifyVerticalMoved(int id) {
+  FOR_EACH_OBSERVER(OscWaveGroupObserver, vertical_observer_, OnPartMoved(id));
+}
+
 OscWaveGroup::~OscWaveGroup() {
   DCHECK(triggers_.size() == 0);
   DCHECK(horizontals_.size() == 0);

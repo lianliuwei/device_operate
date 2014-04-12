@@ -129,7 +129,7 @@ SkColor TestOscWave::color() {
   return color_;
 }
 
-SkBitmap TestOscWave::icon() {
+const gfx::Image& TestOscWave::icon() {
   return icon_;
 }
 

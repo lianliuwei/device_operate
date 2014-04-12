@@ -36,6 +36,7 @@
         'ana_wave_data.h',
         'ana_wave_data.cc',
         'wave_range.h',
+        'wave_range.cc',
         
         'wave_view.h',
         

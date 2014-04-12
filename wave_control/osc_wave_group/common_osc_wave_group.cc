@@ -116,6 +116,20 @@ void CommonOscWaveGroup::OnTriggerDelete(TriggerPart* trigger) {
   trigger_changed_ = true;
 }
 
+void CommonOscWaveGroup::OnHorizontalDelete(HorizontalPart* horizontal) {
+  Horizontals::iterator it = find(horizontals_.begin(), horizontals_.end(), horizontal);
+  DCHECK(it != horizontals_.end());
+  horizontals_.erase(it);
+  horizontal_changed_ = true;
+}
+
+void CommonOscWaveGroup::OnVerticalDelete(VerticalPart* vertical) {
+  Verticals::iterator it = find(verticals_.begin(), verticals_.end(), vertical);
+  DCHECK(it != verticals_.end());
+  verticals_.erase(it);
+  vertical_changed_ = true;
+}
+
 void CommonOscWaveGroup::OnOscWaveChanged(OscWave* osc_wave, int change_set) {
   OscWaveRecord& record = GetOscWaveRecord(osc_wave);
 
@@ -213,9 +227,9 @@ string16 RefTriggerPart::text() {
 #include "ui/base/resource/resource_bundle.h"
 #include "grit/ui_resources.h"
 
-SkBitmap RefTriggerPart::icon() {
+const gfx::Image& RefTriggerPart::icon() {
   ResourceBundle& rb = ResourceBundle::GetSharedInstance();
-  return *(rb.GetImageNamed(IDR_CLOSE_SA_H));
+  return rb.GetImageNamed(IDR_CLOSE_SA_H);
 }
 
 WaveRange RefTriggerPart::offset_range() {
@@ -262,9 +276,9 @@ string16 RefHorizontalPart::text() {
   return L"";
 }
 
-SkBitmap RefHorizontalPart::icon() {
+const gfx::Image& RefHorizontalPart::icon() {
   ResourceBundle& rb = ResourceBundle::GetSharedInstance();
-  return *(rb.GetBitmapNamed(IDR_MENU_ARROW));
+  return rb.GetImageNamed(IDR_MENU_DROPARROW);
 }
 
 WaveRange RefHorizontalPart::range() {
@@ -311,8 +325,8 @@ string16 RefVerticalPart::text() {
   return osc_wave_->name();
 }
 
-SkBitmap RefVerticalPart::icon() {
-  return SkBitmap();
+const gfx::Image& RefVerticalPart::icon() {
+  return icon_;
 }
 WaveRange RefVerticalPart::range() {
   return osc_wave_->vertical_range();

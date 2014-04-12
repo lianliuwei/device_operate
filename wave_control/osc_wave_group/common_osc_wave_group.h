@@ -13,7 +13,7 @@ public:
   virtual SkColor color();
   virtual bool show();
   virtual string16 text();
-  virtual SkBitmap icon();
+  virtual const gfx::Image& icon();
   virtual WaveRange offset_range();
   virtual double offset();
   virtual void set_offset(double offset);
@@ -40,7 +40,7 @@ public:
   virtual SkColor color();
   virtual bool show();
   virtual string16 text();
-  virtual SkBitmap icon();
+  virtual const gfx::Image& icon();
   virtual WaveRange range();
   virtual WaveRange offset_range();
   virtual double offset();
@@ -67,7 +67,7 @@ public:
   virtual SkColor color();
   virtual bool show();
   virtual string16 text();
-  virtual SkBitmap icon();
+  virtual const gfx::Image& icon();
   virtual WaveRange range();
   virtual WaveRange offset_range();
   virtual double offset();
@@ -80,7 +80,7 @@ private:
   ~RefVerticalPart();
 
   OscWave* osc_wave_;
-
+  gfx::Image icon_;
   // notify delete
   CommonOscWaveGroup* wave_group_;  
 };

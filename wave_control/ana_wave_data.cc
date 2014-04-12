@@ -10,12 +10,35 @@ double AnaWaveData::GetValue(double offset) {
   DCHECK(data_ptr);
   gfx::Transform transform;
   WaveRange range = data_range();
+  if (size() == 1) {
+    return data_ptr[0];
+  }
   double range_size =  range.end - range.begin;
   transform.Scale(range_size / size() - 1, 1);
   transform.Translate(range.begin, 0);
   int index = TransformReverseX(transform, offset);
   CHECK(index >= 0 && index <= size() - 1);
   return data_ptr[index];
+}
+
+PeakValue AnaWaveData::GetRangePeak(int start, int range_size) {
+  double* data_ptr = data();
+  int data_size = size();
+  DCHECK(data_ptr);
+  DCHECK(start >=0 && start < data_size - 1);
+  DCHECK(range_size > 0 &&  start + range_size - 1 < data_size - 1);
+  double max = data_ptr[0]; 
+  double min = data_ptr[0];
+  for (int i = start; i < start + range_size; ++i) {
+    if (max < data_ptr[i]) {
+      max = data_ptr[i];
+    }
+    if (min > data_ptr[i]) {
+      min = data_ptr[i];
+    }
+  }
+  PeakValue peak = { data_ptr[0], data_ptr[start + range_size - 1], max, min };
+  return peak;
 }
 
 double AnaWaveData::MaxY() {
