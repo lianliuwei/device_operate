@@ -13,14 +13,14 @@ Handle::Handle(HandleBar* bar)
   set_border(NULL); // no need border
 }
 
-bool Handle::OnMousePressed(const views::MouseEvent& event) {
+bool Handle::OnMousePressed(const ui::MouseEvent& event) {
   bool ret = TextButton::OnMousePressed(event);
   mouse_offset_ = bar_->IsHorizontal() ? event.x() : event.y();
   bar_->ActiveHandle(tag());
   return ret;
 }
 
-bool Handle::OnMouseDragged(const MouseEvent& event) {
+bool Handle::OnMouseDragged(const ui::MouseEvent& event) {
   // notify the bar_ to move the handle. the bar_ calculate the handle represent
   // offset and set the model, model set the offset by it's rule(for example only odd)
   // model notify the handleBar to update, finish the handle be moved.

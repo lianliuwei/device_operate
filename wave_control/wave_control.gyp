@@ -7,7 +7,7 @@
         '<(DEPTH)/base/base.gyp:base',
         '<(DEPTH)/ui/ui.gyp:ui',
         '<(DEPTH)/ui/ui.gyp:ui_resources',
-        '<(DEPTH)/views/views.gyp:views',
+        '<(DEPTH)/ui/views/views.gyp:views',
         '<(DEPTH)/skia/skia.gyp:skia',
       ],
       'sources': [
@@ -87,12 +87,6 @@
         'views/transform_util.h',
         'views/transform_util.cc',
         'views/wave_control_views_constants.h',
-        
-        #helper
-        'list_model.h',
-        'list_model_observer.h',
-        'supports_user_data.h',
-        'supports_user_data.cc',
       ],
     }, 
  ],

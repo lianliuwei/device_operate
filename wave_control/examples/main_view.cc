@@ -53,6 +53,7 @@ WaveControl* CreateWaveControl() {
   for (size_t i = 0; i < waves.size(); ++i) {
     wave_control->AddWave(waves[i]);
   }
+  return wave_control;
 }
 
 void ExampleView::Init() {

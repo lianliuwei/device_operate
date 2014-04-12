@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ui/gfx/transform.h"
-#include "views/view.h"
+#include "ui/views/view.h"
 
 #include "wave_control/ana_wave_data.h"
 
@@ -37,23 +37,23 @@ public:
   void set_line_data(AnaWaveData* line_data);
   AnaWaveData* line_data() const;
 
-  void set_data_transform(const ui::Transform& data_transform);
-  ui::Transform data_transform();
+  void set_data_transform(const gfx::Transform& data_transform);
+  gfx::Transform data_transform();
 
 private:
   virtual void OnPaint(gfx::Canvas* canvas) OVERRIDE;
   
   // for test hit on the wave, so we can move the wave
-  virtual bool HitTest(const gfx::Point& l) const OVERRIDE;
+  virtual bool HasHitTestMask() const OVERRIDE;
 
   // for dragged the wave
-  virtual bool OnMouseDragged(const views::MouseEvent& event) OVERRIDE;
+  virtual bool OnMouseDragged(const ui::MouseEvent& event) OVERRIDE;
 
   void PaintWave(gfx::Canvas* canvas);
 
   bool PaintWaveParam(int* vector_start_out, int* vector_end_out,
                       int* plot_begin_out, int* plot_end_out,
-                      ui::Transform* vector_to_real_x_out,
+                      gfx::Transform* vector_to_real_x_out,
                       bool* auto_show_dot_out,
                       bool* need_sample_out);
 private:
@@ -64,6 +64,6 @@ private:
   SkColor dot_color_;
   ShowStyle show_sytle_;
 
-  ui::Transform data_transform_;
+  gfx::Transform data_transform_;
 };
 

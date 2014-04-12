@@ -215,7 +215,7 @@ string16 RefTriggerPart::text() {
 
 SkBitmap RefTriggerPart::icon() {
   ResourceBundle& rb = ResourceBundle::GetSharedInstance();
-  return *(rb.GetBitmapNamed(IDR_CLOSE_SA_H));
+  return *(rb.GetImageNamed(IDR_CLOSE_SA_H));
 }
 
 WaveRange RefTriggerPart::offset_range() {

@@ -1,8 +1,10 @@
 #include "wave_control/views/axis_painter.h"
 
 #include "base/logging.h"
-#include "ui/gfx/canvas_skia.h"
+#include "ui/gfx/canvas.h"
 #include "SkDashPathEffect.h"
+
+using namespace gfx;
 
 // must be very careful with pixel
 
@@ -17,30 +19,32 @@ AxisPainter::AxisPainter(SkColor line, int line_width,
     , v_grid_div_(v_grid_div)
     , h_grid_(h_grid)
     , h_grid_div_(h_grid_div) {
-    CHECK(v_grid_ > 0 && v_grid_div_ > 0 
-        && h_grid_ > 0 && h_grid_div_ > 0) << "grid and grid div must be postive";
-    gfx::Size size = GetMinimumSize();
-    CHECK(line_width_ < size.width() 
-        && line_width_ < size.height()) << "line width is too width";
+  CHECK(v_grid_ > 0 && v_grid_div_ > 0  && h_grid_ > 0 && h_grid_div_ > 0) 
+      << "grid and grid div must be postive";
+  gfx::Size size = GetMinimumSize();
+  CHECK(line_width_ < size.width() && line_width_ < size.height()) 
+      << "line width is too width";
 }
 
-void AxisPainter::Paint(int w, int h, gfx::Canvas* canvas) {
-    gfx::Size size(w, h);
-    CHECK(NormalSize(size));
-    CHECK(size.width() == w && size.height() == h);
-    canvas->Save();
-    PaintGrid(w, h, canvas, true);
-    PaintGrid(w, h, canvas, false);
-    PaintAxis(w, h, canvas, true);
-    PaintAxis(w, h, canvas, false);
-    canvas->Restore();
+void AxisPainter::Paint(gfx::Canvas* canvas, const gfx::Size& in_size) {
+  gfx::Size size = in_size;
+  int w = size.width();
+  int h = size.height();
+  CHECK(NormalSize(size));
+  CHECK(size.width() == w && size.height() == h);
+  canvas->Save();
+  PaintGrid(w, h, canvas, true);
+  PaintGrid(w, h, canvas, false);
+  PaintAxis(w, h, canvas, true);
+  PaintAxis(w, h, canvas, false);
+  canvas->Restore();
 }
 
 void AxisPainter::PaintGrid(int w, int h, gfx::Canvas* canvas, bool vertical) {
-    SkPaint paint;
-    paint.setStyle(SkPaint::kStroke_Style);
-    paint.setStrokeWidth(SkIntToScalar(1));
-    paint.setColor(grid_);
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setStrokeWidth(SkIntToScalar(1));
+  paint.setColor(grid_);
 
 //  too slow
 //  SkScalar intervals[] = { SkIntToScalar(1), SkIntToScalar(1) };
@@ -55,33 +59,17 @@ void AxisPainter::PaintGrid(int w, int h, gfx::Canvas* canvas, bool vertical) {
       continue;
     // the location is start from the 0 sub 1
     if (vertical) {
-      canvas->AsCanvasSkia()->drawLine(SkIntToScalar(0), 
-                                       SkIntToScalar(step*i - 1), 
-                                       SkIntToScalar(w), 
-                                       SkIntToScalar(step*i - 1), 
-                                       paint);
+      canvas->DrawLine(Point(0, step*i - 1), Point(w, step*i - 1), paint);
     } else {
-      canvas->AsCanvasSkia()->drawLine(SkIntToScalar(step*i - 1), 
-                                       SkIntToScalar(0), 
-                                       SkIntToScalar(step*i - 1), 
-                                       SkIntToScalar(h), 
-                                       paint);
+      canvas->DrawLine(Point(step*i - 1 , 0), Point(step*i - 1, h), paint);
     }
   }
     paint.setColor(line_); // using the more obvious color
   // draw the middle line
   if (vertical) {
-    canvas->AsCanvasSkia()->drawLine(SkIntToScalar(0), 
-                                     SkIntToScalar(step*count/2 - 1), 
-                                     SkIntToScalar(w), 
-                                     SkIntToScalar(step*count/2 - 1), 
-                                     paint);
+    canvas->DrawLine(Point(0, step*count/2 - 1), Point(w, step*count/2 - 1), paint);
   } else {
-    canvas->AsCanvasSkia()->drawLine(SkIntToScalar(step*count/2 - 1), 
-                                     SkIntToScalar(0), 
-                                     SkIntToScalar(step*count/2 - 1), 
-                                     SkIntToScalar(h), 
-                                     paint);
+    canvas->DrawLine(Point(step*count/2 - 1, 0), Point(step*count/2 - 1, h), paint);
   }
 }
 
@@ -95,17 +83,13 @@ void AxisPainter::PaintAxis(int w, int h, gfx::Canvas* canvas, bool vertical) {
   int hwidth = (line_width_ - 1) / 2;
   for (int i = 1; i < count; i++) {
     if (vertical) {
-      canvas->AsCanvasSkia()->drawLine(SkIntToScalar((w+1)/2-1 - hwidth), 
-                                        SkIntToScalar(step*i - 1), 
-                                        SkIntToScalar((w+1)/2-1 + hwidth + 1), 
-                                        SkIntToScalar(step*i - 1), 
-                                        paint);
+      canvas->DrawLine(Point((w+1)/2-1 - hwidth, step*i - 1), 
+                       Point((w+1)/2-1 + hwidth + 1, step*i - 1), 
+                       paint);
     } else {
-      canvas->AsCanvasSkia()->drawLine(SkIntToScalar(step*i - 1), 
-                                        SkIntToScalar((h+1)/2-1 - hwidth), 
-                                        SkIntToScalar(step*i - 1), 
-                                        SkIntToScalar((h+1)/2-1 + hwidth + 1), 
-                                        paint);
+      canvas->DrawLine(Point(step*i - 1, (h+1)/2-1 - hwidth), 
+                       Point(step*i - 1, (h+1)/2-1 + hwidth + 1), 
+                       paint);
     }
   }
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "wave_control/list_model.h"
+#include "ui/base/models/list_model.h"
 
 #include "wave_control/wave.h"
 
@@ -31,8 +31,8 @@ public:
 
   int WaveAt(Wave* wave);
   bool HasWave(Wave* wave);
-  bool AddWave(Wave* wave); // may layout the wave
-  bool RemoveWave(Wave* wave);
+  void AddWave(Wave* wave); // may layout the wave
+  void RemoveWave(Wave* wave);
 
 private:
   WaveControl* wave_control_;

@@ -4,9 +4,11 @@
 
 #include "base/logging.h"
 #include "ui/gfx/point.h"
-#include "ui/gfx/canvas_skia.h"
+#include "ui/gfx/canvas.h"
 
 #include "wave_control/views/transform_util.h"
+
+using namespace gfx;
 
 namespace {
 static const int kAutoShowDotThreshold = 10;
@@ -30,7 +32,7 @@ bool RangeIntersect(int* intersect_left, int* intersect_right,
 
 bool LineDataWaveView::PaintWaveParam(int* vector_start_out, int* vector_end_out,
                                       int* plot_begin_out, int* plot_end_out,
-                                      ui::Transform* vector_to_real_x_out,
+                                      gfx::Transform* vector_to_real_x_out,
                                       bool* auto_show_dot_out,
                                       bool* need_sample_out) {
 
@@ -51,10 +53,10 @@ bool LineDataWaveView::PaintWaveParam(int* vector_start_out, int* vector_end_out
   }
 
   int vector_size = static_cast<int>(line_data_->size());
-  ui::Transform vector_to_real_x;
+  gfx::Transform vector_to_real_x;
   // convert to float manual, or the divide is using int lost precision
-  vector_to_real_x.SetScaleX(static_cast<float>(real_length) / (vector_size - 1));
-  vector_to_real_x.SetTranslateX(real_begin);
+  vector_to_real_x.Scale(static_cast<float>(real_length) / (vector_size - 1), 1);
+  vector_to_real_x.Translate(real_begin, 0);
   // get How many point to show
   int vector_start = TransformReverseX(vector_to_real_x, plot_begin);
   int vector_end = TransformReverseX(vector_to_real_x, plot_end);
@@ -92,7 +94,7 @@ void LineDataWaveView::PaintWave(gfx::Canvas* canvas) {
     return;
  
   int vector_start, vector_end, plot_begin, plot_end;
-  ui::Transform vector_to_real_x;
+  gfx::Transform vector_to_real_x;
   bool auto_show_dot, need_sample;
 
   bool ret = PaintWaveParam(&vector_start, &vector_end, 
@@ -117,7 +119,6 @@ void LineDataWaveView::PaintWave(gfx::Canvas* canvas) {
   line_paint.setColor(wave_color_);
   line_paint.setAntiAlias(true);
 
-  SkCanvas* sk_canvas = canvas->AsCanvasSkia();
   AnaWaveData* buffer = line_data_;
   double* data = line_data_->data();
   // need sample for range.
@@ -136,18 +137,14 @@ void LineDataWaveView::PaintWave(gfx::Canvas* canvas) {
       int min = TransformY(data_transform_, peak.max);
       
       if (draw_line) {
-        sk_canvas->drawLine(SkIntToScalar(i), SkIntToScalar(begin_y), 
-                            SkIntToScalar(i + 1), SkIntToScalar(begin), 
-                            line_paint);
-        sk_canvas->drawLine(SkIntToScalar(i), SkIntToScalar(max), 
-                            SkIntToScalar(i), SkIntToScalar(min), 
-                            line_paint);
+        canvas->DrawLine(Point(i, begin_y), Point(i + 1, begin), line_paint);
+        canvas->DrawLine(Point(i, max), Point(i, min), line_paint);
       }
       if (draw_dot) {
-        sk_canvas->drawPoint(SkIntToScalar(i), SkIntToScalar(begin), dot_paint);
-        sk_canvas->drawPoint(SkIntToScalar(i), SkIntToScalar(end), dot_paint);
-        sk_canvas->drawPoint(SkIntToScalar(i), SkIntToScalar(max), dot_paint);
-        sk_canvas->drawPoint(SkIntToScalar(i), SkIntToScalar(min), dot_paint);
+        canvas->DrawPoint(Point(i, begin), dot_paint);
+        canvas->DrawPoint(Point(i, end), dot_paint);
+        canvas->DrawPoint(Point(i, max), dot_paint);
+        canvas->DrawPoint(Point(i, min), dot_paint);
       }
       begin_y = end;
     }
@@ -162,23 +159,19 @@ void LineDataWaveView::PaintWave(gfx::Canvas* canvas) {
       int end_x = TransformX(vector_to_real_x, i+1);
       int end_y = TransformY(data_transform_, data[i+1]);
       if (draw_line) {
-        sk_canvas->drawLine(SkIntToScalar(begin_x), SkIntToScalar(begin_y),
-                            SkIntToScalar(end_x), SkIntToScalar(end_y), 
-                            line_paint);
+        canvas->DrawLine(Point(begin_x, begin_y), Point(end_x, end_y), line_paint);
       }
       if (draw_dot) {
-        sk_canvas->drawPoint(SkIntToScalar(begin_x), 
-                             SkIntToScalar(begin_y),
-                             dot_paint);
+        canvas->DrawPoint(Point(begin_x, begin_y), dot_paint);
       }
     }
   }
   // draw the last dot;
   if (draw_dot) {
     double logic_y = data[vector_end];
-    sk_canvas->drawPoint(TransformX(vector_to_real_x, vector_end),
-                         TransformY(data_transform_, logic_y), 
-                         dot_paint);
+    Point point(TransformX(vector_to_real_x, vector_end), 
+                TransformY(data_transform_, logic_y));
+    canvas->DrawPoint(point, dot_paint);
   }
 }
 
@@ -187,11 +180,11 @@ void LineDataWaveView::OnPaint(gfx::Canvas* canvas) {
   PaintWave(canvas);
 }
 
-bool LineDataWaveView::HitTest(const gfx::Point& l) const {
+bool LineDataWaveView::HasHitTestMask() const  {
   return false;
 }
 
-bool LineDataWaveView::OnMouseDragged(const views::MouseEvent& event) {
+bool LineDataWaveView::OnMouseDragged(const ui::MouseEvent& event) {
   return false;
 }
 
@@ -222,10 +215,9 @@ void LineDataWaveView::set_line_data(AnaWaveData* line_data) {
   SchedulePaint();
 }
 
-void LineDataWaveView::set_data_transform(
-    const ui::Transform& logic_to_real_transform) {
-  if (logic_to_real_transform != data_transform_) {
-    data_transform_ = logic_to_real_transform;
+void LineDataWaveView::set_data_transform(const gfx::Transform& data_transform) {
+  if (data_transform != data_transform_) {
+    data_transform_ = data_transform;
     SchedulePaint();
   }
 }

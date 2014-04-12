@@ -1,6 +1,6 @@
 #pragma once
 
-#include "views/controls/button/text_button.h"
+#include "ui/views/controls/button/text_button.h"
 
 class HandleBar;
 
@@ -13,8 +13,8 @@ public:
 
 protected:
   // overridden from views::View
-  virtual bool OnMousePressed(const views::MouseEvent& event) OVERRIDE;
-  virtual bool OnMouseDragged(const views::MouseEvent& event) OVERRIDE;
+  virtual bool OnMousePressed(const ui::MouseEvent& event) OVERRIDE;
+  virtual bool OnMouseDragged(const ui::MouseEvent& event) OVERRIDE;
 
 private:
   HandleBar* bar_;

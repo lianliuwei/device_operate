@@ -19,34 +19,30 @@ void OscWaveView::OnOscWaveChanged(OscWave* osc_wave, int change_set) {
 }
 
 void OscWaveView::UpdateTransform() {
-  ui::Transform transform;
+  gfx::Transform transform;
 
-  int windows_size;
-  double data_size;
-  double offset;
+  int y_window_size, x_window_size;
+  double y_data_size, x_data_size;
+  double y_offset, x_offset;
   {
-  offset = osc_wave_->vertical_offset();
+  y_offset = osc_wave_->vertical_offset();
   WaveRange wave_range = osc_wave_->vertical_offset_range();
   double div_size = (wave_range.begin - wave_range.end) / osc_wave_->vertical_div();
-  data_size = div_size * osc_wave_->vertical_window_size();
-  windows_size = GetLocalBounds().height();
+  y_data_size = div_size * osc_wave_->vertical_window_size();
+  y_window_size = GetLocalBounds().height();
   }
-  
-  transform.SetTranslateY(windows_size / 2);
-  transform.SetScaleY(- windows_size / data_size);
-  transform.SetTranslateY(-offset);
 
   {
-  offset = osc_wave_->horizontal_offset();
+  x_offset = osc_wave_->horizontal_offset();
   WaveRange wave_range = osc_wave_->horizontal_offset_range();
   double div_size = (wave_range.begin - wave_range.end) / osc_wave_->horizontal_div();
-  data_size = div_size * osc_wave_->horizontal_window_size();
-  windows_size = GetLocalBounds().width();
+  x_data_size = div_size * osc_wave_->horizontal_window_size();
+  x_window_size = GetLocalBounds().width();
   }
 
-  transform.SetTranslateY(windows_size / 2);
-  transform.SetScaleY(windows_size / data_size);
-  transform.SetTranslateY(-offset);
+  transform.Translate(x_window_size / 2, y_window_size / 2);
+  transform.Scale(x_window_size / x_data_size, -y_window_size / y_data_size);
+  transform.Translate(-x_offset, -y_offset);
 
   set_data_transform(transform);
 }

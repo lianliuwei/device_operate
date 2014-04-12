@@ -1,9 +1,9 @@
 #pragma once
 
-#include "views/view.h"
+#include "ui/views/view.h"
+#include "ui/base/models/list_model_observer.h"
 
 #include "wave_control/wave_control.h"
-#include "wave_control/list_model_observer.h"
 
 class WaveControlView : public views::View
                       , public ui::ListModelObserver {

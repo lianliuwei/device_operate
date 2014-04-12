@@ -14,13 +14,13 @@ int SymmetricRound(double x) {
 }
 }
 
-int TransformX(const ui::Transform transform, int x) {
+int TransformX(const gfx::Transform transform, int x) {
   gfx::Point point(x, 0);
   transform.TransformPoint(point);
   return point.x();
 }
 
-int TransformX(const ui::Transform transform, double x) {
+int TransformX(const gfx::Transform transform, double x) {
   SkScalar p[4] = {
     SkDoubleToScalar(x),
     0,
@@ -30,14 +30,14 @@ int TransformX(const ui::Transform transform, double x) {
     return SymmetricRound(p[0]);
 }
 
-int TransformReverseX(const ui::Transform transform, int x) {
+int TransformReverseX(const gfx::Transform transform, int x) {
   gfx::Point point(x, 0);
   bool ret = transform.TransformPointReverse(point);
   CHECK(ret) << "Invalid transform matrix";
   return point.x();
 }
 
-int TransformY(const ui::Transform transform, double y) {
+int TransformY(const gfx::Transform transform, double y) {
   SkScalar p[4] = {
     0,
     SkDoubleToScalar(y),
@@ -47,7 +47,7 @@ int TransformY(const ui::Transform transform, double y) {
     return SymmetricRound(p[1]);
 }
 
-int TransformReverseY(const ui::Transform transform, int y) {
+int TransformReverseY(const gfx::Transform transform, int y) {
   gfx::Point point(0, y);
   bool ret = transform.TransformPointReverse(point);
   CHECK(ret) << "Invalid transform matrix";

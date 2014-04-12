@@ -19,11 +19,12 @@ bool WaveContainer::HasWave(Wave* wave) {
   return false;
 }
 
-bool WaveContainer::AddWave(Wave* wave) {
+void WaveContainer::AddWave(Wave* wave) {
   Add(wave);
+
 }
 
-bool WaveContainer::RemoveWave(Wave* wave) {
+void WaveContainer::RemoveWave(Wave* wave) {
   size_t i = WaveAt(wave);
   RemoveAt(i);
 }

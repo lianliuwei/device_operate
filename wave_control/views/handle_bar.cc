@@ -144,7 +144,7 @@ void HandleBar::SetHandlePos(Handle* handle, int ID) {
   // using the real index pos, the CalculateDest() is the handle control offset 
   // no the index pos, model_->GetOffset(ID) is the logic offset no the real pos
   offset += start_;
-  bool enable = handle->IsEnabled();
+  bool enable = handle->enabled();
   if (offset < start_ || offset > end_) {
       handle->SetVisible(false);
   } else {

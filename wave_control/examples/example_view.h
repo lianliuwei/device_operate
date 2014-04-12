@@ -1,7 +1,7 @@
 #pragma once
 
-#include "views/widget/widget.h"
-#include "views/widget/widget_delegate.h"
+#include "ui/views/widget/widget.h"
+#include "ui/views/widget/widget_delegate.h"
 #include "base/message_loop.h"
 
 class ExampleView : public views::WidgetDelegate {

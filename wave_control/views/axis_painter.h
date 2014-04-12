@@ -2,7 +2,7 @@
 
 #include "base/compiler_specific.h"
 #include "ui/gfx/size.h"
-#include "views/painter.h"
+#include "ui/views/painter.h"
 
 class AxisPainter : public views::Painter
 {
@@ -14,7 +14,7 @@ public:
 public:
     // Overridden from views::Painter
     // the w h must be normal
-    virtual void Paint(int w, int h, gfx::Canvas* canvas) OVERRIDE;
+    virtual void Paint(gfx::Canvas* canvas, const gfx::Size& size) OVERRIDE;
 
     // if true the size set to the biggest of the cx(y) % (2*grid*div) == 0 size, 
     // if false the size no change the cx(y) is too small.

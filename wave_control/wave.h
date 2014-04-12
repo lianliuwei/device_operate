@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base/string16.h"
-#include "wave_control/supports_user_data.h"
+#include "base/supports_user_data.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 

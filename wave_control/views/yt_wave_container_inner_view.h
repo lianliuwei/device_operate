@@ -1,10 +1,10 @@
 #pragma once
 
 #include "base/observer_list.h"
-#include "views/view.h"
+#include "ui/base/models/list_model_observer.h"
+#include "ui/views/view.h"
 
 #include "wave_control/wave_container.h"
-#include "wave_control/list_model_observer.h"
 #include "wave_control/osc_wave_group/osc_wave_group.h"
 #include "wave_control/views/axis_background.h"
 #include "wave_control/views/handle_bar_model.h"
@@ -59,11 +59,11 @@ public:
   HandleBarDelegate* GetTriggerBarDelegate();
 
   // osc coord transform
-  ui::Transform OscWaveTransform(OscWave* osc_wave);
+  gfx::Transform OscWaveTransform(OscWave* osc_wave);
   static double ToOscOffset(double old_offset, double move_delta);
 
   // SimpleAnaWave coord transform
-  ui::Transform SimpleAnaWaveTransform(SimpleAnaWave* ana_wave);
+  gfx::Transform SimpleAnaWaveTransform(SimpleAnaWave* ana_wave);
   int GetYOffset(SimpleAnaWave* wave);
   void MoveToY(SimpleAnaWave* wave, double offset);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "views/view.h"
+#include "ui/views/view.h"
 
 #include "wave_control/yt_wave_container.h"
 #include "wave_control/views/yt_wave_container_inner_view.h"

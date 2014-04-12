@@ -1,22 +1,24 @@
-#include "Osc/sample/example_view.h"
+#include "wave_control/examples/example_view.h"
 
 #include "base/at_exit.h"
 #include "base/command_line.h"
 #include "base/process_util.h"
+#include "base/run_loop.h"
+#include "base/i18n/icu_util.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "ui/base/ui_base_paths.h"
-#include "views/focus/accelerator_handler.h"
+#include "ui/views/focus/accelerator_handler.h"
+#include "ui/base/win/scoped_ole_initializer.h"
 
 int main(int argc, char** argv) {
-#if defined(OS_WIN)
-    OleInitialize(NULL);
-#elif defined(OS_LINUX)
-    // Initializes gtk stuff.
-    g_thread_init(NULL);
-    g_type_init();
-    gtk_init(&argc, &argv);
-#endif
-    CommandLine::Init(argc, argv);
+  ui::ScopedOleInitializer ole_initializer;
+
+  CommandLine::Init(argc, argv);
+  logging::InitLogging(NULL,
+                       logging::LOG_ONLY_TO_SYSTEM_DEBUG_LOG,
+                       logging::LOCK_LOG_FILE,
+                       logging::DELETE_OLD_LOG_FILE,
+                       logging::DISABLE_DCHECK_FOR_NON_OFFICIAL_RELEASE_BUILDS);
 
   base::EnableTerminationOnHeapCorruption();
 
@@ -24,25 +26,21 @@ int main(int argc, char** argv) {
   base::AtExitManager exit_manager;
 
   ui::RegisterPathProvider();
-  ui::ResourceBundle::InitSharedInstance("en-US");
+  ui::ResourceBundle::InitSharedInstanceWithLocale("en-US", NULL);
 
   MessageLoopForUI main_message_loop;
 
-  // views::TestViewsDelegate delegate;
-
-  // We do not use this header: chrome/common/chrome_switches.h
-  // because that would create a bad dependency back on Chrome.
-  views::Widget::SetPureViews(CommandLine::ForCurrentProcess()->
-                              HasSwitch("use-pure-views"));
+  bool icu_result = icu_util::Initialize();
+  CHECK(icu_result);
+  ui::ResourceBundle::InitSharedInstanceWithLocale("en-US", NULL);
 
   scoped_ptr<ExampleView> view(ExampleView::CreateInstance());
   view->Init();
 
   views::AcceleratorHandler accelerator_handler;
-  MessageLoopForUI::current()->Run(&accelerator_handler);
+  base::RunLoop run;
+  run.set_dispatcher(&accelerator_handler);
+  run.Run();
 
-#if defined(OS_WIN)
-    OleUninitialize();
-#endif
-    return 0;
+  return 0;
 }

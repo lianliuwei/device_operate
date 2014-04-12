@@ -75,7 +75,7 @@ SkBitmap HorizOffsetBar::GetIcon(int ID) {
 
 int HorizOffsetBar::GetOffset(int ID) {
   OscWave* wave = wave_group_->horizontal_at(ID)->osc_wave();
-  ui::Transform transform = view_->OscWaveTransform(wave);
+  gfx::Transform transform = view_->OscWaveTransform(wave);
   return TransformX(transform, 0);
 }
 
@@ -85,7 +85,7 @@ bool HorizOffsetBar::IsVisible(int ID) {
 
 void HorizOffsetBar::OnHandleMove(int ID, int offset) {
   OscWave* wave = wave_group_->horizontal_at(ID)->osc_wave();
-  ui::Transform transform = view_->OscWaveTransform(wave);
+  gfx::Transform transform = view_->OscWaveTransform(wave);
   int logic_offset = TransformReverseX(transform, offset);
   double old_offset = wave->horizontal_offset();
   wave->MoveToX(YTWaveContainerInnerView::ToOscOffset(old_offset, logic_offset));
@@ -209,7 +209,7 @@ int TriggerBar::GetOffset(int ID) {
   if (relate) {
     offset = trigger_wave->vertical_offset() + offset;
   }
-  ui::Transform transform = view_->OscWaveTransform(trigger_wave);
+  gfx::Transform transform = view_->OscWaveTransform(trigger_wave);
   return TransformY(transform, offset);
 }
 
@@ -222,7 +222,7 @@ void TriggerBar::OnHandleMove(int ID, int offset) {
   if (relate) {
     base_y = trigger_wave->vertical_offset();
   }
-  ui::Transform transform = view_->OscWaveTransform(trigger_wave);
+  gfx::Transform transform = view_->OscWaveTransform(trigger_wave);
   double new_offset = TransformReverseY(transform, offset);
   trigger_wave->MoveTrigger(new_offset - base_y);
 }
@@ -392,7 +392,7 @@ bool WaveBar::IsVisible(int ID) {
 int WaveBar::GetOffset(int ID) {
   if (ID < wave_group_->vertical_count()) {
     OscWave* wave = wave_group_->vertical_at(ID)->osc_wave();
-    ui::Transform transform = view_->OscWaveTransform(wave);
+    gfx::Transform transform = view_->OscWaveTransform(wave);
     return TransformY(transform, 0);
   } else {
     int index = ID - wave_group_->vertical_count();
@@ -404,7 +404,7 @@ int WaveBar::GetOffset(int ID) {
 void WaveBar::OnHandleMove(int ID, int offset) {
   if (ID < wave_group_->vertical_count()) {
     OscWave* wave = wave_group_->horizontal_at(ID)->osc_wave();
-    ui::Transform transform = view_->OscWaveTransform(wave);
+    gfx::Transform transform = view_->OscWaveTransform(wave);
     int logic_offset = TransformReverseY(transform, offset);
     double old_offset = wave->vertical_offset();
     wave->MoveToY(YTWaveContainerInnerView::ToOscOffset(old_offset, logic_offset));
@@ -570,12 +570,12 @@ double YTWaveContainerInnerView::ToOscOffset(double old_offset, double move_delt
 
 int YTWaveContainerInnerView::GetYOffset(SimpleAnaWave* wave) {
   WaveRange range = wave->vertical_range();
-  Transform transform = SimpleAnaWaveTransform(wave);
+  gfx::Transform transform = SimpleAnaWaveTransform(wave);
   return TransformY(transform, (range.begin + range.end) / 2);
 }
 
 void YTWaveContainerInnerView::MoveToY(SimpleAnaWave* wave, double offset) {
-  Transform transform = SimpleAnaWaveTransform(wave);
+  gfx::Transform transform = SimpleAnaWaveTransform(wave);
   int logic_offset = TransformReverseY(transform, offset);
   WaveRange range = wave->vertical_range();
   range.MoveCenter(logic_offset);
@@ -642,7 +642,7 @@ void YTWaveContainerInnerView::ListItemsChanged(size_t start, size_t count) {
   }
 }
 
-ui::Transform YTWaveContainerInnerView::OscWaveTransform(OscWave* osc_wave) {
+gfx::Transform YTWaveContainerInnerView::OscWaveTransform(OscWave* osc_wave) {
   int id = container_->WaveAt(osc_wave);
   OscWaveView* wave_view = static_cast<OscWaveView*>(child_at(id));
   return wave_view->data_transform();

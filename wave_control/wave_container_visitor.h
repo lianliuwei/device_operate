@@ -9,9 +9,9 @@ class WaveContainerVisitor {
 public:
   WaveContainerVisitor() {}
 
-  void VisitYTWaveContainer(YTWaveContainer* wave_container) = 0;
-  void VisitYLWaveContainer(YLWaveContainer* wave_container) = 0;
-  void VisitXYWaveContainer(XYWaveContainer* wave_container) = 0;
+  virtual void VisitYTWaveContainer(YTWaveContainer* wave_container) = 0;
+  virtual void VisitYLWaveContainer(YLWaveContainer* wave_container) = 0;
+  virtual void VisitXYWaveContainer(XYWaveContainer* wave_container) = 0;
 
 protected:
   virtual ~WaveContainerVisitor() {}

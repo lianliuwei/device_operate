@@ -1,6 +1,6 @@
 #pragma once
 
-#include "wave_control/list_model.h"
+#include "ui/base/models/list_model.h"
 
 #include "wave_control/wave_container.h"
 

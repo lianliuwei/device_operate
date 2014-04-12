@@ -3,7 +3,7 @@
 #pragma once
 
 #include "base/memory/scoped_ptr.h"
-#include "views/background.h"
+#include "ui/views/background.h"
 #include "wave_control/views/axis_painter.h"
 
 // fill the background with the color and using the axis_painter_ to

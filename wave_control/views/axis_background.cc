@@ -1,18 +1,17 @@
 #include "wave_control/views/axis_background.h"
 
-#include "ui/gfx/canvas_skia.h"
-#include "views/view.h"
+#include "ui/gfx/canvas.h"
+#include "ui/views/view.h"
 
 // TODO() maybe use double buffer. when size no change no redraw.
 void AxisBackground::Paint( gfx::Canvas* canvas, views::View* view ) const {
     // Fill the background. Note that we don't constrain to the bounds as
     // canvas is already clipped for us.
-    canvas->AsCanvasSkia()->drawColor(get_color());
+    canvas->DrawColor(get_color());
     // paint the axis on the view but no the border area that paint by the border
     // itself.
     gfx::Rect rect = view->GetContentsBounds();
-    views::Painter::PaintPainterAt(rect.x(), rect.y(), rect.width(), rect.height(),
-        canvas, axis_painter_.get());
+    views::Painter::PaintPainterAt(canvas, axis_painter_.get(), rect);
 }
 
 bool AxisBackground::NormalSize( gfx::Size& size ) {
