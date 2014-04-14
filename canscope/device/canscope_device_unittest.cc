@@ -1,11 +1,10 @@
 #include "base/values.h"
 #include "base/message_loop.h"
 #include "base/synchronization/waitable_event.h"
-#include "base/json/json_string_value_serializer.h"
-#include "base/json/json_file_value_serializer.h"
-#include "base/json/json_reader.h"
 
 #include "common/common_thread.h"
+
+#include "base/json/json_file_value_serializer.h"
 
 #include "testing/gtest/include/gtest/gtest.h"
 #include "testing/gmock/include/gmock/gmock.h"
@@ -18,6 +17,7 @@
 #include "canscope/device/device_thread_mock.h"
 #include "canscope/device/property/device_property_observer_mock.h"
 #include "canscope/device/scoped_device_property_commit.h"
+#include "canscope/device/test/test_util.h"
 
 using namespace base;
 using namespace common;
@@ -52,16 +52,6 @@ static const char kOscConfig [] =  {" \
 } \
 "};
 
-DictionaryValue* GetDefaultConfig() {
-  std::string content(kOscConfig);
-  JSONStringValueSerializer serializer(content);
-  Value* value = serializer.Deserialize(NULL, NULL);
-  EXPECT_TRUE(NULL != value);
-  EXPECT_TRUE(value->IsType(Value::TYPE_DICTIONARY));
-  DictionaryValue* dict_value;
-  value->GetAsDictionary(&dict_value);
-  return dict_value;
-}
 
 bool ActionIsDeviceThread() {
   return CommonThread::CurrentlyOn(CommonThread::DEVICE);
@@ -124,7 +114,7 @@ private:
 
   void CreateCANScopeDevice() {
     manager_ = CANScopeDevice::Create(MessageLoopProxy::current());
-    manager_->Init(GetDefaultConfig());
+    manager_->Init(GetConfig(kOscConfig));
     event_.Signal();
   }
 
