@@ -404,7 +404,7 @@ int WaveBar::GetOffset(int ID) {
 
 void WaveBar::OnHandleMove(int ID, int offset) {
   if (ID < wave_group_->vertical_count()) {
-    OscWave* wave = wave_group_->horizontal_at(ID)->osc_wave();
+    OscWave* wave = wave_group_->vertical_at(ID)->osc_wave();
     gfx::Transform transform = view_->OscWaveTransform(wave);
     int logic_offset = TransformReverseY(transform, offset);
     double old_offset = wave->vertical_offset();
