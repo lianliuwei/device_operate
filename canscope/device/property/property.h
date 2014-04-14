@@ -26,7 +26,8 @@ public:
       , device_member_(device_member)
       , call_back_(call_back)
       , check_value_(check_value)
-      , event_(true, false) {}
+      , event_(true, false)
+      , async_count_(0) {}
 
  Property(PropertyDelegate* delegate, 
       StoreType& member, StoreType& device_member,
@@ -35,16 +36,22 @@ public:
       , member_(member)
       , device_member_(device_member)
       , call_back_(call_back)
-      , event_(true, false) {}
+      , event_(true, false)
+      , async_count_(0) {}
 
   Property(PropertyDelegate* delegate, 
       StoreType& member, StoreType& device_member)
       : delegate_(delegate)
       , member_(member)
       , device_member_(device_member)
-      , event_(true, false) {}
+      , event_(true, false)
+      , async_count_(0){}
 
   ~Property() {
+    {
+    base::AutoLock lock(lock_);
+    CHECK(async_count_ == 0) << "must wait for all async task finish before destroy Property";
+    }
   }
 
   Type value() const {
@@ -90,6 +97,10 @@ public:
     DCHECK(!IsDeviceThread());
     TRACE_EVENT_FLOW_STEP0("Property", "SetValueAsync",
         async_task.get(), "CheckValue");
+    {
+    base::AutoLock lock(lock_);
+    ++async_count_;
+    }
     delegate_->PostDeviceTask(Bind(&Property::SetValueAsyncImpl,
         base::Unretained(this), value, async_task.get()));
   }
@@ -195,6 +206,10 @@ private:
     }
 
     TRACE_EVENT_FLOW_END0("Property", "SetValueAsync", async_task.get());
+    {
+    base::AutoLock lock(lock_);
+    --async_count_;
+    }
   }
 
   void CallCallback() {
@@ -225,6 +240,10 @@ private:
 
   // sync call
   base::WaitableEvent event_;
+
+  // async call
+  int async_count_;
+  base::Lock lock_;
 };
 
 typedef Property<bool> BooleanProperty;
