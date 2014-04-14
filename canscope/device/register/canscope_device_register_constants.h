@@ -130,7 +130,6 @@ static const int kFpgaSendSize = kDstbOffset + 0x4;
 // EP3
 // scope data read addr
 static const uint32 kScopeReadAddr = kBaseAddr + 0x138;
-// size dependent on canscope type.
-// static const int kScopeReadSize = 4000;
-
+// frame data read addr
+static const uint32 kFramdReadAddr = kBaseAddr + 0x128;
 }; // namespace canscope
