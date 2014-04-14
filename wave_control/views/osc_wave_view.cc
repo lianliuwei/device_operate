@@ -59,10 +59,13 @@ OscWaveView::OscWaveView(OscWave* osc_wave)
   set_show_style(KLineAndAutoDot);
 
   osc_wave->AddObserver(this);
-  UpdateTransform();
   UpdateData();
 }
 
 OscWaveView::~OscWaveView() {
   osc_wave_->RemoveObserver(this);
+}
+
+void OscWaveView::OnBoundsChanged(const gfx::Rect& previous_bounds) {
+  UpdateTransform();
 }

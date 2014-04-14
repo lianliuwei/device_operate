@@ -13,6 +13,9 @@ private:
   // implement OscWaveObserver
   virtual void OnOscWaveChanged(OscWave* osc_wave, int change_set);
 
+  // override views::View
+  virtual void OnBoundsChanged(const gfx::Rect& previous_bounds) OVERRIDE;
+
   void UpdateTransform();
   void UpdateData();
 
