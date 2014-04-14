@@ -12,6 +12,47 @@ void FrameDataCollecter::DeviceOffine() {
   set_stop_by_offine(true);
 }
 
+void FrameDataCollecter::SaveError(device::Error error) {
+  last_error_ = error;
+}
+
+DataCollecter::LoopState FrameDataCollecter::OnLoopRun() {
+  CHECK_NE(STATE_NONE, next_state_);
+  LoopState loop_state = STOP;
+  {
+    State state = next_state_;
+    next_state_ = STATE_NONE;
+    switch (state) {
+      case STATE_CHECK_COLLECT:
+        DoCheckCollect(&loop_state);
+        break;
+      
+      case STATE_WAIT_FULL:
+        DoWaitFull(&loop_state);
+        break;
+
+      case STATE_COLLECT:
+        DoCollect(&loop_state);
+        break;
+      
+      default:
+        NOTREACHED();
+        return STOP;
+    }
+  }
+  // helper, if state machine just stop stop the loop.
+  if (next_state_ == STATE_NONE)
+    return STOP;
+  return loop_state;
+}
+
+device::Error FrameDataCollecter::ReadDevice(::device::RegisterMemory& memory) {
+  // TODO USB return Error
+  bool ret = device_delegate_->ReadDevice(
+      memory.start_addr(), memory.buffer(), memory.size());
+  return OK;
+}
+
 #define CHECK_DEVICE(error) \
 do { \
   if ((error) != canscope::device::OK) { \
@@ -84,6 +125,7 @@ FrameDataCollecter::FrameDataCollecter(DeviceDelegate* device_delegate,
     : device_delegate_(device_delegate)
     , frame_device_(frame_device)
     , next_state_(STATE_CHECK_COLLECT)
+    , last_error_(OK)
     , queue_(new FrameRawDataQueue(false, true)) {
   
 }

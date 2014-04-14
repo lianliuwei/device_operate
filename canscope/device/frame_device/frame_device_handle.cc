@@ -63,4 +63,12 @@ void FrameDeviceHandle::FpgaSendImpl() {
   }
 }
 
+FrameDeviceHandle::FrameDeviceHandle(FrameDevice* device)
+    : DeviceHandleBase(device)
+    , device_(device)
+    , last_err_(device::OK) {
+  InitHandle();
+  properties_.Init();
+}
+
 } // namespace canscope

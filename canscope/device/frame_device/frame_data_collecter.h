@@ -42,6 +42,7 @@ private:
   device::Error ReadDevice(::device::RegisterMemory& memory);
   void DeviceOffine();
 
+  device::Error last_error_;
   State next_state_;
   FrameDevice* frame_device_;
   DeviceDelegate* device_delegate_;

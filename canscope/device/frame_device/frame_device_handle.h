@@ -11,7 +11,7 @@ namespace canscope {
 class FrameDeviceHandle : public DeviceHandleBase {
 public:
   FrameDeviceHandle(FrameDevice* device);
-  virtual ~FrameDeviceHandle();
+  virtual ~FrameDeviceHandle() {}
   
   device::Error FpgaSend(const FpgaFrameData& data, uint8 send_num);
   device::Error SetAck(bool ack, uint8 ack_bit);

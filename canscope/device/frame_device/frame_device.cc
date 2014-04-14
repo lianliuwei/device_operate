@@ -1,5 +1,7 @@
 #include "canscope/device/frame_device/frame_device.h"
 
+#include "canscope/device/frame_device/sja_btr_util.h"
+
 namespace {
 int KValidSampleRates[] = {
   100000000,50000000,20000000,
@@ -75,7 +77,6 @@ void FrameDevice::SetSoftDiff() {
 #define CHECK_DEVICE(error) \
 do { \
   if ((error) != canscope::device::OK) { \
-    SaveError((error)); \
     return; \
   } \
 } while (0)
@@ -99,5 +100,44 @@ void FrameDevice::SetAll() {
 }
 
 #undef CHECK_DEVICE
+
+FrameDevice::FrameDevice(DeviceDelegate* device_delegate, 
+                         ConfigManager* config_manager,
+                         SoftDiffRegister* soft_diff)
+    : DeviceBase(config_manager)
+    , device_delegate_(device_delegate)
+    , soft_diff_(soft_diff) {
+  DCHECK(soft_diff);
+}
+
+device::Error FrameDevice::WriteDevice(::device::RegisterMemory& memory) {
+  device_delegate_->WriteDevice(
+      memory.start_addr(), memory.buffer(), memory.size());
+  return device::OK;
+}
+
+device::Error FrameDevice::ReadDevice(::device::RegisterMemory& memory) {
+  device_delegate_->ReadDevice(
+      memory.start_addr(), memory.buffer(), memory.size());
+  return device::OK;
+}
+
+device::Error FrameDevice::WriteDeviceRange(::device::RegisterMemory& memory, 
+                                            int start_offset, 
+                                            int size) {
+  DCHECK(start_offset + size <= memory.size());
+  device_delegate_->WriteDevice(
+      memory.start_addr(), memory.PtrByRelative(start_offset), size);
+  return device::OK;
+}
+
+device::Error FrameDevice::ReadDeviceRange(::device::RegisterMemory& memory, 
+                                           int start_offset, 
+                                           int size) {
+  DCHECK(start_offset + size <= memory.size());
+  device_delegate_->ReadDevice(
+      memory.start_addr(), memory.PtrByRelative(start_offset), size);
+  return device::OK;
+}
 
 } // namespace canscope

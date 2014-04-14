@@ -17,7 +17,10 @@ class FrameDeviceHandle;
 class FrameDevice : public FrameDeviceProperty
                   , public DeviceBase {
 public:
-  FrameDevice(DeviceDelegate* device_delegate, ConfigManager* config_manager);
+  // need soft_diff from OscDevice
+  FrameDevice(DeviceDelegate* device_delegate, 
+              ConfigManager* config_manager, 
+              SoftDiffRegister* soft_diff);
   virtual ~FrameDevice() {}
 
   void ConfigUpdate();
@@ -35,7 +38,6 @@ private:
   void SetSoftDiff();
 
   int GetFrameStorageSize();
-  void SaveError(device::Error error);
 
   // implement DeviceBase
   virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { return &prefs_; }
