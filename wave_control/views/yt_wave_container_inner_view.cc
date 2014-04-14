@@ -5,6 +5,7 @@
 #include "wave_control/views/transform_util.h"
 #include "wave_control/views/wave_control_view_factory.h"
 #include "wave_control/views/wave_control_views_constants.h"
+#include "wave_control/views/all_fill_layout.h"
 
 using namespace ui;
 using namespace std;
@@ -545,6 +546,9 @@ void HandleBarDelegate::NotifyHandleMoved(int id) {
 
 YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
     : container_(container) {
+  set_border(Border::CreateSolidBorder(kBorderThickness, kBorderColor));
+  SetLayoutManager(new AllFillLayout());
+
   wave_group_.reset(container_->CreateOscWaveGroup());
   wave_bar_.reset(new WaveBar(wave_group_.get(), this));
   horiz_offset_bar_.reset(new HorizOffsetBar(wave_group_.get(), this));
@@ -554,7 +558,6 @@ YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
   // fetch Wave
   ListItemsAdded(0, container->item_count());
 
-  set_border(Border::CreateSolidBorder(kBorderThickness, kBorderColor));
   SetGrid(kDefaultVDiv, kDefaultHDiv);
 }
 
