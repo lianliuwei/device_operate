@@ -44,3 +44,19 @@ FpgaDstbData canscope::FpgaSendRegister::dstb_data() const {
 void canscope::FpgaSendRegister::set_dstb_data(const FpgaDstbData& data) {
   memcpy(memory.PtrByRelative(kDstbDataOffset), &(data.data), sizeof(data.data));
 }
+
+int canscope::FpgaSendRegister::SendOffset() const {
+  return 0;
+}
+
+int canscope::FpgaSendRegister::SendSize() const {
+  return 0x18;
+}
+
+int canscope::FpgaSendRegister::StateOffset() const {
+  return 0x1C;
+}
+
+int canscope::FpgaSendRegister::StateSize() const {
+  return 4;
+}

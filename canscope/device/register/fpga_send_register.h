@@ -40,6 +40,14 @@ public:
   FpgaSendRegister();
   ~FpgaSendRegister() {}
 
+  // send range
+  int SendOffset() const;
+  int SendSize() const;
+
+  // state range
+  int StateOffset() const;
+  int StateSize() const;
+
 private:
   DISALLOW_COPY_AND_ASSIGN(FpgaSendRegister);
 };
