@@ -1,6 +1,9 @@
 #include "canscope/device/frame_device/frame_device_property.h"
 
 #include "canscope/device/canscope_device_property_constants.h"
+#include "canscope/device/canscope_device_constants.h"
+
+#include "canscope/device/frame_device/sja_btr_util.h"
 
 namespace canscope {
 
@@ -42,6 +45,14 @@ void FrameDeviceProperty::DetachFromThread() {
   frame_storage_percent.DetachFromThread();
   bit_sample_rate.DetachFromThread();
   frame_bit.DetachFromThread();
+}
+
+int FrameDeviceProperty::BaudRate() {
+  return SJABtrToBaudRate(sja_btr.value());
+}
+
+uint16 FrameDeviceProperty::BtrDiv() {
+  return kMaxBaudRate / BaudRate() / 16 - 1;
 }
 
 } // namespace canscope

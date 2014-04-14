@@ -25,6 +25,9 @@ public:
   void Init();
   void DetachFromThread();
 
+  int BaudRate();
+  uint16 BtrDiv();
+
   ValueMapDevicePropertyStore prefs_;
 
   BooleanStoreMember device_enable;

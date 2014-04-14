@@ -12,6 +12,8 @@
 
 namespace canscope {
 
+class FrameDeviceHandle;
+
 class FrameDevice : public FrameDeviceProperty
                   , public DeviceBase {
 public:
@@ -20,18 +22,12 @@ public:
 
   void ConfigUpdate();
 
-  // property result in set register to hardware
-  void SetDeviceEnable();
-  void SetAckEnable();
-  void SetSjaEnable();
-  void SetFrameStoragePercent();
-  void SetBitSampleRate();
-  void SetFrameBit();
-  void SetAll();
-
   void set_device_type(canscope::DeviceType value) { device_type_ = value; }
   canscope::DeviceType device_type() const { return device_type_; }
 
+  // property result in set register to hardware
+  void SetAll();
+ 
 private:
   void SetSJA1000();
   void SetFrameStorage();
@@ -47,6 +43,9 @@ private:
   device::Error WriteDevice(::device::RegisterMemory& memory);
   device::Error ReadDevice(::device::RegisterMemory& memory);
   device::Error WriteDeviceRange(::device::RegisterMemory& memory, int start_offset, int size);
+  device::Error ReadDeviceRange(::device::RegisterMemory& memory, int start_offset, int size);
+
+  friend class FrameDeviceHandle;
 
   SJA1000Register sja1000_;
   FrameStorageRegister frame_storage_;

@@ -1,7 +1,5 @@
 #include "canscope/device/frame_device/frame_device.h"
 
-#include "canscope/device/frame_device/sja_btr_util.h"
-
 namespace {
 int KValidSampleRates[] = {
   100000000,50000000,20000000,
@@ -48,7 +46,7 @@ void FrameDevice::SetFrameStorage() {
 }
 
 void FrameDevice::SetWaveStorage() {
-  int baud_rate = SJABtrToBaudRate(sja_btr.value());
+  int baud_rate = BaudRate();
   int frame_sample_rate = FrameSampleRate(baud_rate, bit_sample_rate.value());
   uint32 frame_len = (frame_bit.value() * 2 * 1.0 * frame_sample_rate / baud_rate);
   frame_len = frame_len & 0xFFFFFFF8;
@@ -82,46 +80,6 @@ do { \
   } \
 } while (0)
 
-void FrameDevice::SetDeviceEnable() {
-  SetSoftDiff();
-  device::Error err;
-  err = WriteDeviceRange(soft_diff_->memory, soft_diff_->SysOffset(), soft_diff_->SysSize());
-  CHECK_DEVICE(err);
-}
-
-void FrameDevice::SetAckEnable() {
-  SetSJA1000();
-  device::Error err;
-  err = WriteDeviceRange(sja1000_.memory, sja1000_.SysOffset(), sja1000_.SysSize());
-  CHECK_DEVICE(err);
-}
-
-void FrameDevice::SetSjaEnable() {
-  // same as Ack enable
-  SetAckEnable();
-}
-
-void FrameDevice::SetFrameStoragePercent() {
-  SetFrameStorage();
-  SetWaveStorage();
-  device::Error err;
-  err = WriteDevice(frame_storage_.memory);
-  CHECK_DEVICE(err);
-  err = WriteDevice(wave_storage_.memory);
-  CHECK_DEVICE(err);
-}
-
-void FrameDevice::SetBitSampleRate() {
-  SetWaveStorage();
-  device::Error err;
-  err = WriteDevice(wave_storage_.memory);
-  CHECK_DEVICE(err);
-}
-
-void FrameDevice::SetFrameBit() {
-  // same as BitSampleRate
-  SetBitSampleRate();
-}
 
 void FrameDevice::SetAll() {
   SetSJA1000();
