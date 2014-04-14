@@ -45,7 +45,8 @@ CANScopeDevice::CANScopeDevice(
     scoped_refptr<base::SingleThreadTaskRunner> device_loop)
     : DeviceManager(device_loop)
     , osc_device_(&device_delegate_, &osc_device_config_)
-    , runner_(this) {}
+    , runner_(this) {
+}
 
 void CANScopeDevice::Init(base::Value* value) {
   DCHECK(value);
@@ -61,6 +62,7 @@ void CANScopeDevice::Init(base::Value* value) {
   osc_device_config_.Update(osc_device_value);
   osc_device_.InitFromConfig();
   osc_device_.Init();
+  osc_device_.set_run_thread(run_thread());
 }
 
 void CANScopeDevice::LoadConfig(base::Value* value) {

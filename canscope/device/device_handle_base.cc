@@ -1,12 +1,12 @@
 #include "canscope/device/device_handle_base.h"
 
-#include "common/common_thread.h"
 #include "common/notification/notification_source.h"
 
 #include "canscope/canscope_notification_types.h"
 #include "canscope/device/config_manager.h"
 #include "canscope/device/property/value_map_device_property_store.h"
 
+using namespace base;
 using namespace common;
 using namespace canscope;
 
@@ -23,7 +23,7 @@ DevicePropertyStore* DeviceHandleBase::GetDevicePropertyStore() {
 }
 
 void DeviceHandleBase::PostDeviceTask(const base::Closure& task) {
-  CommonThread::PostTask(CommonThread::DEVICE, FROM_HERE, task);
+  device_->run_thread()->PostTask(FROM_HERE, task);
 }
 
 void DeviceHandleBase::FetchNewPref() {
@@ -63,6 +63,11 @@ void DeviceHandleBase::Observe(int type,
   }
   NOTREACHED();
 }
+
+scoped_refptr<SingleThreadTaskRunner> DeviceHandleBase::DeviceTaskRunner() {
+  return device_->run_thread();
+}
+
 
 
 #ifndef UNIT_TEST

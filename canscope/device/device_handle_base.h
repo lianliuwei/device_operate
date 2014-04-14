@@ -31,6 +31,9 @@ public:
   void InitHandle();
 
   DeviceBase* device() { return device_; }
+
+  scoped_refptr<base::SingleThreadTaskRunner> DeviceTaskRunner();
+
 protected:
   friend class ScopedDevicePropertyCommit;
 
