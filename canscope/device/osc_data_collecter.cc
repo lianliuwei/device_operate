@@ -68,7 +68,7 @@ void OscDataCollecter::DeviceOffine() {
 
 #define CHECK_DEVICE(error) \
 do { \
-  if ((error) != OK) { \
+  if ((error) != canscope::device::OK) { \
     SaveError((error)); \
     DeviceOffine(); \
     return; \

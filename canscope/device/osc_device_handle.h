@@ -39,7 +39,7 @@ public:
   Property<double> time_param;
 
 private:
-  // DeviceHandleBase
+  // implement DeviceHandleBase
   virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { 
     return &(properties_.prefs_); 
   }

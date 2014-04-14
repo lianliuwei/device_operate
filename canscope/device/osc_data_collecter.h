@@ -2,7 +2,6 @@
 
 #include "base/time.h"
 
-#include "device/register_memory.h"
 #include "device/sequenced_bulk_queue.h"
 #include "device/memory_usage_pool.h"
 
@@ -87,6 +86,8 @@ private:
   bool limit_time_;
   base::TimeDelta time_delta_;
   base::Time start_time_;
+
+  DISALLOW_COPY_AND_ASSIGN(OscDataCollecter);
 };
 
 } // namespace canscope

@@ -11,7 +11,6 @@
 
 namespace canscope {
 
-
 // all Open Close CANScopeDevice must through CANScopeDeviceFinder
 // or must add CANScopeDevice Destroy observer
 // 
