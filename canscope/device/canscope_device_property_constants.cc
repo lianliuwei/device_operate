@@ -26,10 +26,10 @@ const char kOscTriggerVolt[]           = "Trigger.Volt";
 const char kOscTimeParam[]             = "TimeParam";
 // FrameDevice
 const char kFrameDevice[]                = "FrameDevice";
-const char kFrameDeviceEnable[]          = "DeviceEanble";
+const char kFrameDeviceEnable[]          = "DeviceEnable";
 const char kFrameAckEnable[]             = "AckEnable";
 const char kFrameSjaBtr[]                = "SjaBtr";
-const char kFrameFrameStoragePercent[]   = "FrameStoragePerent";
+const char kFrameFrameStoragePercent[]   = "FrameStoragePercent";
 const char kFrameBitSampleRate[]         = "BitSampleRate";
 const char kFrameBit[]                   = "BitNum";
 } // namespace canscope
