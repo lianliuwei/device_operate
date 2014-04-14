@@ -111,33 +111,29 @@ FrameDevice::FrameDevice(DeviceDelegate* device_delegate,
 }
 
 device::Error FrameDevice::WriteDevice(::device::RegisterMemory& memory) {
-  device_delegate_->WriteDevice(
+  return device_delegate_->WriteDevice(
       memory.start_addr(), memory.buffer(), memory.size());
-  return device::OK;
 }
 
 device::Error FrameDevice::ReadDevice(::device::RegisterMemory& memory) {
-  device_delegate_->ReadDevice(
+  return device_delegate_->ReadDevice(
       memory.start_addr(), memory.buffer(), memory.size());
-  return device::OK;
 }
 
 device::Error FrameDevice::WriteDeviceRange(::device::RegisterMemory& memory, 
                                             int start_offset, 
                                             int size) {
   DCHECK(start_offset + size <= memory.size());
-  device_delegate_->WriteDevice(
+  return device_delegate_->WriteDevice(
       memory.start_addr(), memory.PtrByRelative(start_offset), size);
-  return device::OK;
 }
 
 device::Error FrameDevice::ReadDeviceRange(::device::RegisterMemory& memory, 
                                            int start_offset, 
                                            int size) {
   DCHECK(start_offset + size <= memory.size());
-  device_delegate_->ReadDevice(
+  return device_delegate_->ReadDevice(
       memory.start_addr(), memory.PtrByRelative(start_offset), size);
-  return device::OK;
 }
 
 } // namespace canscope

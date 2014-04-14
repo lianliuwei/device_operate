@@ -12,15 +12,14 @@
 
 namespace canscope {
 
-class UsbPort;
-class UsbPortDeviceDelegate;
+class DeviceDelegate;
 
 typedef SequencedBulkQueue<OscRawDataHandle> OscRawDataQueue;
 
 // implement as state machine
 class OscDataCollecter : public DataCollecter {
 public:
-  OscDataCollecter(UsbPortDeviceDelegate* device_delegate, 
+  OscDataCollecter(DeviceDelegate* device_delegate, 
                    OscDevice* osc_device);
   
   enum State {
@@ -62,8 +61,8 @@ private:
                        DeviceType type, 
                        OscRawDataDeviceConfigHandle config);
 
-  bool WriteDevice(::device::RegisterMemory* memory);
-  bool ReadDevice(::device::RegisterMemory* memory);
+  device::Error WriteDevice(::device::RegisterMemory& memory);
+  device::Error ReadDevice(::device::RegisterMemory& memory);
   device::Error ReadData(OscRawDataHandle raw_data);
   
 
@@ -73,8 +72,7 @@ private:
   OscRawDataDeviceConfigHandle last_config_;
 
   OscDevice* osc_device_;
-  UsbPort* usb_port();
-  UsbPortDeviceDelegate* device_delegate_;
+  DeviceDelegate* device_delegate_;
   bool stop_by_offine_;
   device::Error rv_;
 

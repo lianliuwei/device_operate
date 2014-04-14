@@ -47,10 +47,8 @@ DataCollecter::LoopState FrameDataCollecter::OnLoopRun() {
 }
 
 device::Error FrameDataCollecter::ReadDevice(::device::RegisterMemory& memory) {
-  // TODO USB return Error
-  bool ret = device_delegate_->ReadDevice(
+  return device_delegate_->ReadDevice(
       memory.start_addr(), memory.buffer(), memory.size());
-  return OK;
 }
 
 #define CHECK_DEVICE(error) \

@@ -4,7 +4,7 @@
 
 #include "canscope/device/device_manager.h"
 #include "canscope/device/osc_device.h"
-#include "canscope/device/usb_port_device_delegate.h"
+#include "canscope/device/device_delegate.h"
 #include "canscope/device/config_manager.h"
 #include "canscope/device/canscope_device_runner.h"
 
@@ -38,7 +38,7 @@ public:
 
   CANScopeRunner* runner() { return &runner_; }
 
-  UsbPortDeviceDelegate* device_delegate() { return &device_delegate_; }
+  DeviceDelegate* device_delegate() { return device_delegate_.get(); }
 
   // after DeviceType Detected the DeviceType type can not change.
   void DeviceTypeDetected(DeviceType type);
@@ -51,7 +51,7 @@ private:
   CANScopeDevice(scoped_refptr<base::SingleThreadTaskRunner> device_loop);
   virtual ~CANScopeDevice() {}
 
-  UsbPortDeviceDelegate device_delegate_;
+  scoped_ptr<DeviceDelegate> device_delegate_;
 
   ConfigManager osc_device_config_;
   OscDevice osc_device_;

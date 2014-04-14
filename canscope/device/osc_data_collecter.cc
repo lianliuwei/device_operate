@@ -1,7 +1,7 @@
 #include "canscope/device/osc_data_collecter.h"
 
 #include "canscope/device/canscope_device_constants.h"
-#include "canscope/device/usb_port_device_delegate.h"
+#include "canscope/device/device_delegate.h"
 #include "canscope/device/register/scope_ctrl_register.h"
 #include "canscope/device/register/canscope_device_register_constants.h"
 
@@ -142,33 +142,24 @@ void OscDataCollecter::DoCollect(LoopState* loop_state) {
 
 #undef CHECK_DEVICE
 
-bool OscDataCollecter::WriteDevice(RegisterMemory* memory) {
+Error OscDataCollecter::WriteDevice(RegisterMemory& memory) {
   return device_delegate_->WriteDevice(
-    memory->start_addr(), memory->buffer(), memory->size());
+    memory.start_addr(), memory.buffer(), memory.size());
 }
 
-bool OscDataCollecter::ReadDevice(RegisterMemory* memory) {
+Error OscDataCollecter::ReadDevice(RegisterMemory& memory) {
   return device_delegate_->ReadDevice(
-    memory->start_addr(), memory->buffer(), memory->size());
-}
-
-Error OscDataCollecter::ReadData(OscRawDataHandle raw_data) {
-  memset(raw_data->data(), 0, raw_data->size());
-  bool ret = usb_port()->ReadEP3(kScopeReadAddr, 
-      kUsbModelStream, raw_data->data(), raw_data->size());
-  return ret ? OK : ERR_READ_DEVICE;
+    memory.start_addr(), memory.buffer(), memory.size());
 }
 
 Error OscDataCollecter::UpdateTriggerState() {
-  bool ret = ReadDevice(&(trigger_state_.memory));
-  return ret ? OK : ERR_READ_DEVICE;
+  return ReadDevice(trigger_state_.memory);
 }
 
 Error OscDataCollecter::StartScope() {
   ScopeCtrlRegister scope_ctrl;
   scope_ctrl.scope_ctrl.set_value(true);
-  bool ret = WriteDevice(&(scope_ctrl.memory));
-  return ret ? OK : ERR_WRITE_DEVICE;
+  return WriteDevice(scope_ctrl.memory);
 }
 
 bool OscDataCollecter::IsCollected() {
@@ -185,7 +176,7 @@ OscRawDataDeviceConfigHandle OscDataCollecter::LastConfig() {
   return last_config_;
 }
 
-OscDataCollecter::OscDataCollecter(UsbPortDeviceDelegate* device_delegate, 
+OscDataCollecter::OscDataCollecter(DeviceDelegate* device_delegate, 
                                    OscDevice* osc_device)
     : device_delegate_(device_delegate)
     , osc_device_(osc_device)
@@ -195,10 +186,6 @@ OscDataCollecter::OscDataCollecter(UsbPortDeviceDelegate* device_delegate,
     // over write no keep
     , queue_(new OscRawDataQueue(true, false)) {
   SetFreq(kOscMaxFreq);
-}
-
-UsbPort* OscDataCollecter::usb_port() {
-  return device_delegate_->usb_port_ptr();
 }
 
 bool OscDataCollecter::AllocOscRawData(OscRawDataHandle* raw_data, 

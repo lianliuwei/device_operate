@@ -8,6 +8,7 @@
 #include "canscope/device/devices_manager.h"
 
 using namespace base;
+using namespace canscope::device;
 
 namespace canscope {
 
@@ -73,17 +74,15 @@ void CANScopeRunner::CloseDevice() {
 }
 
 device::Error CANScopeRunner::InitDeviceImpl(string16 device_path) {
-  UsbPortDeviceDelegate* device_delegate = canscope_->device_delegate();
-  // INFO now  just usb_port, if add more port change device_delegate interface
-  UsbPort* usb_port = device_delegate->usb_port_ptr();
-  bool ret = false;
-  ret = usb_port->OpenDevice(device_path);
-  if (!ret) {
+  DeviceDelegate* device_delegate = canscope_->device_delegate();
+  Error err;
+  err = device_delegate->OpenDevice(device_path);
+  if (err != OK) {
     return device::ERR_DEVICE_OPEN;
   }
-  ret = device_delegate->GetDeviceInfo(&device_info_);
-  if (!ret) {
-    usb_port->CloseDevice();
+  err = device_delegate->GetDeviceInfo(&device_info_);
+  if (err != OK) {
+    device_delegate->CloseDevice();
     return device::ERR_DEVICE_INFO;
   }
   // config FPGA
@@ -96,24 +95,24 @@ device::Error CANScopeRunner::InitDeviceImpl(string16 device_path) {
   // pro use different FPGA file.
   fpga_file = fpga_file.Append(
       device_info_.IsProVersion() ? L"CANScopePro.dll" : L"CANScope.dll");
+  bool ret;
   ret = file_util::ReadFileToString(fpga_file, &content);
   if (!ret) {
-    usb_port->CloseDevice();
+    device_delegate->CloseDevice();
     return device::ERR_DEVICE_LOADFPGAFILE;
   }
-  ret = usb_port->DownloadFPGA((uint8*)(content.c_str()), content.size());
-  if (!ret) {
-    usb_port->CloseDevice();
+  err = device_delegate->DownloadFPGA((uint8*)(content.c_str()), content.size());
+  if (err != OK) {
+    device_delegate->CloseDevice();
     return device::ERR_DEVICE_DOWNLOADFPGA;
   }
   return device::OK;
 }
 
 void CANScopeRunner::CloseDeviceImpl() {
-  UsbPortDeviceDelegate* device_delegate = canscope_->device_delegate();
-  UsbPort* usb_port = device_delegate->usb_port_ptr();
-  bool ret = usb_port->CloseDevice();
-  DCHECK(ret);
+  DeviceDelegate* device_delegate = canscope_->device_delegate();
+  Error err = device_delegate->CloseDevice();
+  DCHECK(err == OK);
 }
 
 // NOTE may DevicesManager manager the state is better
