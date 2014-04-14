@@ -22,7 +22,7 @@ ScopeOpenDevice::ScopeOpenDevice(UsbPortDeviceDelegate* device_delegate)
     : device_delegate_(device_delegate)
     , open_(false) {
   DCHECK(device_delegate);
-  open_ = InitDevice(device_delegate);
+  open_ = InitDevice(device_delegate, &type_);
 }
 
 ScopeOpenDevice::~ScopeOpenDevice() {
@@ -30,7 +30,7 @@ ScopeOpenDevice::~ScopeOpenDevice() {
     CloseDevice(device_delegate_->usb_port_ptr());
 }
 
-bool ScopeOpenDevice::InitDevice(UsbPortDeviceDelegate* device_delegate) {
+bool ScopeOpenDevice::InitDevice(UsbPortDeviceDelegate* device_delegate, DeviceType* type) {
   UsbPort* usb_port = device_delegate->usb_port_ptr();
 
   std::vector<string16> devices;
@@ -43,6 +43,7 @@ bool ScopeOpenDevice::InitDevice(UsbPortDeviceDelegate* device_delegate) {
   DeviceInfo device_info;
   ret = device_delegate->GetDeviceInfo(&device_info);
   EXPECT_TRUE_OR_RET_FALSE(ret);
+  *type = device_info.GetDeviceType();
   // config FPGA
   if (device_info.fpage_version.value() == 0xFFFFFFFF) {
     return true;
