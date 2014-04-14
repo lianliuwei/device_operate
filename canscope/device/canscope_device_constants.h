@@ -15,6 +15,8 @@ const int kOscMemoryUsage = 100 * 1024* 1024; // 100MB
 const int kOscMaxFreq = 30; // real speed can be very high > 500
 const int kMaxBaudRate = 100*1000*1000; // 100M
 const int kFrameSize = 48;
+const int kFrameBufferMaxSize = 5 * 1024 * 1024;
+const int64 kFrameWaitFull = 1000; // ms
 // TODO move to canscope_device_util.h
 inline void SleepMs(int64 ms) {
   base::PlatformThread::Sleep(base::TimeDelta::FromMilliseconds(ms));
