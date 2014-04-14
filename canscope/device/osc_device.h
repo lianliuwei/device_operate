@@ -41,8 +41,6 @@ public:
   OscDevice(DeviceDelegate* device_delegate, ConfigManager* config_manager);
   virtual ~OscDevice() {}
 
-  void ConfigUpdate();
-
   CalibrateInfo GetCalibrateInfo(Chnl chnl, VoltRange range);
   VoltRange GetChnlVoltRange(Chnl chnl);
   ChnlConfig GetChnlConfig(Chnl chnl);
