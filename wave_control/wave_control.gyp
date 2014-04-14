@@ -88,6 +88,8 @@
         'views/transform_util.h',
         'views/transform_util.cc',
         'views/wave_control_views_constants.h',
+        'views/fill_box_layout.h',
+        'views/fill_box_layout.cc',
       ],
     }, 
  ],

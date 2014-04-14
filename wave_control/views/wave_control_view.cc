@@ -1,9 +1,8 @@
 #include "wave_control/views/wave_control_view.h"
 
-#include "ui/views/layout/box_layout.h"
-
 #include "wave_control/views/wave_control_view_factory.h"
 #include "wave_control/views/wave_control_views_constants.h"
+#include "wave_control/views/fill_box_layout.h"
 
 using namespace views;
 
@@ -11,7 +10,7 @@ using namespace views;
 WaveControlView::WaveControlView(WaveControl* wave_control)
     : wave_control_(wave_control) {
   set_background(Background::CreateSolidBackground(kWaveControlBackgroundColor));
-  SetLayoutManager(new BoxLayout(BoxLayout::kVertical, 0, 0, 0));
+  SetLayoutManager(new FillBoxLayout(FillBoxLayout::kVertical, 0, 0, 0));
   wave_control->AddObserver(this);
 
   // fetch WaveContainer
