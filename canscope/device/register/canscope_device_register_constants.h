@@ -110,7 +110,7 @@ static const uint32 kScopeCtrlAddr = kBaseAddr + 0x210;
 static const uint32 kScopeCtrlOffset = 0x0;
 static const int kScopeCtrlSize = kScopeCtrlOffset + 0x4;
 // fpga send register
-static const uint32 kFpgaSendAddr = kBaseAddr + 0x800;
+static const uint32 kFpgaSendAddr = kBaseAddr + 0x1380;
 static const uint32 kBtrDivOffset = 0x0;
 static const uint32 kBitNumOffset = 0x2;
 static const uint32 kSendNumOffset = 0x3;
