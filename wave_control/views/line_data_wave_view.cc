@@ -90,7 +90,7 @@ bool LineDataWaveView::PaintWaveParam(int* vector_start_out, int* vector_end_out
 }
 
 void LineDataWaveView::PaintWave(gfx::Canvas* canvas) {
-  if (line_data_ || line_data_->data() == NULL)
+  if (!line_data_ || line_data_->data() == NULL)
     return;
  
   int vector_start, vector_end, plot_begin, plot_end;
