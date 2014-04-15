@@ -37,5 +37,6 @@ static const uint32 kUsbCommandDataSizeOffset = 0x8;
 static const uint32 kUsbCommandFucAddrOffset = 0xC;
 static const uint32 kUsbCommandSize = kUsbCommandFucAddrOffset + 0x4;
 static const uint32 kUsbCommandReadOffset = 0x4;
+static const uint32 kUsbCommandWriteOffset = 0x10;
 
 } // namespace canscope

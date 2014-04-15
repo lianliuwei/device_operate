@@ -13,7 +13,7 @@ UsbCommand::UsbCommand()
 
 
 uint8* UsbCommand::write_data_ptr() {
-  return memory.PtrByRelative(kUsbCommandReadOffset);
+  return memory.PtrByRelative(kUsbCommandWriteOffset);
 }
 // static
 int UsbCommand::write_data_max_size() {
