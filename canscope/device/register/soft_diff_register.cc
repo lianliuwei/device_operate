@@ -39,7 +39,7 @@ int SoftDiffRegister::FilDivOffset() const {
 }
 
 int SoftDiffRegister::FilDivSize() const {
-  return 2;
+  return 4;
 }
 
 
