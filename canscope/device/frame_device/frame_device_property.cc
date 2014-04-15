@@ -52,7 +52,7 @@ int FrameDeviceProperty::BaudRate() {
 }
 
 uint16 FrameDeviceProperty::BtrDiv() {
-  return kMaxBaudRate / BaudRate() / 16 - 1;
+  return kMaxBaudRate / BaudRate() - 1;
 }
 
 } // namespace canscope
