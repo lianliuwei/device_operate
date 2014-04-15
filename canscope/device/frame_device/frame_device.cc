@@ -88,15 +88,18 @@ void FrameDevice::SetAll() {
   SetWaveStorage();
   SetSoftDiff();
   device::Error err;
-  err = WriteDeviceRange(sja1000_.memory, sja1000_.SysOffset(), sja1000_.SysSize());
-  CHECK_DEVICE(err);
+   err = WriteDeviceRange(sja1000_.memory, sja1000_.SysOffset(), sja1000_.SysSize());
+   CHECK_DEVICE(err);
   err = WriteDevice(frame_storage_.memory);
   CHECK_DEVICE(err);
-  err = WriteDevice(wave_storage_.memory);
+   err = WriteDevice(wave_storage_.memory);
+   CHECK_DEVICE(err);
+   err = WriteDeviceRange(soft_diff_->memory, soft_diff_->FilDivOffset(), soft_diff_->FilDivSize());
+   CHECK_DEVICE(err);
+   // set sys final after config all.
+   err = WriteDeviceRange(soft_diff_->memory, soft_diff_->SysOffset(), soft_diff_->SysSize());
   CHECK_DEVICE(err);
-  // set sys final after config all.
-  err = WriteDeviceRange(soft_diff_->memory, soft_diff_->SysOffset(), soft_diff_->SysSize());
-  CHECK_DEVICE(err);
+
 }
 
 #undef CHECK_DEVICE
