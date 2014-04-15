@@ -10,8 +10,8 @@ static const int kFpgaSendStateFreq = 40;
 
 namespace canscope {
 
-device::Error canscope::FrameDeviceHandle::FpgaSend(const FpgaFrameData& data, 
-                                                    uint8 send_num) { 
+device::Error canscope::FrameDeviceHandle::FpgaSend(const FpgaFrameData& data,
+                                                    uint8 send_num) {
   fpga_send.set_frame_data(data);
   fpga_send.send_num.set_value(send_num);
   // TODO need calc from data
@@ -22,6 +22,7 @@ device::Error canscope::FrameDeviceHandle::FpgaSend(const FpgaFrameData& data,
 
 device::Error FrameDeviceHandle::FpgaSend() {
   SyncCall sync_call(DeviceTaskRunner());
+  last_err_ = device::OK;
   sync_call.set_callback(Bind(&FrameDeviceHandle::FpgaSendImpl, Unretained(this)));
   sync_call.Call();
   return last_err_;
@@ -30,19 +31,19 @@ device::Error FrameDeviceHandle::FpgaSend() {
 // sync can use post fpga_send_ because it's in wait.
 void FrameDeviceHandle::FpgaSendImpl() {
   device::Error err;
-  err = device_->WriteDeviceRange(fpga_send.memory, 
+  err = device_->WriteDeviceRange(fpga_send.memory,
       fpga_send.SendOffset(), fpga_send.SendSize());
   if (err != device::OK) {
-    last_err_ = err;  
+    last_err_ = err;
     return;
   }
 
   int count = 0;
   while (true) {
-    err = device_->ReadDeviceRange(fpga_send.memory, 
+    err = device_->ReadDeviceRange(fpga_send.memory,
         fpga_send.StateOffset(), fpga_send.StateSize());
     if (err != device::OK) {
-      last_err_ = err;  
+      last_err_ = err;
       return;
     }
     // success
@@ -50,7 +51,7 @@ void FrameDeviceHandle::FpgaSendImpl() {
       last_err_ = device::OK;
       return;
     }
-    // sleep 
+    // sleep
     if ((count % kFpgaSendStateFreq) == kFpgaSendStateFreq -1) {
       SleepMs(1);
     }
