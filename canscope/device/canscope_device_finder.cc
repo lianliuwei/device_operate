@@ -2,7 +2,6 @@
 
 #include "base/synchronization/lock.h"
 
-#include "canscope/device/usb/usb_port.h"
 #include "canscope/device/devices_manager.h"
 
 using namespace std;
@@ -11,7 +10,7 @@ namespace canscope {
 bool CANScopeDeviceFinder::LoopRunImp() {
   // EnumDevice
   std::vector<string16> devices;
-  bool ret = EnumDevices(&devices);
+  bool ret = device_delegate_->EnumDevices(&devices);
   DCHECK(ret);
   int find_device_size = static_cast<int>(devices.size());
 
@@ -25,19 +24,16 @@ bool CANScopeDeviceFinder::LoopRunImp() {
   if (stop_on_found_ && find_device_size > 0)
     return false;
 
-  if (IsSingle())
-    return false;
-
-  return true;
+  return !IsSingle();
 }
 
 CANScopeDeviceFinder::CANScopeDeviceFinder(
     scoped_refptr<base::SingleThreadTaskRunner> run_thread, 
     bool stop_on_found)
-    : stop_on_found_(stop_on_found) {
+    : stop_on_found_(stop_on_found)
+    , device_delegate_(CreateDeviceDelegate()) {
   set_run_thread(run_thread);
   next_loop_delay_ = base::TimeDelta::FromSeconds(1);
 }
-
 
 } // namespace canscope

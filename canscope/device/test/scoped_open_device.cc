@@ -7,18 +7,25 @@
 #include "canscope/device/register/device_info.h"
 #include "base/path_service.h"
 
-#define EXPECT_TRUE_OR_RET_FALSE(ret) \
-  { \
-    EXPECT_EQ(true, (ret)); \
-    if(!(ret)) \
+#define EXPECT_OK_OR_RET_FALSE(ret) \
+{ \
+  EXPECT_EQ(canscope::device::OK, (ret)); \
+  if((ret) != canscope::device::OK) \
     return false; \
-  }
+}
+
+#define EXPECT_TRUE_OR_RET_FALSE(ret) \
+{ \
+  EXPECT_EQ(true, (ret)); \
+  if(!(ret)) \
+    return false; \
+}
 
 using namespace base;
 
 namespace canscope {
 
-ScopeOpenDevice::ScopeOpenDevice(UsbPortDeviceDelegate* device_delegate) 
+ScopeOpenDevice::ScopeOpenDevice(DeviceDelegate* device_delegate) 
     : device_delegate_(device_delegate)
     , open_(false) {
   DCHECK(device_delegate);
@@ -27,25 +34,25 @@ ScopeOpenDevice::ScopeOpenDevice(UsbPortDeviceDelegate* device_delegate)
 
 ScopeOpenDevice::~ScopeOpenDevice() {
   if (open_)
-    CloseDevice(device_delegate_->usb_port_ptr());
+    CloseDevice(device_delegate_);
 }
 
-bool ScopeOpenDevice::InitDevice(UsbPortDeviceDelegate* device_delegate, DeviceType* type) {
-  UsbPort* usb_port = device_delegate->usb_port_ptr();
+bool ScopeOpenDevice::InitDevice(DeviceDelegate* device_delegate, DeviceType* type) {
 
   std::vector<string16> devices;
-  bool ret = EnumDevices(&devices);
-  EXPECT_TRUE_OR_RET_FALSE(ret && devices.size() > 0);
+  device::Error err = device_delegate->EnumDevices(&devices);
+  EXPECT_OK_OR_RET_FALSE(err);
+  EXPECT_TRUE_OR_RET_FALSE(devices.size() > 0);
 
-  ret = usb_port->OpenDevice(devices[0]);
-  EXPECT_TRUE_OR_RET_FALSE(ret);
+  err = device_delegate->OpenDevice(devices[0]);
+  EXPECT_OK_OR_RET_FALSE(err);
 
   DeviceInfo device_info;
-  ret = device_delegate->GetDeviceInfo(&device_info);
-  EXPECT_TRUE_OR_RET_FALSE(ret);
+  err = device_delegate->GetDeviceInfo(&device_info);
+  EXPECT_OK_OR_RET_FALSE(err);
   *type = device_info.GetDeviceType();
   // config FPGA
-  if (device_info.fpage_version.value() == 0xFFFFFFFF) {
+  if (device_info.fpage_version.value() != 0xFFFFFFFF) {
     return true;
   }
 
@@ -55,10 +62,10 @@ bool ScopeOpenDevice::InitDevice(UsbPortDeviceDelegate* device_delegate, DeviceT
   // pro use different FPGA file.
   fpga_file = fpga_file.Append(
     device_info.IsProVersion() ? L"CANScopePro.dll" : L"CANScope.dll");
-  ret = file_util::ReadFileToString(fpga_file, &content);
+  bool ret = file_util::ReadFileToString(fpga_file, &content);
   EXPECT_TRUE_OR_RET_FALSE(ret);
-  ret = usb_port->DownloadFPGA((uint8*)(content.c_str()), content.size());
-  EXPECT_TRUE_OR_RET_FALSE(ret);
+  err = device_delegate->DownloadFPGA((uint8*)(content.c_str()), content.size());
+  EXPECT_OK_OR_RET_FALSE(err);
 
   return true;
 }

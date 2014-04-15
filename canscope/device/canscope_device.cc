@@ -44,7 +44,8 @@ void CANScopeDevice::DeleteDeviceImpl() {
 CANScopeDevice::CANScopeDevice(
     scoped_refptr<base::SingleThreadTaskRunner> device_loop)
     : DeviceManager(device_loop)
-    , osc_device_(&device_delegate_, &osc_device_config_)
+    , device_delegate_(CreateDeviceDelegate())
+    , osc_device_(device_delegate_.get(), &osc_device_config_)
     , runner_(this) {
 }
 

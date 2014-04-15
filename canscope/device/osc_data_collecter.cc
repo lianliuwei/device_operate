@@ -131,7 +131,7 @@ void OscDataCollecter::DoCollect(LoopState* loop_state) {
     return;
   }
 
-  error = ReadData(raw_data);
+  error = device_delegate_->ReadOscData(raw_data->data(), raw_data->size());
   CHECK_DEVICE(error);
   
   queue_->PushBulk(raw_data);

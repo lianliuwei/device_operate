@@ -6,6 +6,7 @@
 #include "base/observer_list_threadsafe.h"
 
 #include "canscope/device/threaded_loop_run.h"
+#include "canscope/device/device_delegate.h"
 
 namespace canscope {
 
@@ -37,6 +38,8 @@ private:
 
   // open first_ executed?
   bool open_first_;
+
+  scoped_ptr<DeviceDelegate> device_delegate_;
 
   DISALLOW_COPY_AND_ASSIGN(CANScopeDeviceFinder);
 };

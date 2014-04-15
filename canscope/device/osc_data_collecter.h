@@ -63,8 +63,6 @@ private:
 
   device::Error WriteDevice(::device::RegisterMemory& memory);
   device::Error ReadDevice(::device::RegisterMemory& memory);
-  device::Error ReadData(OscRawDataHandle raw_data);
-  
 
   State next_state_;
 
