@@ -37,7 +37,7 @@ public:
   // pass out ownership value
   base::DictionaryValue* SaveConfig();
 
-  CANScopeRunner* runner() { return &runner_; }
+  CANScopeDeviceRunner* runner() { return &runner_; }
 
   DeviceDelegate* device_delegate() { return device_delegate_.get(); }
 
@@ -60,7 +60,7 @@ private:
   ConfigManager frame_device_config_;
   FrameDevice frame_device_;
 
-  CANScopeRunner runner_;
+  CANScopeDeviceRunner runner_;
 
   DISALLOW_COPY_AND_ASSIGN(CANScopeDevice);
 };

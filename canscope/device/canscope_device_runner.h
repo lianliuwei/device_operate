@@ -13,7 +13,7 @@ class CANScopeDevice;
 // init the device first and download the FPGA.
 // carefully with loop refcounted!!!!
 // live in CANScopeDevice
- class CANScopeRunner : public DevicesManagerObserver {
+class CANScopeDeviceRunner : public DevicesManagerObserver {
 public:
   scoped_refptr<OscDataCollecter> osc_data;
   scoped_refptr<FrameDataCollecter> frame_data;
@@ -22,8 +22,8 @@ public:
   void StopAll();
   void ReRunAll();
 
-  CANScopeRunner(CANScopeDevice* canscope);
-  virtual ~CANScopeRunner();
+  CANScopeDeviceRunner(CANScopeDevice* canscope);
+  virtual ~CANScopeDeviceRunner();
 
   void Init(string16 device_path);
 

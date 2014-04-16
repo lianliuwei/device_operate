@@ -12,7 +12,7 @@ using namespace canscope::device;
 
 namespace canscope {
 
-CANScopeRunner::CANScopeRunner(CANScopeDevice* canscope)
+CANScopeDeviceRunner::CANScopeDeviceRunner(CANScopeDevice* canscope)
     : canscope_(canscope)
     , inited_(false)
     // when runner is create the device is online,
@@ -21,11 +21,11 @@ CANScopeRunner::CANScopeRunner(CANScopeDevice* canscope)
 
 }
 
-CANScopeRunner::~CANScopeRunner() {
+CANScopeDeviceRunner::~CANScopeDeviceRunner() {
   CloseDevice();
 }
 
-void CANScopeRunner::Init(string16 device_path) {
+void CANScopeDeviceRunner::Init(string16 device_path) {
   DCHECK(!inited_) << "set device_path before inited";
   device_path_ = device_path;
 
@@ -39,7 +39,7 @@ void CANScopeRunner::Init(string16 device_path) {
   frame_data->set_run_thread(run_thread);
 }
 
-device::Error CANScopeRunner::InitDevice() {
+device::Error CANScopeDeviceRunner::InitDevice() {
   DCHECK(!inited_) << "device already init";
   device::Error error = InitDeviceImpl(device_path_);
   if (error != device::OK) {
@@ -54,7 +54,7 @@ device::Error CANScopeRunner::InitDevice() {
   return error;
 }
 
-device::Error CANScopeRunner::ReOnline() {
+device::Error CANScopeDeviceRunner::ReOnline() {
   DCHECK(inited_) << "device need InitDevice";
   CloseDeviceImpl();
   device::Error error = InitDeviceImpl(device_path_);
@@ -69,7 +69,7 @@ device::Error CANScopeRunner::ReOnline() {
   return error;
 }
 
-void CANScopeRunner::CloseDevice() {
+void CANScopeDeviceRunner::CloseDevice() {
   if (!inited_)
     return;
   StopAll();
@@ -77,7 +77,7 @@ void CANScopeRunner::CloseDevice() {
   inited_ = false;
 }
 
-device::Error CANScopeRunner::InitDeviceImpl(string16 device_path) {
+device::Error CANScopeDeviceRunner::InitDeviceImpl(string16 device_path) {
   DeviceDelegate* device_delegate = canscope_->device_delegate();
   Error err;
   err = device_delegate->OpenDevice(device_path);
@@ -113,14 +113,14 @@ device::Error CANScopeRunner::InitDeviceImpl(string16 device_path) {
   return device::OK;
 }
 
-void CANScopeRunner::CloseDeviceImpl() {
+void CANScopeDeviceRunner::CloseDeviceImpl() {
   DeviceDelegate* device_delegate = canscope_->device_delegate();
   Error err = device_delegate->CloseDevice();
   DCHECK(err == OK);
 }
 
 // NOTE may DevicesManager manager the state is better
-void CANScopeRunner::DeviceStateChanged() {
+void CANScopeDeviceRunner::DeviceStateChanged() {
   scoped_refptr<DevicesManager> manager = DevicesManager::Get();
   DeviceStatus status = manager->GetDeviceStatus(device_path_);
   if (status == status_)
@@ -134,24 +134,24 @@ void CANScopeRunner::DeviceStateChanged() {
   }
 }
 
-void CANScopeRunner::DeviceListChanged() {}
+void CANScopeDeviceRunner::DeviceListChanged() {}
 
-void CANScopeRunner::StartAll() {
+void CANScopeDeviceRunner::StartAll() {
   osc_data->Start();
   frame_data->Start();
 }
 
-void CANScopeRunner::StopAll() {
+void CANScopeDeviceRunner::StopAll() {
   osc_data->Stop();
   frame_data->Stop();
 }
 
-void CANScopeRunner::ReRunAll() {
+void CANScopeDeviceRunner::ReRunAll() {
   osc_data->ReRun();
   frame_data->ReRun();
 }
 
-canscope::DeviceType CANScopeRunner::GetDeviceType() {
+canscope::DeviceType CANScopeDeviceRunner::GetDeviceType() {
   DCHECK(inited_);
   return device_info_.GetDeviceType();
 }

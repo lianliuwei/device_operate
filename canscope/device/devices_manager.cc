@@ -165,7 +165,7 @@ bool DevicesManager::OpenDeviceImpl(string16 device_path, bool notify) {
   }
   scoped_refptr<CANScopeDevice> device = 
       CANScopeDevice::Create(run_thread_);
-  CANScopeRunner* runner = device->runner();
+  CANScopeDeviceRunner* runner = device->runner();
   runner->Init(device_path);
   runner->auto_init_device = kDefaultAutoInitDevice;
   runner->start_on_device_online = kDefaultStartOnDeviceOnline;
@@ -214,7 +214,7 @@ bool DevicesManager::CloseDeviceImpl(string16 device_path, bool notify) {
     device = device_it->second;
     DCHECK(device.get() != NULL);
   }
-  CANScopeRunner* runner = device->runner();
+  CANScopeDeviceRunner* runner = device->runner();
   RemoveObserver(runner);
   runner->CloseDevice();
   device->StartDestroying();
