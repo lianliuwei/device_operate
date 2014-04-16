@@ -26,7 +26,7 @@ using namespace canscope;
 using testing::Invoke;
 
 namespace {
-static const char kOscConfig [] =  {" \
+static const char kCANScopeConfig [] =  {" \
 { \"OscDevice\" : \
   { \
     \"CANH.Range\" : 3, \
@@ -48,6 +48,15 @@ static const char kOscConfig [] =  {" \
     \"Trigger.Compare\" : 0, \
     \"Trigger.Volt\" : 0.0, \
     \"TimeParam\" : 1.0 \
+  } \
+  \"FrameDevice\" : \
+  { \
+    \"DeviceEnable\": true, \
+    \"AckEnable\": true, \
+    \"SjaBtr\": 5184, \
+    \"FrameStoragePercent\": 50.0, \
+    \"BitSampleRate\": 5000, \
+    \"BitNum\": 180 \
   } \
 } \
 "};
@@ -88,7 +97,7 @@ public:
 protected:
   DevicePropertyObserverMock* mock_;
   OscDeviceHandle* GetOscDeviceHandle() {
-    return CANScopeDeviceHandle::GetInstance(manager_)->osc_device_handle(); 
+    return &(CANScopeDeviceHandle::GetInstance(manager_)->osc_device_handle); 
   }
   OscDevice* GetOscDevice() {
     return manager_->osc_device();
@@ -114,7 +123,7 @@ private:
 
   void CreateCANScopeDevice() {
     manager_ = CANScopeDevice::Create(MessageLoopProxy::current());
-    manager_->Init(GetConfig(kOscConfig));
+    manager_->Init(GetConfig(kCANScopeConfig));
     event_.Signal();
   }
 
@@ -173,8 +182,8 @@ TEST_F(CANScopeDeviceTest, SetValue) {
 
 void CANScopeDeviceTest::SetValueFileThread() {
   CANScopeDeviceHandle::Create(manager_);
-  OscDeviceHandle* handle = CANScopeDeviceHandle::GetInstance(manager_)->
-      osc_device_handle();
+  OscDeviceHandle* handle = &(CANScopeDeviceHandle::GetInstance(manager_)->
+      osc_device_handle);
 
   EXPECT_EQ(k8V, handle->volt_range_can_h.value());
   handle->volt_range_can_h.set_value(k1V);

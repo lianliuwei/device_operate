@@ -134,14 +134,17 @@ void CANScopeRunner::DeviceListChanged() {}
 
 void CANScopeRunner::StartAll() {
   osc_data->Start();
+  frame_data->Start();
 }
 
 void CANScopeRunner::StopAll() {
   osc_data->Stop();
+  frame_data->Stop();
 }
 
 void CANScopeRunner::ReRunAll() {
   osc_data->ReRun();
+  frame_data->ReRun();
 }
 
 canscope::DeviceType CANScopeRunner::GetDeviceType() {

@@ -1,10 +1,6 @@
 #include "base/values.h"
 #include "base/message_loop.h"
 #include "base/synchronization/waitable_event.h"
-#include "base/json/json_string_value_serializer.h"
-#include "base/json/json_file_value_serializer.h"
-#include "base/json/json_reader.h"
-#include "base/string_number_conversions.h"
 
 #include "common/common_thread.h"
 
@@ -22,6 +18,7 @@
 #include "canscope/device/devices_manager.h"
 #include "canscope/device/canscope_device_constants.h"
 #include "canscope/test/speed_meter.h"
+#include "canscope/device/test/test_util.h"
 
 using namespace std;
 using namespace base;
@@ -31,7 +28,7 @@ using namespace canscope;
 using testing::Invoke;
 
 namespace {
-static const char kOscConfig [] =  {" \
+static const char kCANScopeConfig [] =  {" \
 { \"OscDevice\" : \
   { \
     \"CANH.Range\" : 3, \
@@ -54,19 +51,17 @@ static const char kOscConfig [] =  {" \
     \"Trigger.Volt\" : 0.0, \
     \"TimeParam\" : 1.0 \
   } \
+  \"FrameDevice\" : \
+  { \
+    \"DeviceEnable\": true, \
+    \"AckEnable\": true, \
+    \"SjaBtr\": 5184, \
+    \"FrameStoragePercent\": 50.0, \
+    \"BitSampleRate\": 5000, \
+    \"BitNum\": 180 \
+  } \
 } \
 "};
-
-DictionaryValue* GetDefaultConfig() {
-  std::string content(kOscConfig);
-  JSONStringValueSerializer serializer(content);
-  Value* value = serializer.Deserialize(NULL, NULL);
-  EXPECT_TRUE(NULL != value);
-  EXPECT_TRUE(value->IsType(Value::TYPE_DICTIONARY));
-  DictionaryValue* dict_value;
-  value->GetAsDictionary(&dict_value);
-  return dict_value;
-}
 
 bool ActionIsDeviceThread() {
   return CommonThread::CurrentlyOn(CommonThread::DEVICE);
@@ -142,7 +137,7 @@ private:
       event_.Signal();
       return;
     }
-    manager_->Init(GetDefaultConfig());
+    manager_->Init(GetConfig(kCANScopeConfig));
     event_.Signal();
   }
 
@@ -164,8 +159,8 @@ private:
 void DevicesManagerTest::GetValueTest() {
   ASSERT_TRUE(manager_.get() != NULL) << "no Devices Finded";
   CANScopeDeviceHandle::Create(manager_);
- OscDeviceHandle* handle = CANScopeDeviceHandle::GetInstance(manager_)->
-    osc_device_handle();
+ OscDeviceHandle* handle = &(CANScopeDeviceHandle::GetInstance(manager_)->
+    osc_device_handle);
 
   EXPECT_EQ(k8V, handle->volt_range_can_h.value());
   EXPECT_DOUBLE_EQ(0.0, handle->offset_can_h.value());

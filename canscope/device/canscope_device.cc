@@ -13,6 +13,27 @@ using namespace common;
 using namespace std;
 using namespace base;
 
+namespace {
+
+base::DictionaryValue* GetSubDict(base::Value* value, string key) {
+  if (!value) {
+    return NULL;
+  }
+  if (!value->IsType(Value::TYPE_DICTIONARY)) {
+    return NULL;
+  }
+  DictionaryValue* dict_value;
+  value->GetAsDictionary(&dict_value);
+
+  DictionaryValue* sub_dict;
+  bool ret = dict_value->GetDictionary(key, &sub_dict);
+  if (!ret) {
+    return NULL;
+  }
+  return sub_dict;
+}
+
+}
 
 namespace canscope {
 
@@ -45,53 +66,62 @@ CANScopeDevice::CANScopeDevice(
     scoped_refptr<base::SingleThreadTaskRunner> device_loop)
     : DeviceManager(device_loop)
     , device_delegate_(CreateDeviceDelegate())
+    , osc_device_config_()
     , osc_device_(device_delegate_.get(), &osc_device_config_)
+    , frame_device_config_()
+    , frame_device_(device_delegate_.get(), &frame_device_config_, osc_device_.soft_diff())
     , runner_(this) {
+  osc_device_.set_run_thread(run_thread());
+  frame_device_.set_run_thread(run_thread());
 }
 
 void CANScopeDevice::Init(base::Value* value) {
-  DCHECK(value);
-  DCHECK(value->IsType(Value::TYPE_DICTIONARY));
-  DictionaryValue* dict_value;
-  value->GetAsDictionary(&dict_value);
-  string key(kOscDevice);
-  DCHECK(dict_value->HasKey(key));
-  
-  DictionaryValue* osc_device_value;
-  bool ret = dict_value->GetDictionary(key, &osc_device_value);
-  DCHECK(ret);
+  // osc device
+  DictionaryValue* osc_device_value = GetSubDict(value, kOscDevice);
+  DCHECK(osc_device_value);
   osc_device_config_.Update(osc_device_value);
   osc_device_.InitFromConfig();
   osc_device_.Init();
-  osc_device_.set_run_thread(run_thread());
+
+  // frame device
+  DictionaryValue* frame_device_value = GetSubDict(value, kFrameDevice);
+  DCHECK(frame_device_value);
+  frame_device_config_.Update(frame_device_value);
+  frame_device_.InitFromConfig();
+  frame_device_.Init();
 }
 
 void CANScopeDevice::LoadConfig(base::Value* value) {
-  DCHECK(value);
-  DCHECK(value->IsType(Value::TYPE_DICTIONARY));
-  DictionaryValue* dict_value;
-  value->GetAsDictionary(&dict_value);
-  string key(kOscDevice);
-  DCHECK(dict_value->HasKey(key));
-
-  DictionaryValue* osc_device_value;
-  bool ret = dict_value->GetDictionary(key, &osc_device_value);
-  DCHECK(ret);
+  // osc device
+  DictionaryValue* osc_device_value = GetSubDict(value, kOscDevice);
+  DCHECK(osc_device_value);
   osc_device_config_.Update(osc_device_value);
   osc_device_.LoadFromConfig();
+
+  // frame device
+  DictionaryValue* frame_device_value = GetSubDict(value, kFrameDevice);
+  DCHECK(frame_device_value);
+  frame_device_config_.Update(frame_device_value);
+  frame_device_.InitFromConfig();
 }
 
 base::DictionaryValue* CANScopeDevice::SaveConfig() {
   scoped_ptr<DictionaryValue> dict_value(new DictionaryValue);
-  string key(kOscDevice);
+  {
   ConfigManager::Config config = osc_device_config_.GetLast();
-  dict_value->Set(key, config.pref->DeepCopy());
-
+  dict_value->Set(kOscDevice, config.pref->DeepCopy());
+  }
+  {
+  ConfigManager::Config config = frame_device_config_.GetLast();
+  dict_value->Set(kFrameDevice, config.pref->DeepCopy());
+  }
+  
   return dict_value.release();
 }
 
 void CANScopeDevice::DeviceTypeDetected(DeviceType type) {
   osc_device_.set_device_type(type);
+  frame_device_.set_device_type(type);
 }
 
 

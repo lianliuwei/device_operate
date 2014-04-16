@@ -5,6 +5,7 @@
 
 #include "canscope/device/canscope_device.h"
 #include "canscope/device/osc_device/osc_device_handle.h"
+#include "canscope/device/frame_device/frame_device_handle.h"
 
 namespace canscope {
 
@@ -19,21 +20,19 @@ public:
   // or user call this.
   void DestroyHandle();
 
-  OscDeviceHandle* osc_device_handle() { return osc_device_handle_.get(); }
+  OscDeviceHandle osc_device_handle;
+  FrameDeviceHandle frame_device_handle;
 
 private:
   virtual void Observe(int type, 
                        const common::NotificationSource& source, 
                        const common::NotificationDetails& details);
 
-  void Init();
 
   CANScopeDeviceHandle(CANScopeDevice* manager);
   virtual ~CANScopeDeviceHandle();
 
   common::NotificationRegistrar registrar_;
-
-  scoped_ptr<OscDeviceHandle> osc_device_handle_;
 
   scoped_refptr<CANScopeDevice> device_manager_;
 

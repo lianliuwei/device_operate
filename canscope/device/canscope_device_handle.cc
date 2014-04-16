@@ -48,7 +48,6 @@ CANScopeDeviceHandle* CANScopeDeviceHandle::Create(
   CANScopeDeviceHandle* handle = new CANScopeDeviceHandle(manager);
   handle_map->insert(make_pair(manager, handle));
   
-  handle->Init();
   return handle;
 }
 
@@ -68,23 +67,21 @@ void CANScopeDeviceHandle::DestroyHandle() {
   }
 }
 
-CANScopeDeviceHandle::CANScopeDeviceHandle(
-    CANScopeDevice* manager)
-    : device_manager_(manager) {
+CANScopeDeviceHandle::CANScopeDeviceHandle(CANScopeDevice* manager)
+    : device_manager_(manager)
+    , osc_device_handle(manager->osc_device())
+    , frame_device_handle(manager->frame_device()) {
   DCHECK(manager);
   registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_START_DESTROY, 
       common::Source<CANScopeDevice>(manager));
 }
 
 void CANScopeDeviceHandle::Observe(int type, 
-                                          const common::NotificationSource& source, 
-                                          const common::NotificationDetails& details) {
+                                   const common::NotificationSource& source, 
+                                   const common::NotificationDetails& details) {
   DestroyHandle();
 }
 
-void CANScopeDeviceHandle::Init() {
-  osc_device_handle_.reset(new OscDeviceHandle(device_manager_->osc_device()));
-}
 
 CANScopeDeviceHandle::~CANScopeDeviceHandle() {
   device_manager_ = NULL;

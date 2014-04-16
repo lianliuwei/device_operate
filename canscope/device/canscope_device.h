@@ -3,10 +3,11 @@
 #include "base/memory/scoped_ptr.h"
 
 #include "canscope/device/device_manager.h"
-#include "canscope/device/osc_device/osc_device.h"
 #include "canscope/device/device_delegate.h"
 #include "canscope/device/config_manager.h"
 #include "canscope/device/canscope_device_runner.h"
+#include "canscope/device/osc_device/osc_device.h"
+#include "canscope/device/frame_device/frame_device.h"
 
 namespace base {
 class MessageLoopProxy;
@@ -21,11 +22,11 @@ public:
   static CANScopeDevice* Create(
       scoped_refptr<base::SingleThreadTaskRunner> runner);
 
-  OscDevice* osc_device() {
-    return &osc_device_;
-  }
+  OscDevice* osc_device() { return &osc_device_; }
+  FrameDevice* frame_device() { return &frame_device_; }
 
   ConfigManager* osc_device_config_test() { return &osc_device_config_; }
+  ConfigManager* frame_device_config_test() { return &frame_device_config_; }
 
   // take ownership of value
   void Init(base::Value* value);
@@ -55,6 +56,9 @@ private:
 
   ConfigManager osc_device_config_;
   OscDevice osc_device_;
+
+  ConfigManager frame_device_config_;
+  FrameDevice frame_device_;
 
   CANScopeRunner runner_;
 

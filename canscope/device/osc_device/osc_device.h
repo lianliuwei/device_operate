@@ -65,6 +65,9 @@ public:
   void set_device_type(canscope::DeviceType value) { device_type_ = value; }
   canscope::DeviceType device_type() const { return device_type_; }
 
+  // frame device need use soft diff
+  SoftDiffRegister* soft_diff() { return &soft_diff_; }
+
 private:
   // implement DeviceBase
   virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { return &prefs_; }
