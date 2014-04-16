@@ -1,6 +1,6 @@
 #include "canscope/osc_chnl_calc/chnl_calc_item.h"
 
-#include "canscope/device/osc_raw_data.h"
+#include "canscope/device/osc_device/osc_raw_data.h"
 #include "canscope/osc_chnl_calc/chnl_calc_result.h"
 
 using namespace canscope;

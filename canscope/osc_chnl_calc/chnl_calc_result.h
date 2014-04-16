@@ -5,7 +5,7 @@
 #include "depend_calc/calc_data.h"
 #include "depend_calc/calc_delegate.h"
 
-#include "canscope/device/osc_raw_data.h"
+#include "canscope/device/osc_device/osc_raw_data.h"
 
 namespace canscope {
 

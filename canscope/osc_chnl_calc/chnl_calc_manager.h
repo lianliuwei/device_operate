@@ -10,7 +10,7 @@
 #include "canscope/async_task.h"
 #include "canscope/osc_chnl_calc/freq_time.h"
 #include "canscope/osc_chnl_calc/chnl_calc_result.h"
-#include "canscope/device/osc_raw_data.h"
+#include "canscope/device/osc_device/osc_raw_data.h"
 
 namespace canscope {
 
