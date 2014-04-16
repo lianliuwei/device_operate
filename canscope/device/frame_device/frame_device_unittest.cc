@@ -1,6 +1,5 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
-#include "canscope/device/osc_device.h"
 #include "canscope/device/device_delegate.h"
 #include "canscope/device/test/scoped_open_device.h"
 #include "canscope/device/test/test_util.h"
