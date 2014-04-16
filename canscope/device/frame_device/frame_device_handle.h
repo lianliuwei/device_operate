@@ -12,7 +12,7 @@ class FrameDeviceHandle : public DeviceHandleBase {
 public:
   FrameDeviceHandle(FrameDevice* device);
   virtual ~FrameDeviceHandle() {}
-  
+
   device::Error FpgaSend(const FpgaFrameData& data, uint8 send_num);
   device::Error SetAck(bool ack, uint8 ack_bit);
 
@@ -20,13 +20,13 @@ public:
   device::Error FpgaSend();
   device::Error SetDstb();
   device::Error SetAck();
-  
+
   FpgaSendRegister fpga_send;
 
 private:
   // implement DeviceHandleBase
-  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { 
-    return &(properties_.prefs_); 
+  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() {
+    return &(properties_.prefs_);
   }
 
   void FpgaSendImpl();
