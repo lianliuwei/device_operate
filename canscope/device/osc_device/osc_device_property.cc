@@ -1,4 +1,4 @@
-#include "canscope/device/osc_device_property.h"
+#include "canscope/device/osc_device/osc_device_property.h"
 
 #include "canscope/device/canscope_device_property_constants.h"
 

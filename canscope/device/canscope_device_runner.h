@@ -1,6 +1,6 @@
 #pragma once
 
-#include "canscope/device/osc_data_collecter.h"
+#include "canscope/device/osc_device/osc_data_collecter.h"
 #include "canscope/device/register/device_info.h"
 #include "canscope/device/devices_manager_observer.h"
 #include "canscope/device/canscope_device_finder.h"

@@ -4,10 +4,10 @@
 
 #include "device/memory_usage_pool.h"
 
-#include "canscope/device/osc_device_property.h"
+#include "canscope/device/osc_device/osc_device_property.h"
 #include "canscope/device/config_manager.h"
 // for DeviceType
-#include "canscope/device/osc_device.h"
+#include "canscope/device/osc_device/osc_device.h"
 
 namespace canscope {
 // Osc Config for RawData

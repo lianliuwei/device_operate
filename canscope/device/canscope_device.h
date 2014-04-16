@@ -3,7 +3,7 @@
 #include "base/memory/scoped_ptr.h"
 
 #include "canscope/device/device_manager.h"
-#include "canscope/device/osc_device.h"
+#include "canscope/device/osc_device/osc_device.h"
 #include "canscope/device/device_delegate.h"
 #include "canscope/device/config_manager.h"
 #include "canscope/device/canscope_device_runner.h"

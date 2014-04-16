@@ -1,6 +1,6 @@
 #pragma once
 
-#include "canscope/device/osc_device.h"
+#include "canscope/device/osc_device/osc_device.h"
 
 #include "canscope/device/property/property.h"
 #include "canscope/device/device_handle_base.h"

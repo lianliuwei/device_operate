@@ -1,4 +1,4 @@
-#include "canscope/device/osc_data_collecter.h"
+#include "canscope/device/osc_device/osc_data_collecter.h"
 
 #include "canscope/device/canscope_device_constants.h"
 #include "canscope/device/device_delegate.h"

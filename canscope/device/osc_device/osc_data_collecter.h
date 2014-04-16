@@ -7,7 +7,7 @@
 
 #include "canscope/device_errors.h"
 #include "canscope/device/data_collecter.h"
-#include "canscope/device/osc_raw_data.h"
+#include "canscope/device/osc_device/osc_raw_data.h"
 #include "canscope/device/register/trigger_state_register.h"
 
 namespace canscope {

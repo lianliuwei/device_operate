@@ -4,7 +4,7 @@
 #include "common/notification/notification_registrar.h"
 
 #include "canscope/device/canscope_device.h"
-#include "canscope/device/osc_device_handle.h"
+#include "canscope/device/osc_device/osc_device_handle.h"
 
 namespace canscope {
 

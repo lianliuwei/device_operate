@@ -1,4 +1,4 @@
-#include "canscope/device/osc_raw_data.h"
+#include "canscope/device/osc_device/osc_raw_data.h"
 
 namespace canscope {
 

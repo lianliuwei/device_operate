@@ -1,4 +1,4 @@
-#include "canscope/device/osc_device_handle.h"
+#include "canscope/device/osc_device/osc_device_handle.h"
 
 #include "base/bind.h"
 
