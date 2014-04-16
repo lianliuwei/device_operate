@@ -1,7 +1,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
 #include "canscope/device/osc_device.h"
-#include "canscope/device/usb_port_device_delegate.h"
+#include "canscope/device/device_delegate.h"
 #include "canscope/device/test/scoped_open_device.h"
 #include "canscope/device/test/test_util.h"
 #include "canscope/device/frame_device/frame_device.h"
@@ -41,14 +41,16 @@ static const char kFrameConfig[] = {" \
 class FrameDeviceTest : public testing::Test {
 public:
   FrameDeviceTest()
-      : device_delegate_()
-      , open_device_(&device_delegate_) {
+      : device_delegate_(CreateDeviceDelegate())
+      , open_device_(device_delegate_.get()) {
 
   }
   ~FrameDeviceTest() {}
 
 protected:
   virtual void SetUp() {
+    EXPECT_TRUE_OR_RET(open_device_.IsOpen());
+
     new TestProcess();
     GetTestProcess()->Init();
 
@@ -68,8 +70,7 @@ protected:
   }
 
   void InitDevice() {
-    EXPECT_TRUE_OR_RET(open_device_.IsOpen());
-    frame_device_.reset(new FrameDevice(&device_delegate_, 
+    frame_device_.reset(new FrameDevice(device_delegate_.get(), 
           &frame_device_config_, &soft_diff_));
     frame_device_->set_run_thread(MessageLoopProxy::current());
     frame_device_->set_device_type(open_device_.type());
@@ -84,7 +85,7 @@ protected:
   }
 
   ConfigManager frame_device_config_;
-  UsbPortDeviceDelegate device_delegate_;
+  scoped_ptr<DeviceDelegate> device_delegate_;
   ScopeOpenDevice open_device_;
   scoped_ptr<FrameDevice> frame_device_;
   scoped_ptr<FrameDeviceHandle> frame_device_handle_;
@@ -93,9 +94,32 @@ protected:
 
 #define EXPECT_OK_OR_RET(err) \
 { \
-  EXPECT_EQ(canscope::device::OK, (err)) << ErrorToString((err)); \
-  if(!(err)) \
-  return; \
+  EXPECT_EQ(canscope::device::OK, (err)) << canscope::device::ErrorToString((err)); \
+  if((err) != canscope::device::OK) \
+    return; \
+}
+
+using namespace canscope::device;
+
+Error WriteDevice(DeviceDelegate* device_delegate_, 
+                  ::device::RegisterMemory& memory) {
+  return device_delegate_->WriteDevice(
+      memory.start_addr(), memory.buffer(), memory.size());
+}
+
+Error ReadDevice(DeviceDelegate* device_delegate_, 
+                 ::device::RegisterMemory& memory) {
+  return device_delegate_->ReadDevice(
+      memory.start_addr(), memory.buffer(), memory.size());
+}
+
+Error WriteDeviceRange(DeviceDelegate* device_delegate_, 
+                       ::device::RegisterMemory& memory, 
+                       int start_offset, 
+                       int size) {
+  DCHECK(start_offset + size <= memory.size());
+  return device_delegate_->WriteDevice(
+      memory.start_addr() + start_offset, memory.PtrByRelative(start_offset), size);
 }
 
 TEST_F(FrameDeviceTest, Send) {
@@ -103,7 +127,70 @@ TEST_F(FrameDeviceTest, Send) {
   for (int i = 0; i < arraysize(data.data); ++i) {
     data.data[i] = i;
   }
-  canscope::device::Error err = frame_device_handle_->FpgaSend(data, 1);
+  canscope::device::Error err;
+
+  err = frame_device_handle_->FpgaSend(data, 100);
+  EXPECT_OK_OR_RET(err);
+  
+  FrameStorageRegister frame_storage;
+  err = ReadDevice(device_delegate_.get(), frame_storage.memory);
+  EXPECT_OK_OR_RET(err);
+  cout << "Frame Num: " << frame_storage.frame_num.value() * 1.0 / kFrameSize << endl;
+  EXPECT_GT(frame_storage.frame_num.value(), 0u);
+}
+
+TEST(FrameDeviceTest2, TestRegister) {
+  scoped_ptr<DeviceDelegate> device_delegate(CreateDeviceDelegate());
+  ScopeOpenDevice open_device(device_delegate.get());
+  Error err;
+
+  EXPECT_TRUE_OR_RET(open_device.IsOpen());
+  
+  FrameStorageRegister frame_storage;
+  frame_storage.frame_depth.set_value(48 * 1000);
+  err = WriteDevice(device_delegate.get(), frame_storage.memory);  
   EXPECT_OK_OR_RET(err);
 
+  WaveStorageRegister wave_storage;
+  wave_storage.frame_len.set_value(0x36000);
+  wave_storage.wave_start.set_value(200000);
+  wave_storage.wave_end.set_value(200000000);
+  err = WriteDevice(device_delegate.get(), wave_storage.memory);
+  EXPECT_OK_OR_RET(err);
+
+  SJA1000Register sja1000;
+  sja1000.slient.set_value(false);
+  sja1000.sja_btr.set_value(0x1440);
+  err = WriteDevice(device_delegate.get(), sja1000.memory);
+  EXPECT_OK_OR_RET(err);
+
+  SleepMs(100);
+  SoftDiffRegister soft_diff;
+  soft_diff.sja_btr.set_value(0x1440);
+  soft_diff.sys_cfg.set_value(true);
+  soft_diff.fil_div.set_value(5);
+  err = WriteDeviceRange(device_delegate.get(), soft_diff.memory, 
+      soft_diff.FilDivOffset(), soft_diff.FilDivSize());  
+  EXPECT_OK_OR_RET(err);
+  err = WriteDeviceRange(device_delegate.get(), soft_diff.memory, 
+      soft_diff.SysOffset(), soft_diff.SysSize());
+  EXPECT_OK_OR_RET(err);
+
+  FpgaSendRegister send_register;
+  send_register.btr_div.set_value(99);
+  send_register.send_num.set_value(20);
+  FpgaFrameData data;
+  for (int i = 0; i < arraysize(data.data); ++i) {
+    data.data[i] = i;
+  }
+  send_register.set_frame_data(data);
+  err = WriteDeviceRange(device_delegate.get(),
+      send_register.memory, 0, 0x1C);
+
+  SleepMs(100);
+  err = ReadDevice(device_delegate.get(), frame_storage.memory);
+  EXPECT_OK_OR_RET(err);
+  EXPECT_GT(frame_storage.frame_num.value(), 0u);
+
+  EXPECT_OK_OR_RET(err);
 }
