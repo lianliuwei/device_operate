@@ -128,7 +128,7 @@ device::Error FrameDevice::WriteDeviceRange(::device::RegisterMemory& memory,
                                             int size) {
   DCHECK(start_offset + size <= memory.size());
   return device_delegate_->WriteDevice(
-      memory.start_addr(), memory.PtrByRelative(start_offset), size);
+      memory.start_addr() + start_offset, memory.PtrByRelative(start_offset), size);
 }
 
 device::Error FrameDevice::ReadDeviceRange(::device::RegisterMemory& memory, 
@@ -136,7 +136,7 @@ device::Error FrameDevice::ReadDeviceRange(::device::RegisterMemory& memory,
                                            int size) {
   DCHECK(start_offset + size <= memory.size());
   return device_delegate_->ReadDevice(
-      memory.start_addr(), memory.PtrByRelative(start_offset), size);
+      memory.start_addr() + start_offset, memory.PtrByRelative(start_offset), size);
 }
 
 } // namespace canscope
