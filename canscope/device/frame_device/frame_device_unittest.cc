@@ -1,10 +1,13 @@
 #include "testing/gtest/include/gtest/gtest.h"
 
+#include "base/string_number_conversions.h"
+
 #include "canscope/device/device_delegate.h"
 #include "canscope/device/test/scoped_open_device.h"
 #include "canscope/device/test/test_util.h"
 #include "canscope/device/frame_device/frame_device.h"
 #include "canscope/device/frame_device/frame_device_handle.h"
+#include "canscope/device/frame_device/frame_data_collecter.h"
 #include "canscope/device/sync_call.h"
 #include "canscope/device/register/soft_diff_register.h"
 #include "canscope/device/config_manager.h"
@@ -100,24 +103,24 @@ protected:
 
 using namespace canscope::device;
 
-Error WriteDevice(DeviceDelegate* device_delegate_, 
+Error WriteDevice(DeviceDelegate* device_delegate, 
                   ::device::RegisterMemory& memory) {
-  return device_delegate_->WriteDevice(
+  return device_delegate->WriteDevice(
       memory.start_addr(), memory.buffer(), memory.size());
 }
 
-Error ReadDevice(DeviceDelegate* device_delegate_, 
+Error ReadDevice(DeviceDelegate* device_delegate, 
                  ::device::RegisterMemory& memory) {
-  return device_delegate_->ReadDevice(
+  return device_delegate->ReadDevice(
       memory.start_addr(), memory.buffer(), memory.size());
 }
 
-Error WriteDeviceRange(DeviceDelegate* device_delegate_, 
+Error WriteDeviceRange(DeviceDelegate* device_delegate, 
                        ::device::RegisterMemory& memory, 
                        int start_offset, 
                        int size) {
   DCHECK(start_offset + size <= memory.size());
-  return device_delegate_->WriteDevice(
+  return device_delegate->WriteDevice(
       memory.start_addr() + start_offset, memory.PtrByRelative(start_offset), size);
 }
 
@@ -126,7 +129,7 @@ TEST_F(FrameDeviceTest, Send) {
   for (int i = 0; i < arraysize(data.data); ++i) {
     data.data[i] = i;
   }
-  canscope::device::Error err;
+  Error err;
 
   err = frame_device_handle_->FpgaSend(data, 100);
   EXPECT_OK_OR_RET(err);
@@ -136,6 +139,52 @@ TEST_F(FrameDeviceTest, Send) {
   EXPECT_OK_OR_RET(err);
   cout << "Frame Num: " << frame_storage.frame_num.value() * 1.0 / kFrameSize << endl;
   EXPECT_GT(frame_storage.frame_num.value(), 0u);
+}
+
+TEST_F(FrameDeviceTest, SendAndReceive) {
+  scoped_refptr<FrameDataCollecter> data_collecter(
+      new FrameDataCollecter(device_delegate_.get(), frame_device_.get()));
+  data_collecter->set_run_thread(
+      CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE));
+  data_collecter->Start();
+  FrameRawDataQueue::Reader reader(data_collecter->RawDataQueue());
+  Error err;
+
+  // HACK no this will lead to read frame_storage fault
+  {
+  FpgaFrameData data;
+  for (int i = 0; i < arraysize(data.data); ++i) {
+    data.data[i] = i;
+  }
+  err = frame_device_handle_->FpgaSend(data, 1);
+  EXPECT_OK_OR_RET(err);
+  }
+
+  // clean buffer
+  while(1) {
+    FrameStorageRegister frame_storage;
+    err = ReadDevice(device_delegate_.get(), frame_storage.memory);
+    EXPECT_OK_OR_RET(err);
+    if (frame_storage.frame_num.value() == 0) {
+      break;
+    }
+    reader.WaitGetBulk(NULL, NULL);
+    EXPECT_TRUE(data_collecter->IsRunning());
+  }
+
+  // send and receive
+  FpgaFrameData data;
+  for (int i = 0; i < arraysize(data.data); ++i) {
+    data.data[i] = i;
+  }
+
+  err = frame_device_handle_->FpgaSend(data, 1);
+  EXPECT_OK_OR_RET(err);
+
+  FrameRawDataHandle raw_data;
+  bool ret = reader.WaitGetBulk(&raw_data, NULL);
+  EXPECT_TRUE(ret);
+  cout << "raw_data: " << HexEncode(raw_data->data(), raw_data->real_size()) << endl;
 }
 
 TEST(FrameDeviceTest2, TestRegister) {
