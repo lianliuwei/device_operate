@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/threading/platform_thread.h"
+#include "base/logging.h"
 
 namespace canscope {
 // in us
