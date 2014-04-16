@@ -137,6 +137,14 @@ void FrameDataCollecter::DoCollect(LoopState* loop_state) {
     SaveError(ERR_FRAME_SIZE_NO_ALIGNED);
     return;
   }
+  // still no data
+  if (frame_num == 0) {
+    next_state_ = STATE_CHECK_COLLECT;
+    // immediate do after PostTask, sleep long in WaitFull
+    next_loop_delay_ = TimeDelta::FromMilliseconds(1);
+    *loop_state = NEXT_LOOP;
+    return;
+  }
   int read_size = frame_num > kFrameBufferMaxSize ? kFrameBufferMaxSize : frame_num;
   FrameRawDataHandle raw_data = new FrameRawData(read_size);
   err = device_delegate_->ReadFrameData(raw_data->data(), raw_data->size());
