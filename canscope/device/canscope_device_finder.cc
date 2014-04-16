@@ -10,8 +10,8 @@ namespace canscope {
 bool CANScopeDeviceFinder::LoopRunImp() {
   // EnumDevice
   std::vector<string16> devices;
-  bool ret = device_delegate_->EnumDevices(&devices);
-  DCHECK(ret);
+  device::Error err = device_delegate_->EnumDevices(&devices);
+  DCHECK(err == device::OK);
   int find_device_size = static_cast<int>(devices.size());
 
   scoped_refptr<DevicesManager> manager = DevicesManager::Get();
