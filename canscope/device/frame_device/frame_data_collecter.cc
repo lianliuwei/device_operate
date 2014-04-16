@@ -110,6 +110,7 @@ void FrameDataCollecter::DoCollect(LoopState* loop_state) {
   err = device_delegate_->ReadFrameData(raw_data->data(), raw_data->size());
   CHECK_DEVICE(err);
   // notify raw data
+  raw_data->set_real_size(read_size);
   queue_->PushBulk(raw_data);
 
   next_state_ = STATE_CHECK_COLLECT;
