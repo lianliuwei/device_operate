@@ -1,6 +1,5 @@
 #include "base/values.h"
 #include "base/message_loop.h"
-#include "base/synchronization/waitable_event.h"
 
 #include "common/common_thread.h"
 
@@ -18,6 +17,7 @@
 #include "canscope/device/property/device_property_observer_mock.h"
 #include "canscope/device/scoped_device_property_commit.h"
 #include "canscope/device/test/test_util.h"
+#include "canscope/device/sync_call.h"
 
 using namespace base;
 using namespace common;
@@ -48,7 +48,7 @@ static const char kCANScopeConfig [] =  {" \
     \"Trigger.Compare\" : 0, \
     \"Trigger.Volt\" : 0.0, \
     \"TimeParam\" : 1.0 \
-  } \
+  }, \
   \"FrameDevice\" : \
   { \
     \"DeviceEnable\": true, \
@@ -72,8 +72,7 @@ class CANScopeDeviceTest : public testing::Test
                          , public NotificationObserver {
 public:
   CANScopeDeviceTest()
-    : event_(true, false)
-    , mock_ (NULL)
+    : mock_ (NULL)
     , manager_(NULL) {}
   virtual ~CANScopeDeviceTest() {}
 
@@ -96,6 +95,7 @@ public:
 
 protected:
   DevicePropertyObserverMock* mock_;
+
   OscDeviceHandle* GetOscDeviceHandle() {
     return &(CANScopeDeviceHandle::GetInstance(manager_)->osc_device_handle); 
   }
@@ -109,9 +109,9 @@ protected:
 
 private:
   virtual void SetUp() {
-    CommonThread::PostTask(CommonThread::DEVICE, FROM_HERE, 
-        Bind(&CANScopeDeviceTest::CreateCANScopeDevice, Unretained(this)));
-    event_.Wait();
+    SyncCall sync_call(CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE));
+    sync_call.set_callback(Bind(&CANScopeDeviceTest::CreateCANScopeDevice, Unretained(this)));
+    sync_call.Call();
     CANScopeDeviceHandle::Create(manager_);
     registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_DESTROYED, 
         Source<DeviceManager>(manager_));
@@ -124,7 +124,6 @@ private:
   void CreateCANScopeDevice() {
     manager_ = CANScopeDevice::Create(MessageLoopProxy::current());
     manager_->Init(GetConfig(kCANScopeConfig));
-    event_.Signal();
   }
 
   virtual void Observe(int type, 
@@ -135,7 +134,6 @@ private:
     }
   }
   CANScopeDevice* manager_;
-  WaitableEvent event_;
   NotificationRegistrar registrar_;
 };
 
@@ -213,34 +211,7 @@ TEST_F(CANScopeDeviceTest, SetValueAndNotify) {
       Bind(&CANScopeDeviceTest::SetValueFileThread, Unretained(this)));
   GetTestProcess()->MainMessageLoopRun();
 }
-class CallAndWaitOnDeviceThread {
-public:
-  CallAndWaitOnDeviceThread() 
-      : event_(true, false) {}
-  ~CallAndWaitOnDeviceThread() {}
 
-  static void Call(base::Closure call);
-
-  void Backend();
-
-private:
-  WaitableEvent event_;
-  base::Closure closure_;
-};
-
-void CallAndWaitOnDeviceThread::Call(base::Closure call) {
-  scoped_ptr<CallAndWaitOnDeviceThread> waiter(new CallAndWaitOnDeviceThread);
-  waiter->closure_ = call;  
-  CommonThread::PostTask(CommonThread::DEVICE, FROM_HERE,
-      Bind(&CallAndWaitOnDeviceThread::Backend, Unretained(waiter.get())));
-  waiter->event_.Wait();
-  waiter->event_.Reset();
-}
-
-void CallAndWaitOnDeviceThread::Backend() {
-  closure_.Run();
-  event_.Signal();
-}
 
 namespace {
 void DeviceNoChange(OscDevice* device) {
@@ -263,6 +234,7 @@ TEST_F(CANScopeDeviceTest, BatchSetValue) {
   OscDeviceHandle* handle = GetOscDeviceHandle();
 
   OscDevice* device = GetOscDevice();
+  SyncCall sync_call(CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE));
   {
   ScopedDevicePropertyCommit batch(handle, "BatchSetValueTest");
   handle->volt_range_can_h.set_value(k1V);
@@ -272,9 +244,9 @@ TEST_F(CANScopeDeviceTest, BatchSetValue) {
   EXPECT_EQ(k1V, handle->volt_range_can_h.value());
   EXPECT_DOUBLE_EQ(1.0, handle->offset_can_h.value());
   EXPECT_EQ(kDC, handle->coupling_can_h.value());
-  CallAndWaitOnDeviceThread::Call(Bind(&DeviceNoChange, device));
+  sync_call.CallClosure(Bind(&DeviceNoChange, device));
   }
-  CallAndWaitOnDeviceThread::Call(Bind(&DeviceChanged, device));
+  sync_call.CallClosure(Bind(&DeviceChanged, device));
 
   StartQuit();
   GetTestProcess()->MainMessageLoopRun();

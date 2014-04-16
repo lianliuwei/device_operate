@@ -11,6 +11,8 @@ public:
 
   void set_callback(base::Closure callback) { callback_ = callback; }
   void Call();
+  
+  void CallClosure(base::Closure callback);
 
 private:
   void CallImpl();

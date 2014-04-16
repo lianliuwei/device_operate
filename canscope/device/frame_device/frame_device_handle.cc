@@ -25,8 +25,7 @@ device::Error canscope::FrameDeviceHandle::FpgaSend(const FpgaFrameData& data,
 device::Error FrameDeviceHandle::FpgaSend() {
   SyncCall sync_call(DeviceTaskRunner());
   last_err_ = device::OK;
-  sync_call.set_callback(Bind(&FrameDeviceHandle::FpgaSendImpl, Unretained(this)));
-  sync_call.Call();
+  sync_call.CallClosure(Bind(&FrameDeviceHandle::FpgaSendImpl, Unretained(this)));
   return last_err_;
 }
 

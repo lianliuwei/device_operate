@@ -1,6 +1,5 @@
 #include "base/values.h"
 #include "base/message_loop.h"
-#include "base/synchronization/waitable_event.h"
 
 #include "common/common_thread.h"
 
@@ -19,6 +18,7 @@
 #include "canscope/device/canscope_device_constants.h"
 #include "canscope/test/speed_meter.h"
 #include "canscope/device/test/test_util.h"
+#include "canscope/device/sync_call.h"
 
 using namespace std;
 using namespace base;
@@ -50,7 +50,7 @@ static const char kCANScopeConfig [] =  {" \
     \"Trigger.Compare\" : 0, \
     \"Trigger.Volt\" : 0.0, \
     \"TimeParam\" : 1.0 \
-  } \
+  }, \
   \"FrameDevice\" : \
   { \
     \"DeviceEnable\": true, \
@@ -73,8 +73,7 @@ class DevicesManagerTest : public testing::Test
                          , public NotificationObserver {
 public:
   DevicesManagerTest()
-    : event_(true, false)
-    , mock_ (NULL) {}
+    : mock_ (NULL) {}
   virtual ~DevicesManagerTest() {}
 
   static void SetUpTestCase() {
@@ -117,9 +116,8 @@ private:
       return;
     device_path_ = device_list[0];
     DevicesManager::Get()->OpenDevice(device_path_);
-    CommonThread::PostTask(CommonThread::DEVICE, FROM_HERE,
-        Bind(&DevicesManagerTest::InitDeviceManager, Unretained(this)));
-    event_.Wait();
+    SyncCall sync_call(CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE));
+    sync_call.CallClosure(Bind(&DevicesManagerTest::InitDeviceManager, Unretained(this)));
     if (manager_.get() == NULL)
       return;
     registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_START_DESTROY,
@@ -134,11 +132,9 @@ private:
   void InitDeviceManager() {
     manager_ = DevicesManager::Get()->GetDeviceManager(device_path_);
     if (manager_.get() == NULL) {
-      event_.Signal();
       return;
     }
     manager_->Init(GetConfig(kCANScopeConfig));
-    event_.Signal();
   }
 
   virtual void Observe(int type,
@@ -152,12 +148,11 @@ private:
   }
 
 
-  WaitableEvent event_;
   NotificationRegistrar registrar_;
 };
 
 void DevicesManagerTest::GetValueTest() {
-  ASSERT_TRUE(manager_.get() != NULL) << "no Devices Finded";
+  ASSERT_TRUE(manager_.get() != NULL) << "no Devices Found";
   CANScopeDeviceHandle::Create(manager_);
  OscDeviceHandle* handle = &(CANScopeDeviceHandle::GetInstance(manager_)->
     osc_device_handle);

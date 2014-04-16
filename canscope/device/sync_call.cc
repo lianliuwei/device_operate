@@ -29,3 +29,8 @@ SyncCall::SyncCall(scoped_refptr<SingleThreadTaskRunner> task_runner)
     : task_runner_(task_runner)
     , event_(true, false) {
 }
+
+void SyncCall::CallClosure(base::Closure callback) {
+  set_callback(callback);
+  Call();
+}

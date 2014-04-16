@@ -57,16 +57,14 @@ protected:
     GetTestProcess()->Init();
 
     SyncCall sync_call(CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE));
-    sync_call.set_callback(Bind(&FrameDeviceTest::InitDevice, Unretained(this)));
-    sync_call.Call();
+    sync_call.CallClosure(Bind(&FrameDeviceTest::InitDevice, Unretained(this)));
     frame_device_handle_.reset(new FrameDeviceHandle(frame_device_.get()));
   }
   
   virtual void TearDown() {
     frame_device_handle_.reset(NULL);
     SyncCall sync_call(CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE));
-    sync_call.set_callback(Bind(&FrameDeviceTest::DeleteDevice, Unretained(this)));
-    sync_call.Call();
+    sync_call.CallClosure(Bind(&FrameDeviceTest::DeleteDevice, Unretained(this)));
 
     DestroyTestProcess();
   }
