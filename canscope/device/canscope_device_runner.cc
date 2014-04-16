@@ -29,10 +29,14 @@ void CANScopeRunner::Init(string16 device_path) {
   DCHECK(!inited_) << "set device_path before inited";
   device_path_ = device_path;
 
+  scoped_refptr<SingleThreadTaskRunner> run_thread = canscope_->run_thread();
   // create osc Data
   osc_data = new OscDataCollecter(canscope_->device_delegate(), canscope_->osc_device());
-  scoped_refptr<SingleThreadTaskRunner> run_thread = canscope_->run_thread();
   osc_data->set_run_thread(run_thread);
+  // create frame Data
+  frame_data = new FrameDataCollecter(
+      canscope_->device_delegate(), canscope_->frame_device(), kFrameCleanLeftover);
+  frame_data->set_run_thread(run_thread);
 }
 
 device::Error CANScopeRunner::InitDevice() {
