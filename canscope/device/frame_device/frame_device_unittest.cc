@@ -131,6 +131,15 @@ TEST_F(FrameDeviceTest, Send) {
   }
   Error err;
 
+  {
+  // HACK no send one first lead to read frame_storage fault
+  // happen one time
+  // may be concurrency write device lead.
+  FrameStorageRegister frame_storage;
+  err = ReadDevice(device_delegate_.get(), frame_storage.memory);
+  EXPECT_OK_OR_RET(err);
+  }
+
   err = frame_device_handle_->FpgaSend(data, 100);
   EXPECT_OK_OR_RET(err);
   
@@ -143,34 +152,12 @@ TEST_F(FrameDeviceTest, Send) {
 
 TEST_F(FrameDeviceTest, SendAndReceive) {
   scoped_refptr<FrameDataCollecter> data_collecter(
-      new FrameDataCollecter(device_delegate_.get(), frame_device_.get()));
+      new FrameDataCollecter(device_delegate_.get(), frame_device_.get(), true));
   data_collecter->set_run_thread(
       CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE));
   data_collecter->Start();
   FrameRawDataQueue::Reader reader(data_collecter->RawDataQueue());
   Error err;
-
-  // HACK no this will lead to read frame_storage fault
-  {
-  FpgaFrameData data;
-  for (int i = 0; i < arraysize(data.data); ++i) {
-    data.data[i] = i;
-  }
-  err = frame_device_handle_->FpgaSend(data, 1);
-  EXPECT_OK_OR_RET(err);
-  }
-
-  // clean buffer
-  while(1) {
-    FrameStorageRegister frame_storage;
-    err = ReadDevice(device_delegate_.get(), frame_storage.memory);
-    EXPECT_OK_OR_RET(err);
-    if (frame_storage.frame_num.value() == 0) {
-      break;
-    }
-    reader.WaitGetBulk(NULL, NULL);
-    EXPECT_TRUE(data_collecter->IsRunning());
-  }
 
   // send and receive
   FpgaFrameData data;

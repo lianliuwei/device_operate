@@ -16,9 +16,11 @@ typedef SequencedBulkQueue<FrameRawDataHandle> FrameRawDataQueue;
 class FrameDataCollecter : public DataCollecter {
 public:
   FrameDataCollecter(DeviceDelegate* device_delegate,
-                     FrameDevice* frame_device);
+                     FrameDevice* frame_device,
+                     bool clean_leftover);
 
   enum State {
+    STATE_CLEAN_LEFTOVER,
     STATE_CHECK_COLLECT,
     STATE_WAIT_FULL,
     STATE_COLLECT,
@@ -36,7 +38,7 @@ private:
   void DoCheckCollect(LoopState* loop_state);
   void DoWaitFull(LoopState* loop_state);
   void DoCollect(LoopState* loop_state);
-
+  void DoCleanLeftover(LoopState* loop_state);
   void SaveError(device::Error error);
 
   device::Error ReadDevice(::device::RegisterMemory& memory);
@@ -46,6 +48,8 @@ private:
   State next_state_;
   FrameDevice* frame_device_;
   DeviceDelegate* device_delegate_;
+  bool clean_leftover_;
+
   scoped_refptr<FrameRawDataQueue> queue_;
 
   DISALLOW_COPY_AND_ASSIGN(FrameDataCollecter);

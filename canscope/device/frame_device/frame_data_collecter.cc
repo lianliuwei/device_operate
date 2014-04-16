@@ -8,7 +8,7 @@ using namespace canscope::device;
 namespace canscope {
 
 void FrameDataCollecter::DeviceOffine() {
-  next_state_ = STATE_CHECK_COLLECT;
+  next_state_ = STATE_CLEAN_LEFTOVER;
   set_stop_by_offine(true);
 }
 
@@ -23,6 +23,10 @@ DataCollecter::LoopState FrameDataCollecter::OnLoopRun() {
     State state = next_state_;
     next_state_ = STATE_NONE;
     switch (state) {
+      case STATE_CLEAN_LEFTOVER:
+        DoCleanLeftover(&loop_state);
+        break;
+
       case STATE_CHECK_COLLECT:
         DoCheckCollect(&loop_state);
         break;
@@ -59,6 +63,34 @@ do { \
     return; \
   } \
 } while (0)
+
+void FrameDataCollecter::DoCleanLeftover(LoopState* loop_state) {
+  *loop_state = STOP;
+  if (!clean_leftover_) {
+    next_state_ = STATE_CHECK_COLLECT;
+    *loop_state = IMMEDIATE;
+    return;
+  } 
+
+  device::Error err;
+   // clean buffer
+  while(1) {
+    FrameStorageRegister frame_storage;
+    err = ReadDevice(frame_storage.memory);
+    CHECK_DEVICE(err);
+    int frame_num =  frame_storage.frame_num.value();
+    if (frame_num == 0) {
+      break;
+    }
+    int read_size = frame_num > kFrameBufferMaxSize ? kFrameBufferMaxSize : frame_num;
+    scoped_ptr<uint8[]> buffer(new uint8[read_size]);
+    err = device_delegate_->ReadFrameData(buffer.get(), read_size);
+    CHECK_DEVICE(err);
+  }
+
+  next_state_ = STATE_CHECK_COLLECT;
+  *loop_state = IMMEDIATE;
+}
 
 void FrameDataCollecter::DoCheckCollect(LoopState* loop_state) {
   *loop_state = STOP;
@@ -120,11 +152,13 @@ void FrameDataCollecter::DoCollect(LoopState* loop_state) {
 }
 
 FrameDataCollecter::FrameDataCollecter(DeviceDelegate* device_delegate, 
-                                       FrameDevice* frame_device)
+                                       FrameDevice* frame_device,
+                                       bool clean_leftover)
     : device_delegate_(device_delegate)
     , frame_device_(frame_device)
-    , next_state_(STATE_CHECK_COLLECT)
+    , next_state_(STATE_CLEAN_LEFTOVER)
     , last_error_(OK)
+    , clean_leftover_(clean_leftover)
     , queue_(new FrameRawDataQueue(false, true)) {
   
 }
