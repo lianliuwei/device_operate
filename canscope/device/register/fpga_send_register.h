@@ -26,8 +26,11 @@ public:
 
   BoolBind ack;
   Uint8Bind ack_bit;
-  BoolBind send_state; // set value to change send
-  BoolBind ack_state; // set value to change ack.
+
+  BoolBind start_send;
+  BoolBind send_state;
+  BoolBind set_ack;
+  BoolBind ack_state;
 
   Uint16Bind dstb_start;
   Uint16Bind dstb_end;

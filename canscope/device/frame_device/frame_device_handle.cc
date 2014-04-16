@@ -17,6 +17,8 @@ device::Error canscope::FrameDeviceHandle::FpgaSend(const FpgaFrameData& data,
   // TODO need calc from data
   fpga_send.bit_num.set_value(20*8);
   fpga_send.btr_div.set_value(properties_.BtrDiv());
+  fpga_send.start_send.set_value(true);
+
   return FpgaSend();
 }
 
@@ -37,6 +39,14 @@ void FrameDeviceHandle::FpgaSendImpl() {
     last_err_ = err;
     return;
   }
+
+  err = device_->WriteDeviceRange(fpga_send.memory,
+      fpga_send.StateOffset(), fpga_send.StateSize());
+  if (err != device::OK) {
+    last_err_ = err;
+    return;
+  }
+  
 
   int count = 0;
   while (true) {

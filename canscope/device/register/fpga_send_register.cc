@@ -11,8 +11,10 @@ canscope::FpgaSendRegister::FpgaSendRegister()
     , btr_div(memory.PtrByRelative(kBtrDivOffset), false)
     , ack(memory.PtrByRelative(kAckOffset), 0,true)
     , ack_bit(memory.PtrByRelative(kAckBitOffset))
-    , send_state(memory.PtrByRelative(kSendStateOffset), 0, true)
-    , ack_state(memory.PtrByRelative(kAckStateOffset), 1, true)
+    , start_send(memory.PtrByRelative(kSendStateOffset), 0, true)
+    , send_state(memory.PtrByRelative(kSendStateOffset), 0, false)
+    , set_ack(memory.PtrByRelative(kAckStateOffset), 1, true)
+    , ack_state(memory.PtrByRelative(kAckStateOffset), 1, false)
     , dstb_start(memory.PtrByRelative(kDstbStartOffset), false)
     , dstb_end(memory.PtrByRelative(kDstbEndOffset), false)
     , dstb(memory.PtrByRelative(kDstbOffset), 0, true) {
@@ -22,7 +24,7 @@ canscope::FpgaSendRegister::FpgaSendRegister()
 FpgaFrameData canscope::FpgaSendRegister::frame_data() const {
   FpgaFrameData frame;
   memcpy(&(frame.data),
-     const_cast<RegisterMemory&>(memory).PtrByRelative(kFpgaSendFrameDataOffset), 
+     const_cast<RegisterMemory&>(memory).PtrByRelative(kFpgaSendFrameDataOffset),
      sizeof(frame.data));
 
   return frame;
@@ -35,7 +37,7 @@ void canscope::FpgaSendRegister::set_frame_data(const FpgaFrameData& data) {
 FpgaDstbData canscope::FpgaSendRegister::dstb_data() const {
   FpgaDstbData frame;
   memcpy(&(frame.data),
-     const_cast<RegisterMemory&>(memory).PtrByRelative(kDstbDataOffset), 
+     const_cast<RegisterMemory&>(memory).PtrByRelative(kDstbDataOffset),
      sizeof(frame.data));
 
   return frame;
