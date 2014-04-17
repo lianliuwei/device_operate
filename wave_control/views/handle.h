@@ -11,6 +11,9 @@ public:
   Handle(HandleBar* bar);
   virtual ~Handle() {};
 
+  // overridden from views::View
+  virtual gfx::Size GetMinimumSize() OVERRIDE;
+
 protected:
   // overridden from views::View
   virtual bool OnMousePressed(const ui::MouseEvent& event) OVERRIDE;

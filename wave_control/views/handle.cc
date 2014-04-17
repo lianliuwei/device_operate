@@ -1,5 +1,6 @@
 #include "wave_control/views/handle.h"
 
+#include "ui/gfx/image/image.h"
 #include "wave_control/views/handle_bar.h"
 
 using namespace views;
@@ -32,4 +33,13 @@ bool Handle::OnMouseDragged(const ui::MouseEvent& event) {
     bar_->MoveHandle(tag(), handle_y);
   }
   return true;
+}
+
+gfx::Size Handle::GetMinimumSize() {
+  gfx::ImageSkia image = icon();
+  gfx::Size size = image.size();
+  gfx::Size old_size = TextButton::GetMinimumSize();
+  size.set_width(size.width() + old_size.width());
+  size.set_height(std::max(size.height(), old_size.height()));
+  return size;
 }
