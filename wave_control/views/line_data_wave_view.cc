@@ -55,8 +55,8 @@ bool LineDataWaveView::PaintWaveParam(int* vector_start_out, int* vector_end_out
   int vector_size = static_cast<int>(line_data_->size());
   gfx::Transform vector_to_real_x;
   // convert to float manual, or the divide is using int lost precision
-  vector_to_real_x.Scale(static_cast<float>(real_length) / (vector_size - 1), 1);
   vector_to_real_x.Translate(real_begin, 0);
+  vector_to_real_x.Scale(static_cast<float>(real_length) / (vector_size - 1), 1);
   // get How many point to show
   int vector_start = TransformReverseX(vector_to_real_x, plot_begin);
   int vector_end = TransformReverseX(vector_to_real_x, plot_end);
