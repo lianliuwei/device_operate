@@ -126,6 +126,8 @@ void YTWaveContainerView::Layout() {
     }
     trigger_bar_->SetVisible(show_trigger_bar_);
   }
+
+  View::Layout();
 }
 
 YTWaveContainerView::YTWaveContainerView(YTWaveContainer* container, 
