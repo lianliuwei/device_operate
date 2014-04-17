@@ -90,6 +90,8 @@
         'views/wave_control_views_constants.h',
         'views/fill_box_layout.h',
         'views/fill_box_layout.cc',
+        'views/all_fill_layout.h',
+        'views/all_fill_layout.cc',
       ],
     }, 
  ],
