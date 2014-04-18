@@ -117,21 +117,6 @@ public:
   virtual bool IsVisible(int ID);
 
 private:
-  // trigger need the relate wave vertical move notify.
-  class VerticalOffsetObserver : public OscWaveGroupObserver {
-  public:
-    VerticalOffsetObserver(TriggerBar* trigger_bar);
-    virtual ~VerticalOffsetObserver();
-
-    // implement OscWaveGroupObserver
-    virtual void OnPartGroupChanged() {}
-    virtual void OnPartChanged(int id);
-    virtual void OnPartMoved(int id);
-
-  private:
-    TriggerBar* trigger_bar_;
-  };
-
   // implement HandleBarObserver
   virtual void OnHandleMove(int ID, int offset);
   virtual void OnHandleActive(int ID);
@@ -145,35 +130,15 @@ private:
 
   OscWaveGroup* wave_group_;
   YTWaveContainerInnerView* view_;
-  VerticalOffsetObserver vertical_observer_;
 
   DISALLOW_COPY_AND_ASSIGN(TriggerBar);
 };
 
-TriggerBar::VerticalOffsetObserver::VerticalOffsetObserver(TriggerBar* trigger_bar)
-    : trigger_bar_(trigger_bar) {
-  trigger_bar->wave_group_->AddVerticalObserver(this);
-}
-
-TriggerBar::VerticalOffsetObserver::~VerticalOffsetObserver() {
-  trigger_bar_->wave_group_->RemoveVerticalObserver(this);
-}
-
-void TriggerBar::VerticalOffsetObserver::OnPartChanged(int id) {
-  OscWave* wave = trigger_bar_->wave_group_->vertical_at(id)->osc_wave();
-  trigger_bar_->OnOscWaveVerticalMoved(wave);
-}
-
-void TriggerBar::VerticalOffsetObserver::OnPartMoved(int id) {
-  OscWave* wave = trigger_bar_->wave_group_->vertical_at(id)->osc_wave();
-  trigger_bar_->OnOscWaveVerticalMoved(wave);
-}
 
 TriggerBar::TriggerBar(OscWaveGroup* wave_group, 
                        YTWaveContainerInnerView* view)
     : wave_group_(wave_group)
-    , view_(view)
-    , vertical_observer_(this) {
+    , view_(view) {
   wave_group->AddTriggerObserver(this);
 }
 
@@ -231,15 +196,6 @@ void TriggerBar::OnHandleMove(int ID, int offset) {
 void TriggerBar::OnHandleActive(int ID) {
   TriggerPart* trigger = wave_group_->trigger_at(ID);
   view_->SelectWave(trigger->trigger_wave());
-}
-
-void TriggerBar::OnOscWaveVerticalMoved(OscWave* osc_wave) {
-  for (int i = 0; i < wave_group_->trigger_count(); ++i) {
-    TriggerPart* trigger = wave_group_->trigger_at(i);
-    if (trigger->trigger_wave() == osc_wave) {
-      NotifyHandleMoved(i);
-    }
-  }
 }
 
 // TODO need add OtherWave observer
@@ -490,6 +446,7 @@ void YTWaveVisitor::RemoveWave(Wave* wave) {
 
 void YTWaveVisitor::SetAxis(Wave* wave) {
   type_ = kSetAxis;
+  wave->Accept(this);
 }
 
 void YTWaveVisitor::VisitOscWave(OscWave* wave) {
@@ -700,6 +657,10 @@ void YTWaveContainerInnerView::SetGrid(int v_grid, int h_grid) {
                        kAxisGridColor, 
                        v_grid, kVGridDiv, 
                        h_grid, kHGridDiv));
+  // need check parent is there, may be call in creating, no add to parent yet
+  if (parent()) {
+    parent()->Layout();
+  }
   SchedulePaint();
 }
 
