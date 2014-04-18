@@ -9,7 +9,7 @@ AnaWaveData& TestOscWave::Data() {
 
 void TestOscWave::MoveToX(double pos) {
   horiz_->offset = pos;
-  NotifyChanged(kHorizontalOffset);
+  horiz_->NotifyChanged(kHorizontalOffset);
 }
 
 void TestOscWave::MoveToY(double pos) {
@@ -19,7 +19,7 @@ void TestOscWave::MoveToY(double pos) {
 
 void TestOscWave::MoveTrigger(double pos) {
   trigger_->offset = pos;
-  NotifyChanged(kTriggerOffset);
+  trigger_->NotifyChanged(kTriggerOffset);
 }
 
 void TestOscWave::ZoomInX() {
@@ -153,6 +153,29 @@ bool TestOscWave::horizontal_show() {
   return true;
 }
 
+void TestOscWave::OnNotifyChanged(int changed_part) {
+  NotifyChanged(changed_part);
+}
+
+TestOscWave::~TestOscWave() {
+  horiz_->RemoveObserver(this);
+  trigger_->RemoveObserver(this);
+}
+
+void TestOscWave::AddHoriz(Horiz* horiz) {
+  horiz_ = horiz;
+  horiz_->AddObserver(this);
+}
+
+void TestOscWave::AddTrigger(Trigger* trig) {
+  trigger_ = trig;
+  trigger_->AddObserver(this);
+}
+
+void TestOscWave::AddVertical(Vertical* vertical) {
+  vertical_ = vertical;
+}
+
 
 std::vector<TestOscWave*> CreateWaves() {
   std::vector<TestOscWave*> waves;
@@ -166,26 +189,28 @@ std::vector<TestOscWave*> CreateWaves() {
   horiz->color = SkColorSetRGB(125, 125, 0);
 
   Trigger* trig = new Trigger();
-  trig->offset = 0;
+  trig->offset = 300;
   trig->offset_range.begin = 200;
   trig->offset_range.end = -200;
 
+  {
   // can-h
   TestOscWave* wave = new TestOscWave;
   wave->name_ = L"CAN-H";
   wave->color_ = SkColorSetRGB(125, 0, 0);
-  wave->vertical_ = new Vertical();
-  wave->vertical_->div = 12;
-  wave->vertical_->range.begin = 1000;
-  wave->vertical_->range.end = -1000;
-  wave->vertical_->windows_size = 12;
-  wave->vertical_->offset = 0;
-  wave->vertical_->color = wave->color_;
-  wave->horiz_ = horiz;
-  wave->trigger_ = trig;
+  
+  Vertical* vertical = new Vertical();
+  vertical->div = 12;
+  vertical->range.begin = 1000;
+  vertical->range.end = -1000;
+  vertical->windows_size = 12;
+  vertical->offset = 0;
+  vertical->color = wave->color_;
+  wave->AddVertical(vertical);
+  wave->AddHoriz(horiz);
+  wave->AddTrigger(trig);
   waves.push_back(wave);
 
-  {
   TestAnaData* wave_data = new TestAnaData;
   wave_data->data_range_.begin = -1000;
   wave_data->data_range_.end = 1000;
@@ -194,60 +219,66 @@ std::vector<TestOscWave*> CreateWaves() {
     wave_data->data_.push_back(sin(j*4*2*M_PI/50) * 500);
   }
   wave->wave_data_.reset(wave_data);
-  }
+
   trig->trigger_wave = wave;
 
-  // can-l
-  wave = new TestOscWave;
-  wave->name_ = L"CAN-L";
-  wave->color_ = SkColorSetRGB(0, 125, 0);
-  wave->vertical_ = new Vertical();
-  wave->vertical_->div = 6;
-  wave->vertical_->range.begin = 2000;
-  wave->vertical_->range.end = -2000;
-  wave->vertical_->windows_size = 16;
-  wave->vertical_->offset = 0;
-  wave->horiz_ = horiz;  
-  wave->vertical_->color = wave->color_;
-  wave->trigger_ = trig;
-  waves.push_back(wave);
+  }
 
   {
+  // can-l
+  TestOscWave*  wave = new TestOscWave;
+  wave->name_ = L"CAN-L";
+  wave->color_ = SkColorSetRGB(0, 125, 0);
+  Vertical* vertical = new Vertical();
+  vertical->div = 16;
+  vertical->range.begin = 2000;
+  vertical->range.end = -2000;
+  vertical->windows_size = 16;
+  vertical->offset = 0;
+  vertical->color = wave->color_;
+  wave->AddVertical(vertical);
+  wave->AddHoriz(horiz);
+  wave->AddTrigger(trig);
+  waves.push_back(wave);
+
   TestAnaData* wave_data = new TestAnaData;
-  wave_data->data_range_.begin = -1000;
-  wave_data->data_range_.end = 1000;
+  wave_data->data_range_.begin = -500;
+  wave_data->data_range_.end = 500;
   wave_data->data_.reserve(200);
   for (int j = 0; j < 200; j++) {
-    wave_data->data_.push_back(sin(j*4*2*M_PI/50) * 500 - 200);
+    wave_data->data_.push_back(sin(j*4*2*M_PI/50) * 500 + 500);
   }
   wave->wave_data_.reset(wave_data);
   }
 
+  {
   // can-diff
-  wave = new TestOscWave;
+  TestOscWave* wave = new TestOscWave;
   wave->name_ = L"CAN-DIFF";
   wave->color_ = SkColorSetRGB(0, 0, 125);
-  wave->vertical_ = new Vertical();
-  wave->vertical_->div = 8;
-  wave->vertical_->range.begin = 3000;
-  wave->vertical_->range.end = -3000;
-  wave->vertical_->windows_size = 8;
-  wave->vertical_->offset = 0;
-  wave->vertical_->color = wave->color_;
-  wave->horiz_ = horiz;
-  wave->trigger_ = trig;
+  Vertical* vertical = new Vertical();
+  vertical->div = 8;
+  vertical->range.begin = 3000;
+  vertical->range.end = -3000;
+  vertical->windows_size = 8;
+  vertical->offset = 0;
+  vertical->color = wave->color_;
+
+  wave->AddVertical(vertical);
+  wave->AddHoriz(horiz);
+  wave->AddTrigger(trig);
   waves.push_back(wave);
 
-  {
   TestAnaData* wave_data = new TestAnaData;
-  wave_data->data_range_.begin = -1000;
-  wave_data->data_range_.end = 1000;
+  wave_data->data_range_.begin = -1500;
+  wave_data->data_range_.end = 1500;
   wave_data->data_.reserve(200);
   for (int j = 0; j < 200; j++) {
-    wave_data->data_.push_back(sin(j*4*2*M_PI/50) * 500 + 200);
+    wave_data->data_.push_back(sin(j*4*2*M_PI/50) * 500 - 500);
   }
   wave->wave_data_.reset(wave_data);
   }
 
   return waves;
 }
+

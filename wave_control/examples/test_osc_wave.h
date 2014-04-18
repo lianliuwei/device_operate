@@ -23,12 +23,30 @@ public:
   std::vector<double> data_;
 };
 
+class ChangedNotify {
+public:
+  ChangedNotify() {}
+  virtual void OnNotifyChanged(int changed_part) = 0;
+
+protected:
+  virtual ~ChangedNotify() {};
+};
+
 struct Horiz : public base::RefCounted<Horiz> {
   WaveRange range;
   double offset;
   int div;
   int windows_size;
   SkColor color;
+  
+  void AddObserver(ChangedNotify* observer) { observer_list_.AddObserver(observer); }
+  void RemoveObserver(ChangedNotify* observer) { observer_list_.RemoveObserver(observer); }
+  void NotifyChanged(int changed_part) { 
+    FOR_EACH_OBSERVER(ChangedNotify, observer_list_, OnNotifyChanged(changed_part)); 
+  }
+
+private:
+  ObserverList<ChangedNotify> observer_list_;
 };
 
 struct Vertical : public base::RefCounted<Vertical> {
@@ -43,16 +61,29 @@ struct Trigger : public base::RefCounted<Trigger> {
   WaveRange offset_range;
   int offset;
   OscWave* trigger_wave;
+
+  void AddObserver(ChangedNotify* observer) { observer_list_.AddObserver(observer); }
+  void RemoveObserver(ChangedNotify* observer) { observer_list_.RemoveObserver(observer); }
+  void NotifyChanged(int changed_part) { 
+    FOR_EACH_OBSERVER(ChangedNotify, observer_list_, OnNotifyChanged(changed_part)); 
+  }
+private:
+  ObserverList<ChangedNotify> observer_list_;
 };
 
-class TestOscWave : public OscWave {
+class TestOscWave : public OscWave
+                  , public ChangedNotify {
 public:
   TestOscWave() {}
-  virtual ~TestOscWave() {}
+  virtual ~TestOscWave();
   // implement wave
   virtual string16 name();
   virtual SkColor color();
   virtual const gfx::Image& icon();
+
+  void AddHoriz(Horiz* horiz);
+  void AddTrigger(Trigger* trig);
+  void AddVertical(Vertical* vertical);
 
   // implement OscWave
   virtual AnaWaveData& Data();
@@ -91,11 +122,15 @@ public:
   virtual void DoCommand(int command_id);
   virtual void DoRangeCommand(int command_id, WaveRange range);
 
+  virtual void OnNotifyChanged(int changed_part);
+
 public:
   string16 name_;
   SkColor color_;
   gfx::Image icon_;
   scoped_ptr<TestAnaData> wave_data_;
+
+private:
   scoped_refptr<Horiz> horiz_;
   scoped_refptr<Vertical> vertical_;
   scoped_refptr<Trigger> trigger_;
