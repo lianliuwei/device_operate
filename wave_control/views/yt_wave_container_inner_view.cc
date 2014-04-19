@@ -172,7 +172,12 @@ int TriggerBar::GetOffset(int ID) {
   bool relate = trigger->IsRelate();
   OscWave* trigger_wave = trigger->trigger_wave();
   double offset = trigger->offset();
-  if (relate) {
+  // if is relate the trigger_offset value relate to the wave zero pos
+  // so transform use this offset.
+  // if is no relate, the trigger_offset value relate to the wave wave range.
+  // the pos in the OscWaveTransform need to add trigger vertical_offset.
+  // yet this is trick
+  if (!relate) {
     offset = trigger_wave->vertical_offset() + offset;
   }
   gfx::Transform transform = view_->OscWaveTransform(trigger_wave);

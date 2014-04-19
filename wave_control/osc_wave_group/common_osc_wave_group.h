@@ -4,6 +4,7 @@
 
 class CommonOscWaveGroup;
 
+
 class RefTriggerPart : public base::RefCounted<RefTriggerPart>
                      , public TriggerPart {
 public:
@@ -121,7 +122,9 @@ private:
   int TriggerIndex(TriggerPart* part);
   int HorizontalIndex(HorizontalPart* part);
   int VerticalIndex(VerticalPart* part);
-
+  
+  bool NeedUpdateTriggerOffset(TriggerPart* trigger, OscWave* osc_wave);
+  
   std::vector<OscWaveRecord> osc_waves_;
 
   bool trigger_changed_;

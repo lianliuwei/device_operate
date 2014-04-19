@@ -130,6 +130,13 @@ void CommonOscWaveGroup::OnVerticalDelete(VerticalPart* vertical) {
   vertical_changed_ = true;
 }
 
+bool CommonOscWaveGroup::NeedUpdateTriggerOffset(TriggerPart* trigger, OscWave* osc_wave) {
+  if (!trigger->IsRelate()) {
+    return false;
+  }
+  return trigger->trigger_wave() == osc_wave;
+}
+
 void CommonOscWaveGroup::OnOscWaveChanged(OscWave* osc_wave, int change_set) {
   OscWaveRecord& record = GetOscWaveRecord(osc_wave);
 
@@ -150,6 +157,11 @@ void CommonOscWaveGroup::OnOscWaveChanged(OscWave* osc_wave, int change_set) {
   }
   if (IsSet(change_set, OscWave::kVerticalOffset)) {
     NotifyVerticalMoved(VerticalIndex(record.vertical.get()));
+    for (size_t i = 0; i < triggers_.size(); ++i) {
+      if (NeedUpdateTriggerOffset(triggers_[i], osc_wave)) {
+        NotifyTriggerMoved(TriggerIndex(triggers_[i]));
+      }
+    }
   }
 }
 
@@ -278,7 +290,7 @@ string16 RefHorizontalPart::text() {
 
 const gfx::Image& RefHorizontalPart::icon() {
   ResourceBundle& rb = ResourceBundle::GetSharedInstance();
-  return rb.GetImageNamed(IDR_MENU_DROPARROW);
+  return rb.GetImageNamed(IDR_CLOSE_SA_H);
 }
 
 WaveRange RefHorizontalPart::range() {
@@ -328,6 +340,7 @@ string16 RefVerticalPart::text() {
 const gfx::Image& RefVerticalPart::icon() {
   return icon_;
 }
+
 WaveRange RefVerticalPart::range() {
   return osc_wave_->vertical_range();
 }
