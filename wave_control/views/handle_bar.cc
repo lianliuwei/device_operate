@@ -150,12 +150,13 @@ void HandleBar::SetHandlePos(Handle* handle, int ID) {
   // no the index pos, model_->GetOffset(ID) is the logic offset no the real pos
   offset += start_;
   bool enable = handle->enabled();
-  if (offset < start_ || offset > end_) {
-      handle->SetVisible(false);
-  } else {
-    //restore the model enable state
-    handle->SetVisible(model_->IsEnable(ID));
-  }
+  // SetVisible will break mouse capture
+  //if (offset < start_ || offset > end_) {
+  //    handle->SetVisible(false);
+  //} else {
+  //  //restore the model enable state
+  //  handle->SetVisible(model_->IsEnable(ID));
+  //}
 }
 
 void HandleBar::SetMoveRange(int start, int end) {
