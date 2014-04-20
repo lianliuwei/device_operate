@@ -91,6 +91,7 @@ private:
   AxisBackground* get_axis_background();
   void SetGrid(int v_grid, int h_grid);
   void UpdateAxis();
+  int WaveIDToViewID(int wave_id);
 
   friend class YTWaveVisitor;
 

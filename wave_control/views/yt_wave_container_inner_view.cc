@@ -12,6 +12,9 @@ using namespace std;
 using namespace views;
 
 namespace {
+static const int kFrontSize = 1;
+static const int kHandlePointViewID = 0;
+
 bool IsSet(int set, int test) {
   return (set & test) != 0;
 }
@@ -568,6 +571,10 @@ YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
   horiz_offset_bar_.reset(new HorizOffsetBar(wave_group_.get(), this));
   trigger_bar_.reset(new TriggerBar(wave_group_.get(), this));
 
+  // add HandlePoint
+  View* view = new View();
+  AddChildViewAt(view, kHandlePointViewID);
+
   container->AddObserver(this);
   // fetch Wave
   ListItemsAdded(0, container->item_count());
@@ -605,7 +612,7 @@ void YTWaveContainerInnerView::ListItemsAdded(size_t start, size_t count) {
     Wave* wave = container_->GetItemAt(start + i);
     View* view = WaveControlViewFactory::GetInstance()->Create(wave, 
         static_cast<YTWaveContainerView*>(this->parent()));
-    this->AddChildViewAt(view, start + i);
+    this->AddChildViewAt(view, WaveIDToViewID(start + i));
     wave_record_.insert(wave_record_.begin() + start + i, wave);
 
     // notify add wave
@@ -622,7 +629,7 @@ void YTWaveContainerInnerView::ListItemsRemoved(size_t start, size_t count) {
   View::Views need_remove;
   need_remove.reserve(count);
   for (size_t i = 0; i < count; ++i) {
-    need_remove.push_back(this->child_at(start + i));
+    need_remove.push_back(this->child_at(WaveIDToViewID(start + i)));
     need_remove_wave.push_back(wave_record_[start]);
     wave_record_.erase(wave_record_.begin() + start);
   }
@@ -638,7 +645,7 @@ void YTWaveContainerInnerView::ListItemsRemoved(size_t start, size_t count) {
 }
 
 void YTWaveContainerInnerView::ListItemMoved(size_t index, size_t target_index) {
-  this->ReorderChildView(this->child_at(index), target_index);
+  this->ReorderChildView(this->child_at(WaveIDToViewID(index)), WaveIDToViewID(target_index));
   Wave* wave = wave_record_[index];
   wave_record_.erase(wave_record_.begin() + index);
   wave_record_.insert(wave_record_.begin() + target_index, wave);
@@ -659,7 +666,7 @@ void YTWaveContainerInnerView::ListItemsChanged(size_t start, size_t count) {
 
 gfx::Transform YTWaveContainerInnerView::OscWaveTransform(OscWave* osc_wave) {
   int id = container_->WaveAt(osc_wave);
-  OscWaveView* wave_view = static_cast<OscWaveView*>(child_at(id));
+  OscWaveView* wave_view = static_cast<OscWaveView*>(child_at(WaveIDToViewID(id)));
   return wave_view->data_transform();
 }
 
@@ -726,15 +733,16 @@ void YTWaveContainerInnerView::SelectWave(Wave* wave) {
 }
 
 gfx::Transform YTWaveContainerInnerView::SimpleAnaWaveTransform(SimpleAnaWave* ana_wave) {
-  int id = container_->WaveAt(ana_wave);
-  SimpleAnaWaveView* wave_view = static_cast<SimpleAnaWaveView*>(child_at(id));
-  return wave_view->data_transform();
-
+  return GetSimpleAnaWaveView(ana_wave)->data_transform();
 }
 
 SimpleAnaWaveView* YTWaveContainerInnerView::GetSimpleAnaWaveView(SimpleAnaWave* ana_wave) {
   int id = container_->WaveAt(ana_wave);
-  SimpleAnaWaveView* wave_view = static_cast<SimpleAnaWaveView*>(child_at(id));
+  SimpleAnaWaveView* wave_view = static_cast<SimpleAnaWaveView*>(child_at(WaveIDToViewID(id)));
   return wave_view;
+}
+
+int YTWaveContainerInnerView::WaveIDToViewID(int wave_id) {
+  return wave_id + kFrontSize;
 }
 
