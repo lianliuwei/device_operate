@@ -26,7 +26,7 @@ void OscWaveView::UpdateTransform() {
   double y_offset, x_offset;
   {
   y_offset = osc_wave_->vertical_offset();
-  WaveRange wave_range = osc_wave_->vertical_offset_range();
+  WaveRange wave_range = osc_wave_->vertical_range();
   double div_size = (wave_range.end - wave_range.begin) / osc_wave_->vertical_div();
   y_data_size = div_size * osc_wave_->vertical_window_size();
   y_window_size = GetLocalBounds().height();
@@ -34,7 +34,7 @@ void OscWaveView::UpdateTransform() {
 
   {
   x_offset = osc_wave_->horizontal_offset();
-  WaveRange wave_range = osc_wave_->horizontal_offset_range();
+  WaveRange wave_range = osc_wave_->horizontal_range();
   double div_size = (wave_range.end - wave_range.begin) / osc_wave_->horizontal_div();
   x_data_size = div_size * osc_wave_->horizontal_window_size();
   x_window_size = GetLocalBounds().width();
