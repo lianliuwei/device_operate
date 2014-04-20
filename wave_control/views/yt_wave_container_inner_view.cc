@@ -12,6 +12,10 @@ using namespace std;
 using namespace views;
 
 namespace {
+bool IsSet(int set, int test) {
+  return (set & test) != 0;
+}
+
 class HorizOffsetBar : public HandleBarDelegate
                      , public OscWaveGroupObserver {
 public:
@@ -205,7 +209,8 @@ void TriggerBar::OnHandleActive(int ID) {
 
 // TODO need add OtherWave observer
 class WaveBar : public HandleBarDelegate
-              , public OscWaveGroupObserver {
+              , public OscWaveGroupObserver
+              , public SimpleAnaWaveObserver {
 public:
   WaveBar(OscWaveGroup* wave_group, YTWaveContainerInnerView* view);
   virtual ~WaveBar();
@@ -235,11 +240,15 @@ private:
 
     int GetOffset();
     void MoveToY(int offset);
+    void AddObserver(WaveBar* wave_bar);
+    void RemoveObserver(WaveBar* wave_bar);
 
   private:
     enum VisitorType {
       kOffset,
       kMoveToY,
+      kAddObserver,
+      kRemoveObserver,
     };
 
     // implement WaveVisitor
@@ -251,6 +260,7 @@ private:
     int offset_;
     int ret_offset_;
     Wave* other_wave_;
+    WaveBar* wave_bar_;
     YTWaveContainerInnerView* view_;
 
     DISALLOW_COPY_AND_ASSIGN(OtherWaveVisitor);
@@ -264,6 +274,11 @@ private:
   virtual void OnPartGroupChanged() { NotifyModelChanged(); }
   virtual void OnPartChanged(int id) { NotifyHandleChanged(id); }
   virtual void OnPartMoved(int id){ NotifyHandleMoved(id); }
+
+  // implement SimpleAnaWaveObserver
+  virtual void OnSimpleAnaWaveChanged(SimpleAnaWave* ana_wave, int change_set);
+
+  int OtherWaveIndex(Wave* wave);
 
   OscWaveGroup* wave_group_;
   YTWaveContainerInnerView* view_;
@@ -285,6 +300,10 @@ void WaveBar::OtherWaveVisitor::VisitSimpleAnaWave(SimpleAnaWave* wave){
     ret_offset_ = view_->GetYOffset(wave);
   } else if (type_ == kMoveToY) {
     view_->MoveToY(wave, offset_);
+  } else if (type_ == kAddObserver) {
+    wave->AddObserver(wave_bar_); 
+  } else if (type_ == kRemoveObserver) {
+    wave->RemoveObserver(wave_bar_);
   } else {
     NOTREACHED();
   }
@@ -299,6 +318,18 @@ int WaveBar::OtherWaveVisitor::GetOffset() {
 void WaveBar::OtherWaveVisitor::MoveToY(int offset) {
   type_ = kMoveToY;
   offset_ = offset;
+  other_wave_->Accept(this);
+}
+
+void WaveBar::OtherWaveVisitor::AddObserver(WaveBar* wave_bar) {
+  type_ = kAddObserver;
+  wave_bar_ = wave_bar;
+  other_wave_->Accept(this);
+}
+
+void WaveBar::OtherWaveVisitor::RemoveObserver(WaveBar* wave_bar) {
+  type_ = kRemoveObserver;
+  wave_bar_ = wave_bar;
   other_wave_->Accept(this);
 }
 
@@ -388,12 +419,16 @@ void WaveBar::OnHandleActive(int ID) {
 void WaveBar::AddOtherWave(Wave* wave) {
   DCHECK(!HasOtherWave(wave));
   other_wave_.push_back(wave);
+  OtherWaveVisitor visitor(wave, view_);
+  visitor.AddObserver(this);
   NotifyModelChanged();
 }
 
 void WaveBar::RemoveOtherWave(Wave* wave) {
   vector<Wave*>::iterator it = find(other_wave_.begin(), other_wave_.end(), wave);
   DCHECK(it != other_wave_.end());
+  OtherWaveVisitor visitor(wave, view_);
+  visitor.RemoveObserver(this);
   other_wave_.erase(it);
   NotifyModelChanged();
 }
@@ -405,6 +440,23 @@ bool WaveBar::HasOtherWave(Wave* wave) {
     }
   }
   return false;
+}
+
+int WaveBar::OtherWaveIndex(Wave* wave) {
+  for (size_t i = 0; i < other_wave_.size(); ++i) {
+    if (other_wave_[i] == wave) {
+      return i;
+    }
+  }
+  NOTREACHED();
+  return 0;
+}
+
+void WaveBar::OnSimpleAnaWaveChanged(SimpleAnaWave* ana_wave, int change_set) {
+  if (IsSet(change_set, SimpleAnaWave::kVertical)) {
+    int i = OtherWaveIndex(ana_wave);
+    NotifyHandleMoved(i  + wave_group_->vertical_count());
+  }
 }
 
 class YTWaveVisitor : public WaveVisitor {
@@ -538,17 +590,11 @@ double YTWaveContainerInnerView::ToOscOffset(double old_offset, double move_delt
 }
 
 int YTWaveContainerInnerView::GetYOffset(SimpleAnaWave* wave) {
-  WaveRange range = wave->vertical_range();
-  gfx::Transform transform = SimpleAnaWaveTransform(wave);
-  return TransformY(transform, (range.begin + range.end) / 2);
+  return GetSimpleAnaWaveView(wave)->GetYOffset();
 }
 
-void YTWaveContainerInnerView::MoveToY(SimpleAnaWave* wave, double offset) {
-  gfx::Transform transform = SimpleAnaWaveTransform(wave);
-  int logic_offset = TransformReverseY(transform, offset);
-  WaveRange range = wave->vertical_range();
-  range.MoveCenter(logic_offset);
-  wave->set_vertical_offset(offset);
+void YTWaveContainerInnerView::MoveToY(SimpleAnaWave* wave, int offset) {
+  GetSimpleAnaWaveView(wave)->MoveToY(offset);
 }
 
 void YTWaveContainerInnerView::ListItemsAdded(size_t start, size_t count) {
@@ -680,6 +726,15 @@ void YTWaveContainerInnerView::SelectWave(Wave* wave) {
 }
 
 gfx::Transform YTWaveContainerInnerView::SimpleAnaWaveTransform(SimpleAnaWave* ana_wave) {
-  return gfx::Transform();
+  int id = container_->WaveAt(ana_wave);
+  SimpleAnaWaveView* wave_view = static_cast<SimpleAnaWaveView*>(child_at(id));
+  return wave_view->data_transform();
+
+}
+
+SimpleAnaWaveView* YTWaveContainerInnerView::GetSimpleAnaWaveView(SimpleAnaWave* ana_wave) {
+  int id = container_->WaveAt(ana_wave);
+  SimpleAnaWaveView* wave_view = static_cast<SimpleAnaWaveView*>(child_at(id));
+  return wave_view;
 }
 

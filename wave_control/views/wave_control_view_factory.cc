@@ -31,7 +31,7 @@ views::View* WaveControlViewFactory::Create(Wave* wave,
   case Wave::kOsc:
     return CreateImpl(wave->AsOscWave(), wave_container_view);
   case Wave::kSimpleAna:
- //   return CreateImpl(wave->AsSimpleAnaWave(), wave_container_view);
+    return CreateImpl(wave->AsSimpleAnaWave(), wave_container_view);
 
   default:
     NOTREACHED() << "no support Wave";
@@ -55,4 +55,10 @@ OscWaveView* WaveControlViewFactory::CreateImpl(OscWave* wave,
                                                 YTWaveContainerView* yt_wave_container_view) {
   OscWaveView* osc_wave_view = new OscWaveView(wave);
   return osc_wave_view;
+}
+
+SimpleAnaWaveView* WaveControlViewFactory::CreateImpl(SimpleAnaWave* wave, 
+                                                      YTWaveContainerView* yt_wave_container_view) {
+  SimpleAnaWaveView* simple_ana_wave_view = new SimpleAnaWaveView(wave);
+  return simple_ana_wave_view;
 }

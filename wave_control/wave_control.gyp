@@ -25,6 +25,8 @@
         'osc_wave.cc',
         'osc_wave_observer.h',
         'simple_ana_wave.h',
+        'simple_ana_wave.cc',
+        'simple_ana_wave_observer.h',
         'simple_digit_wave.h',
         
         # view model visitor
@@ -39,6 +41,9 @@
         'wave_range.cc',
         
         'wave_view.h',
+        # model impl
+        'default_simple_ana_wave.h',
+        'default_simple_ana_wave.cc',
         
         # measure line model
         'measure_line/measure_line.h',
@@ -68,6 +73,8 @@
         'views/ana_wave_view.h',
         'views/osc_wave_view.h',
         'views/osc_wave_view.cc',
+        'views/simple_ana_wave_view.h',
+        'views/simple_ana_wave_view.cc',
         
         # views impl
         'views/yt_wave_container_inner_view.h',

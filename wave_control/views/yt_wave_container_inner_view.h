@@ -42,6 +42,8 @@ class WaveBar;
 class YTWaveVisitor;
 }
 
+class SimpleAnaWaveView;
+
 // real YTWaveContainer show view, the YTWaveContainerView
 // just frame
 class YTWaveContainerInnerView : public views::View
@@ -65,7 +67,8 @@ public:
   // SimpleAnaWave coord transform
   gfx::Transform SimpleAnaWaveTransform(SimpleAnaWave* ana_wave);
   int GetYOffset(SimpleAnaWave* wave);
-  void MoveToY(SimpleAnaWave* wave, double offset);
+  void MoveToY(SimpleAnaWave* wave, int offset);
+  SimpleAnaWaveView* GetSimpleAnaWaveView(SimpleAnaWave* ana_wave);
 
   void SelectWave(Wave* wave);
 

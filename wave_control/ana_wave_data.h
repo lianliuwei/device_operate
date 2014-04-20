@@ -12,6 +12,8 @@ struct PeakValue {
 class AnaWaveData {
 public:
   AnaWaveData() {}
+  virtual ~AnaWaveData() {}
+
   virtual WaveRange data_range() = 0;
   virtual double* data() = 0;
   virtual int size() = 0;
@@ -22,6 +24,4 @@ public:
   virtual double MaxY();
   virtual double MinY();
 
-protected:
-  virtual ~AnaWaveData() {}
 };

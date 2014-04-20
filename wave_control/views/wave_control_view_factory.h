@@ -3,8 +3,8 @@
 #include "wave_control/views/wave_control_view.h"
 #include "wave_control/views/yt_wave_container_view.h"
 #include "wave_control/views/osc_wave_view.h"
+#include "wave_control/views/simple_ana_wave_view.h"
 
-class SimpleAnaWaveView;
 template <typename T> struct DefaultSingletonTraits;
 
 // use visitor need template for call the right CreateImpl(), and
@@ -37,6 +37,7 @@ private:
 
   SimpleAnaWaveView* CreateImpl(SimpleAnaWave* wave, 
                                 YTWaveContainerView* yt_wave_container_view);
+
 
   DISALLOW_COPY_AND_ASSIGN(WaveControlViewFactory);
 };
