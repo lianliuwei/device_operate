@@ -18,6 +18,8 @@ bool Handle::OnMousePressed(const ui::MouseEvent& event) {
   bool ret = TextButton::OnMousePressed(event);
   mouse_offset_ = bar_->IsHorizontal() ? event.x() : event.y();
   bar_->ActiveHandle(tag());
+  int offset = bar_->IsHorizontal() ? x() : y();
+  bar_->OnHandlePressed(tag(), offset);
   return ret;
 }
 
@@ -27,10 +29,10 @@ bool Handle::OnMouseDragged(const ui::MouseEvent& event) {
   // model notify the handleBar to update, finish the handle be moved.
   if (bar_->IsHorizontal()) {
     int handle_x = x() + event.x() - mouse_offset_;
-    bar_->MoveHandle(tag(), handle_x);
+    bar_->OnHandleMove(tag(), handle_x);
   } else {
     int handle_y = y() + event.y() - mouse_offset_;
-    bar_->MoveHandle(tag(), handle_y);
+    bar_->OnHandleMove(tag(), handle_y);
   }
   return true;
 }
@@ -43,3 +45,10 @@ gfx::Size Handle::GetMinimumSize() {
   size.set_height(std::max(size.height(), old_size.height()));
   return size;
 }
+
+void Handle::OnMouseReleased(const ui::MouseEvent& event) {
+  bar_->OnHandleReleased(tag());
+}
+
+
+

@@ -99,6 +99,8 @@
         'views/fill_box_layout.cc',
         'views/all_fill_layout.h',
         'views/all_fill_layout.cc',
+        'views/handle_point_view.h',
+        'views/handle_point_view.cc',
       ],
     }, 
  ],

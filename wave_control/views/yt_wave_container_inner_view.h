@@ -60,6 +60,9 @@ public:
   HandleBarDelegate* GetHorizOffsetBarDelegate();
   HandleBarDelegate* GetTriggerBarDelegate();
 
+  // add this to all HandleBar
+  HandleBarObserver* HandlePointDelegate();
+
   // osc coord transform
   gfx::Transform OscWaveTransform(OscWave* osc_wave);
   static double ToOscOffset(double old_offset, double move_delta);

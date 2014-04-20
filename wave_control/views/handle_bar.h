@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "base/observer_list.h"
+
 #include "wave_control/views/handle_bar_model_observer.h"
 #include "wave_control/views/handle.h"
 
@@ -18,7 +20,7 @@ public:
             gfx::Font font,
             int start, int end);
   // the views delete handle auto
-  virtual ~HandleBar();;
+  virtual ~HandleBar();
 
   bool IsHorizontal() const;
 
@@ -27,22 +29,26 @@ public:
     return model_;
   }
 
-  // TODO rename to SetDelegate
-  void SetObserver(HandleBarObserver* observer) {
-    observer_ = observer;
+  void AddObserver(HandleBarObserver* observer) { 
+    observer_list_.AddObserver(observer); 
   }
-  HandleBarObserver* observer() const {
-    return observer_;
+  void RemoveObserver(HandleBarObserver* observer) {
+    observer_list_.RemoveObserver(observer);
   }
-
+  bool HasObserver(HandleBarObserver* observer) {
+    return observer_list_.HasObserver(observer);
+  }
+  
   // put the Active Handle on the Top
   void ActiveHandle(int ID);
 
+  void OnHandlePressed(int id, int dest);
+  void OnHandleReleased(int id);
   // the Handle call this method to set it's offset. the handle must no set
   // the offset by itself, the model may be restrict the offset for some 
   // reason.
   // dest is the x or y the Handle need to be.
-  void MoveHandle(int ID, int dest);
+  void OnHandleMove(int ID, int dest);
 
   // HandleBarModelObserver methods.
   virtual void OnModelChanged();
@@ -98,15 +104,18 @@ private:
   // set the handle correct, the handle is subclass from the textBotton, need to 
   // set the three type icon, any many color.
   void SetHandle(Handle* handle, int ID);
-
   void SetHandlePos(Handle* handle, int ID);
 
-private:
+  void NotifyHandlePressed(int id, int offset);
+  void NotifyHandleMove(int id, int offset);
+  void NotifyHandleReleased(int id);
+  void NotifyHandleActive(int id);
+
   const bool is_horiz_;
 
   std::vector<Handle*> handles_;
 
-  HandleBarObserver* observer_;
+  ObserverList<HandleBarObserver> observer_list_;
 
   HandleBarModel* model_;
 

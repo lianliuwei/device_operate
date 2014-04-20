@@ -18,6 +18,7 @@ protected:
   // overridden from views::View
   virtual bool OnMousePressed(const ui::MouseEvent& event) OVERRIDE;
   virtual bool OnMouseDragged(const ui::MouseEvent& event) OVERRIDE;
+  virtual void OnMouseReleased(const ui::MouseEvent& event) OVERRIDE;
 
 private:
   HandleBar* bar_;

@@ -6,6 +6,7 @@
 #include "wave_control/views/wave_control_view_factory.h"
 #include "wave_control/views/wave_control_views_constants.h"
 #include "wave_control/views/all_fill_layout.h"
+#include "wave_control/views/handle_point_view.h"
 
 using namespace ui;
 using namespace std;
@@ -40,6 +41,8 @@ public:
 
 private:
   // implement HandleBarObserver
+  virtual void OnHandlePressed(int id, int offset, bool horiz) {}
+  virtual void OnHandleReleased(int id) {}
   virtual void OnHandleMove(int ID, int offset);
   virtual void OnHandleActive(int ID);
 
@@ -125,6 +128,8 @@ public:
 
 private:
   // implement HandleBarObserver
+  virtual void OnHandlePressed(int id, int offset, bool horiz) {}
+  virtual void OnHandleReleased(int id) {}
   virtual void OnHandleMove(int ID, int offset);
   virtual void OnHandleActive(int ID);
 
@@ -197,8 +202,8 @@ void TriggerBar::OnHandleMove(int ID, int offset) {
   bool relate = trigger->IsRelate();
   OscWave* trigger_wave = trigger->trigger_wave();
   double base_y = 0;
-  if (relate) {
-    base_y = trigger_wave->vertical_offset();
+  if (!relate) {
+    base_y = -trigger_wave->vertical_offset();
   }
   gfx::Transform transform = view_->OscWaveTransform(trigger_wave);
   double new_offset = TransformReverseY(transform, offset);
@@ -270,6 +275,8 @@ private:
   };
   
   // implement HandleBarObserver
+  virtual void OnHandlePressed(int id, int offset, bool horiz) {}
+  virtual void OnHandleReleased(int id) {}
   virtual void OnHandleMove(int ID, int offset);
   virtual void OnHandleActive(int ID);
 
@@ -572,7 +579,7 @@ YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
   trigger_bar_.reset(new TriggerBar(wave_group_.get(), this));
 
   // add HandlePoint
-  View* view = new View();
+  HandlePointView* view = new HandlePointView();
   AddChildViewAt(view, kHandlePointViewID);
 
   container->AddObserver(this);
@@ -680,6 +687,10 @@ HandleBarDelegate* YTWaveContainerInnerView::GetHorizOffsetBarDelegate() {
 
 HandleBarDelegate* YTWaveContainerInnerView::GetTriggerBarDelegate() {
   return trigger_bar_.get();
+}
+
+HandleBarObserver* YTWaveContainerInnerView::HandlePointDelegate() {
+  return static_cast<HandlePointView*>(child_at(kHandlePointViewID));
 }
 
 bool YTWaveContainerInnerView::NormalSize(gfx::Size& size) {

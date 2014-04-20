@@ -13,3 +13,4 @@ const int kHGridDiv = 5;
 const int kDefaultHDiv = 4;
 const int kDefaultVDiv = 5;
 const SkColor kWaveControlBackgroundColor = SkColorSetRGB(40, 0, 0);
+const SkColor kHandlePointColor = SkColorSetRGB(255, 255, 255);

@@ -12,7 +12,6 @@ HandleBar::HandleBar(HandleBarModel* model,
                      gfx::Font font,
                      int start, int end)
     : model_(NULL)
-    , observer_(NULL)
     , is_horiz_(is_horiz)
     , font_(font) {
   SetMoveRange(start, end);
@@ -59,18 +58,28 @@ void HandleBar::ActiveHandle(int ID) {
   // draw the handle to show the on top effect.
   handle->SchedulePaint();
   // notify the observer the ID handle is active.
-  observer_->OnHandleActive(ID);
+  NotifyHandleActive(ID);
 }
 
-void HandleBar::MoveHandle(int ID, int dest) {
+void HandleBar::OnHandlePressed(int id, int dest) {
+  Handle* handle = GetHandle(id);
+  DCHECK(handle) << "can not find the handle from ID: " << id;
+  int offset = CalculateOffset(dest, IsHorizontal() ? handle->width() :
+    handle->height());
+  NotifyHandlePressed(id, offset);
+}
+
+
+void HandleBar::OnHandleReleased(int id) {
+  NotifyHandleReleased(id);
+}
+
+void HandleBar::OnHandleMove(int ID, int dest) {
   Handle* handle = GetHandle(ID);
   DCHECK(handle) << "can not find the handle from ID: " << ID;
-  if (observer_) {
-    int offset = CalculateOffset(dest, IsHorizontal() ? handle->width() :
-                                 handle->height());
-    observer_->OnHandleMove(ID, offset);
-  }
-
+  int offset = CalculateOffset(dest, IsHorizontal() ? handle->width() :
+                               handle->height());
+  NotifyHandleMove(ID, offset);
 }
 
 void HandleBar::UpdateFromModel() {
@@ -221,4 +230,21 @@ Handle* HandleBar::GetHandle(int ID) const {
       return *it;
   NOTREACHED();
   return NULL;
+}
+
+void HandleBar::NotifyHandlePressed(int id, int offset) {
+  FOR_EACH_OBSERVER(HandleBarObserver, observer_list_, OnHandlePressed(id, offset, is_horiz_));
+}
+
+void HandleBar::NotifyHandleMove(int id, int offset) {
+  FOR_EACH_OBSERVER(HandleBarObserver, observer_list_, OnHandleMove(id, offset));
+}
+
+void HandleBar::NotifyHandleReleased(int id) {
+  FOR_EACH_OBSERVER(HandleBarObserver, observer_list_, OnHandleReleased(id));
+}
+
+void HandleBar::NotifyHandleActive(int id) {
+  FOR_EACH_OBSERVER(HandleBarObserver, observer_list_, OnHandleActive(id));
+
 }

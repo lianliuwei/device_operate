@@ -132,11 +132,19 @@ void YTWaveContainerView::Layout() {
 
 YTWaveContainerView::YTWaveContainerView(YTWaveContainer* container, 
                                          WaveControlView* wave_control_view) {
+  // create inner view
   yt_view_ = new YTWaveContainerInnerView(container);
   AddChildView(yt_view_);
+  //create bars
   wave_bar_ = CreateHandleBar(yt_view_->GetWaveBarDelegate());
   horiz_offset_bar_ = CreateHandleBar(yt_view_->GetHorizOffsetBarDelegate());
   trigger_bar_ = CreateHandleBar(yt_view_->GetTriggerBarDelegate());
+  // add HandlePointDelegate
+  HandleBarObserver* observer = yt_view_->HandlePointDelegate();
+  wave_bar_->AddObserver(observer);
+  horiz_offset_bar_->AddObserver(observer);
+  trigger_bar_->AddObserver(observer);
+
 }
 
 HandleBar* YTWaveContainerView::CreateHandleBar(HandleBarDelegate* delegate) {
@@ -144,13 +152,19 @@ HandleBar* YTWaveContainerView::CreateHandleBar(HandleBarDelegate* delegate) {
   HandleBar* bar = new HandleBar(delegate, delegate->is_horiz(), 
       rb.GetFont(kBarFont),
       0, 1);
-  bar->SetObserver(delegate);
+  bar->AddObserver(delegate);
   AddChildView(bar);
   return bar;
 }
 
 YTWaveContainerView::~YTWaveContainerView() {
-  wave_bar_->SetObserver(NULL);
-  horiz_offset_bar_->SetObserver(NULL);
-  trigger_bar_->SetObserver(NULL);
+  // add HandlePointDelegate
+  HandleBarObserver* observer = yt_view_->HandlePointDelegate();
+  wave_bar_->RemoveObserver(observer);
+  horiz_offset_bar_->RemoveObserver(observer);
+  trigger_bar_->RemoveObserver(observer);
+
+  wave_bar_->RemoveObserver(yt_view_->GetWaveBarDelegate());
+  horiz_offset_bar_->RemoveObserver(yt_view_->GetHorizOffsetBarDelegate());
+  trigger_bar_->RemoveObserver(yt_view_->GetTriggerBarDelegate());
 }
