@@ -82,8 +82,11 @@ public:
   // to layout the assist handlebar.
   int BorderThickness();
 
-  gfx::Size GetMinimumSize();
+  bool HasWave(Wave* wave);
 
+  // override views::View
+  gfx::Size GetMinimumSize() OVERRIDE;
+  
 private:
   // implement ui::ListModelObserver
   virtual void ListItemsAdded(size_t start, size_t count);

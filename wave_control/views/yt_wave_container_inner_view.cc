@@ -175,12 +175,21 @@ const gfx::Image& TriggerBar::GetIcon(int ID) {
 }
 
 bool TriggerBar::IsVisible(int ID) {
-  return wave_group_->trigger_at(ID)->show();
+  TriggerPart* trigger = wave_group_->trigger_at(ID);
+  OscWave* wave = trigger->trigger_wave();
+  if (!view_->HasWave(wave)) {
+    return false;
+  }
+  return trigger->show();
 }
 
 int TriggerBar::GetOffset(int ID) {
   TriggerPart* trigger = wave_group_->trigger_at(ID);
-  OscWave* wave = trigger->osc_wave();
+  OscWave* wave = trigger->trigger_wave();
+  // the relate osc wave is no in this group
+  if (!view_->HasWave(wave)) {
+    return 0;
+  }
   bool relate = trigger->IsRelate();
   OscWave* trigger_wave = trigger->trigger_wave();
   double offset = trigger->offset();
@@ -198,7 +207,6 @@ int TriggerBar::GetOffset(int ID) {
 
 void TriggerBar::OnHandleMove(int ID, int offset) {
   TriggerPart* trigger = wave_group_->trigger_at(ID);
-  OscWave* wave = trigger->osc_wave();
   bool relate = trigger->IsRelate();
   OscWave* trigger_wave = trigger->trigger_wave();
   double base_y = 0;
@@ -755,5 +763,9 @@ SimpleAnaWaveView* YTWaveContainerInnerView::GetSimpleAnaWaveView(SimpleAnaWave*
 
 int YTWaveContainerInnerView::WaveIDToViewID(int wave_id) {
   return wave_id + kFrontSize;
+}
+
+bool YTWaveContainerInnerView::HasWave(Wave* wave) {
+  return container_->HasWave(wave);
 }
 
