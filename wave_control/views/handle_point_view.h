@@ -2,9 +2,12 @@
 
 #include "ui/views/view.h"
 #include "wave_control/views/handle_bar_observer.h"
+#include "ui/base/animation/animation_delegate.h"
+#include "ui/base/animation/linear_animation.h"
 
 class HandlePointView : public views::View 
-                      , public HandleBarObserver {
+                      , public HandleBarObserver
+                      , public ui::AnimationDelegate {
 public:
   HandlePointView();
   virtual ~HandlePointView() {}
@@ -19,8 +22,15 @@ public:
   virtual void OnHandleActive(int ID) {}
 
 private:
+  // implement ui::AnimationDelegate
+  virtual void AnimationEnded(const ui::Animation* animation);
+  virtual void AnimationProgressed(const ui::Animation* animation);
+  virtual void AnimationCanceled(const ui::Animation* animation);
+
   bool in_drag_;
   int offset_;
   // bar horiz
   bool horiz_;
+
+  ui::LinearAnimation animation_;
 };
