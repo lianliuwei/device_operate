@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ui/gfx/transform.h"
+
 #include "wave_control/views/line_data_wave_view.h"
 #include "wave_control/simple_ana_wave.h"
 
@@ -11,6 +13,11 @@ public:
 
   int GetYOffset();
   void MoveToY(int y_pos);
+
+  // overridden from views::View
+  virtual bool OnMousePressed(const ui::MouseEvent& event) OVERRIDE;
+  virtual bool OnMouseDragged(const ui::MouseEvent& event) OVERRIDE;
+  virtual void OnMouseReleased(const ui::MouseEvent& event) OVERRIDE;
 
 private:
   // implement SimpleAnaWaveObserver
@@ -25,4 +32,10 @@ private:
   double handle_offset_;
 
   SimpleAnaWave* ana_wave_;
+
+  // state for drag
+  gfx::Point start_point_;
+  gfx::Transform drag_transform_;
+  WaveRange drag_v_range_;
+  WaveRange drag_h_range_;
 };
