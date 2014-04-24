@@ -2,10 +2,10 @@
 
 #include "ui/gfx/transform.h"
 
-#include "wave_control/views/line_data_wave_view.h"
+#include "wave_control/views/ana_wave_data_view.h"
 #include "wave_control/simple_ana_wave.h"
 
-class SimpleAnaWaveView : public LineDataWaveView
+class SimpleAnaWaveView : public AnaWaveDataView
                         , public SimpleAnaWaveObserver {
 public:
   SimpleAnaWaveView(SimpleAnaWave* ana_wave);

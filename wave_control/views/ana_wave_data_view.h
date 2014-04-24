@@ -11,7 +11,7 @@
 // the data is own by the controller.
 // input data are logic value using the Logic to real transform Matrix 
 // to Transform
-class LineDataWaveView : public views::View {
+class AnaWaveDataView : public views::View {
 public:
   enum ShowStyle {
     kLine,
@@ -21,8 +21,8 @@ public:
     KLineAndAutoDot,
   };
 
-  LineDataWaveView() {};
-  virtual ~LineDataWaveView() {};
+  AnaWaveDataView() {};
+  virtual ~AnaWaveDataView() {};
 
   void set_wave_color(SkColor color);
   SkColor wave_color() const;

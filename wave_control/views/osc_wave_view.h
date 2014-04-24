@@ -1,9 +1,9 @@
 #pragma once
 
-#include "wave_control/views/line_data_wave_view.h"
+#include "wave_control/views/ana_wave_data_view.h"
 #include "wave_control/osc_wave.h"
 
-class OscWaveView : public LineDataWaveView
+class OscWaveView : public AnaWaveDataView
                   , public OscWaveObserver {
 public:
   OscWaveView(OscWave* osc_wave);

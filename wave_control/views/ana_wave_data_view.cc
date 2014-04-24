@@ -1,4 +1,4 @@
-#include "wave_control/views/line_data_wave_view.h"
+#include "wave_control/views/ana_wave_data_view.h"
 
 #include <math.h>
 
@@ -30,11 +30,11 @@ bool RangeIntersect(int* intersect_left, int* intersect_right,
 
 }
 
-bool LineDataWaveView::PaintWaveParam(int* vector_start_out, int* vector_end_out,
-                                      int* plot_begin_out, int* plot_end_out,
-                                      gfx::Transform* vector_to_real_x_out,
-                                      bool* auto_show_dot_out,
-                                      bool* need_sample_out) {
+bool AnaWaveDataView::PaintWaveParam(int* vector_start_out, int* vector_end_out,
+                                     int* plot_begin_out, int* plot_end_out,
+                                     gfx::Transform* vector_to_real_x_out,
+                                     bool* auto_show_dot_out,
+                                     bool* need_sample_out) {
 
   WaveRange wave_range = line_data_->data_range();
   int real_begin = TransformX(data_transform_, wave_range.begin);
@@ -89,7 +89,7 @@ bool LineDataWaveView::PaintWaveParam(int* vector_start_out, int* vector_end_out
   return true;
 }
 
-void LineDataWaveView::PaintWave(gfx::Canvas* canvas) {
+void AnaWaveDataView::PaintWave(gfx::Canvas* canvas) {
   if (!line_data_ || line_data_->data() == NULL)
     return;
  
@@ -175,47 +175,47 @@ void LineDataWaveView::PaintWave(gfx::Canvas* canvas) {
   }
 }
 
-void LineDataWaveView::OnPaint(gfx::Canvas* canvas) {
+void AnaWaveDataView::OnPaint(gfx::Canvas* canvas) {
   views::View::OnPaint(canvas); // draw the background border first.
   PaintWave(canvas);
 }
 
-bool LineDataWaveView::HasHitTestMask() const  {
+bool AnaWaveDataView::HasHitTestMask() const  {
   return false;
 }
 
-bool LineDataWaveView::OnMouseDragged(const ui::MouseEvent& event) {
+bool AnaWaveDataView::OnMouseDragged(const ui::MouseEvent& event) {
   return false;
 }
 
-void LineDataWaveView::set_wave_color(SkColor color) {
+void AnaWaveDataView::set_wave_color(SkColor color) {
   if (color != wave_color_) {
     wave_color_ = color;
     SchedulePaint();    
   }
 }
 
-void LineDataWaveView::set_dot_color(SkColor color) {
+void AnaWaveDataView::set_dot_color(SkColor color) {
   if (color != dot_color_) {
     dot_color_ = color;
     SchedulePaint();    
   }
 }
 
-void LineDataWaveView::set_show_style(ShowStyle style) {
+void AnaWaveDataView::set_show_style(ShowStyle style) {
   if (style != show_sytle_) {
     show_sytle_ = style;
     SchedulePaint();    
   }
 }
 
-void LineDataWaveView::set_line_data(AnaWaveData* line_data) {
+void AnaWaveDataView::set_line_data(AnaWaveData* line_data) {
   // data allow no the same, just repaint it.
   line_data_ = line_data;
   SchedulePaint();
 }
 
-void LineDataWaveView::set_data_transform(const gfx::Transform& data_transform) {
+void AnaWaveDataView::set_data_transform(const gfx::Transform& data_transform) {
   if (data_transform != data_transform_) {
     data_transform_ = data_transform;
     SchedulePaint();
