@@ -18,6 +18,7 @@ public:
   virtual void set_offset(double offset) = 0;
   // Relate to Y or no.
   virtual bool IsRelate() = 0;
+  // trigger wave may no in this wave group
   virtual OscWave* trigger_wave() = 0;
 
   virtual OscWave* osc_wave() = 0;
