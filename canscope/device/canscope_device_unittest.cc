@@ -13,7 +13,6 @@
 #include "canscope/device/canscope_device_handle.h"
 #include "canscope/canscope_notification_types.h"
 #include "canscope/device/canscope_device_property_constants.h"
-#include "canscope/device/device_thread_mock.h"
 #include "canscope/device/property/device_property_observer_mock.h"
 #include "canscope/device/scoped_device_property_commit.h"
 #include "canscope/device/test/test_util.h"
@@ -61,11 +60,6 @@ static const char kCANScopeConfig [] =  {" \
 } \
 "};
 
-
-bool ActionIsDeviceThread() {
-  return CommonThread::CurrentlyOn(CommonThread::DEVICE);
-}
-
 }
 
 class CANScopeDeviceTest : public testing::Test
@@ -77,8 +71,6 @@ public:
   virtual ~CANScopeDeviceTest() {}
 
   static void SetUpTestCase() {
-    ON_CALL(g_DeviceThreadMock.Get(), 
-        IsDeviceThread()).WillByDefault(Invoke(&ActionIsDeviceThread));
     new TestProcess();
     GetTestProcess()->Init();
   }
