@@ -10,6 +10,7 @@
 #include "wave_control/views/handle_bar_model.h"
 #include "wave_control/views/handle_bar_observer.h"
 #include "wave_control/views/handle_bar_model_observer.h"
+#include "wave_control/views/measure_line/measure_line_container_view.h"
 
 
 class HandleBarDelegate : public HandleBarModel
@@ -47,7 +48,8 @@ class SimpleAnaWaveView;
 // real YTWaveContainer show view, the YTWaveContainerView
 // just frame
 class YTWaveContainerInnerView : public views::View
-                               , public ui::ListModelObserver {
+                               , public ui::ListModelObserver
+                               , public MeasureLineContainerView::Delegate {
 public:
   YTWaveContainerInnerView(YTWaveContainer* container);
   virtual ~YTWaveContainerInnerView();
@@ -86,13 +88,15 @@ public:
 
   // override views::View
   gfx::Size GetMinimumSize() OVERRIDE;
-  
+
 private:
   // implement ui::ListModelObserver
   virtual void ListItemsAdded(size_t start, size_t count);
   virtual void ListItemsRemoved(size_t start, size_t count);
   virtual void ListItemMoved(size_t index, size_t target_index);
   virtual void ListItemsChanged(size_t start, size_t count);
+
+  void OnSelectWaveChanged();
 
   AxisBackground* get_axis_background();
   void SetGrid(int v_grid, int h_grid);
@@ -106,12 +110,18 @@ private:
   scoped_ptr<TriggerBar> trigger_bar_;
 
   scoped_ptr<OscWaveGroup> wave_group_;
-  
+
+  MeasureLineContainerView* measure_line_view_;
+
   YTWaveContainer* container_;
 
   // HACK for sync with wave LiistModel, the RemoveWave need Wave ptr.
   std::vector<Wave*> wave_record_;
 
   DISALLOW_COPY_AND_ASSIGN(YTWaveContainerInnerView);
+
+  virtual Wave* GetMeasureWave();
+
+  virtual const gfx::Transform GetMeasureWaveTransform();
 
 };

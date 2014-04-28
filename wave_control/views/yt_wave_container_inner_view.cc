@@ -13,8 +13,9 @@ using namespace std;
 using namespace views;
 
 namespace {
-static const int kFrontSize = 1;
+static const int kFrontSize = 2;
 static const int kHandlePointViewID = 0;
+static const int kMeasureLineViewID = 1;
 
 bool IsSet(int set, int test) {
   return (set & test) != 0;
@@ -485,12 +486,14 @@ public:
   void AddWave(Wave* wave);
   void RemoveWave(Wave* wave);
   void SetAxis(Wave* wave);
+  gfx::Transform GetTransform(Wave* wave);
 
 private:
   enum VisitorType {
     kAddWave,
     kRemoveWave,
     kSetAxis,
+    kGetTransform,
   };
 
   // implement WaveVisitor
@@ -500,6 +503,7 @@ private:
 
   VisitorType type_;
   YTWaveContainerInnerView* view_;
+  gfx::Transform transform_;
 
   DISALLOW_COPY_AND_ASSIGN(YTWaveVisitor);
 };
@@ -524,15 +528,27 @@ void YTWaveVisitor::SetAxis(Wave* wave) {
   wave->Accept(this);
 }
 
+gfx::Transform YTWaveVisitor::GetTransform(Wave* wave) {
+  type_ = kGetTransform;
+  wave->Accept(this);
+  return transform_;
+}
+
 void YTWaveVisitor::VisitOscWave(OscWave* wave) {
   if (type_ == kAddWave) {
     view_->wave_group_->AddOscWave(wave);
+
   } else if (type_ == kRemoveWave) {
     view_->wave_group_->RemoveOscWave(wave);
+
   } else if (type_ == kSetAxis) {
     int v_div = wave->vertical_div() / 2;
     int h_div = wave->horizontal_div() / 2;
     view_->SetGrid(v_div, h_div);
+
+  } else if (type_ == kGetTransform) {
+    transform_ = view_->OscWaveTransform(wave);
+
   } else {
     NOTREACHED();
   }
@@ -541,10 +557,15 @@ void YTWaveVisitor::VisitOscWave(OscWave* wave) {
 void YTWaveVisitor::VisitSimpleAnaWave(SimpleAnaWave* wave) {
   if (type_ == kAddWave) {
     view_->wave_bar_->AddOtherWave(wave);
+
   } else if (type_ == kRemoveWave) {
     view_->wave_bar_->RemoveOtherWave(wave);
+
   } else if (type_ == kSetAxis) {
     // use last axis config.
+  } else if (type_ == kGetTransform) {
+    transform_ = view_->SimpleAnaWaveTransform(wave);
+
   } else {
     NOTREACHED();
   }
@@ -590,11 +611,17 @@ YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
   HandlePointView* view = new HandlePointView();
   AddChildViewAt(view, kHandlePointViewID);
 
+  // add MeasureLine
+  measure_line_view_ = new MeasureLineContainerView(this);
+  AddChildViewAt(measure_line_view_, kMeasureLineViewID);
+
   container->AddObserver(this);
   // fetch Wave
   ListItemsAdded(0, container->item_count());
 
   SetGrid(kDefaultVDiv, kDefaultHDiv);
+
+  measure_line_view_->ShowHorizSingle(true);
 }
 
 YTWaveContainerInnerView::~YTWaveContainerInnerView() {
@@ -767,5 +794,27 @@ int YTWaveContainerInnerView::WaveIDToViewID(int wave_id) {
 
 bool YTWaveContainerInnerView::HasWave(Wave* wave) {
   return container_->HasWave(wave);
+}
+
+Wave* YTWaveContainerInnerView::GetMeasureWave() {
+  if (container_->item_count() == 0) {
+    return NULL;
+  }
+  return container_->GetItemAt(0);
+}
+
+const gfx::Transform YTWaveContainerInnerView::GetMeasureWaveTransform() {
+  Wave* wave = GetMeasureWave();
+  if (wave == NULL) {
+    return gfx::Transform();
+  } else {
+    YTWaveVisitor visitor(this);
+    return visitor.GetTransform(wave);
+  }
+}
+
+void YTWaveContainerInnerView::OnSelectWaveChanged() {
+  UpdateAxis();
+  measure_line_view_->MeasureWaveChanged();
 }
 

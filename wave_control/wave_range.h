@@ -7,4 +7,6 @@ public:
 
   // offset is in start end coord
   void MoveCenter(double offset);
+  bool InRange(double offset);
+
 };

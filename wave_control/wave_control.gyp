@@ -45,11 +45,6 @@
         'default_simple_ana_wave.h',
         'default_simple_ana_wave.cc',
         
-        # measure line model
-        'measure_line/measure_line.h',
-        'measure_line/dual_line.h',
-        'measure_line/single_line.h',
-        'measure_line/measure_line_container.h',
         
         # osc wave grup
         'osc_wave_group/osc_wave_group.h',
@@ -70,7 +65,6 @@
         'views/wave_control_view.cc',
         'views/yt_wave_container_view.h',
         'views/yt_wave_container_view.cc',
-        'views/ana_wave_view.h',
         'views/osc_wave_view.h',
         'views/osc_wave_view.cc',
         'views/simple_ana_wave_view.h',
@@ -101,6 +95,15 @@
         'views/all_fill_layout.cc',
         'views/handle_point_view.h',
         'views/handle_point_view.cc',
+        'views/measure_line/measure_line.h',
+        'views/measure_line/dual_line_view.h',
+        'views/measure_line/dual_line_view.cc',
+        'views/measure_line/single_line_view.h',
+        'views/measure_line/single_line_view.cc',
+        'views/measure_line/measure_line_container_view.h',
+        'views/measure_line/measure_line_container_view.cc',
+        'views/measure_line/measure_line_part_view.h',
+        'views/measure_line/measure_line_part_view.cc',
       ],
     }, 
  ],
