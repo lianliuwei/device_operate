@@ -45,7 +45,8 @@ public:
   void Stop();
 
   bool IsRunning() const;
-
+  bool StartOrStarting() const;
+  bool StopOrStoping() const;
 
 protected:
   bool NeedStop() const;

@@ -3,7 +3,8 @@
 #include "base/values.h"
 #include "base/threading/non_thread_safe.h"
 
-namespace canscope {
+namespace device {
+
 class DevicePropertyStore : public base::NonThreadSafe {
 public:
   class Observer {
@@ -53,4 +54,4 @@ protected:
   virtual ~DevicePropertyStore() {}
 };
 
-} // namespace canscope
+} // namespace device

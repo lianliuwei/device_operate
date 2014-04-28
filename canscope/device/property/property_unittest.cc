@@ -8,20 +8,21 @@
 #include "base/lazy_instance.h"
 #include "base/run_loop.h"
 
+#include "device/property/store_member.h"
+#include "device/property/value_map_device_property_store.h"
+
 #include "canscope/scoped_trace_event.h"
 #include "canscope/device/property/property.h"
 #include "canscope/device/property/property_delegate.h"
-#include "canscope/device/property/store_member.h"
-#include "canscope/device/property/value_map_device_property_store.h"
 #include "canscope/async_task.h"
 #include "canscope/async_task_observer_mock.h"
-#include "canscope/device/device_thread_mock.h"
 
 using namespace base;
 using testing::_;
 using testing::Return;
 using testing::DoAll;
 using namespace canscope::device;
+using namespace device;
 
 namespace {
 static const char* kBoolMember = "test.bool_member";
@@ -43,10 +44,10 @@ public:
   MOCK_METHOD0(SetBoolMember, void());
   MOCK_METHOD0(SetIntMember, void());
 
-  canscope::ValueMapDevicePropertyStore prefs_;
+  ValueMapDevicePropertyStore prefs_;
 
-  canscope::BooleanStoreMember bool_member;
-  canscope::IntegerStoreMember int_member;
+  BooleanStoreMember bool_member;
+  IntegerStoreMember int_member;
 
 };
 
@@ -75,7 +76,7 @@ public:
   MOCK_METHOD2(int_property_check, bool(int, const std::string&));
 
   // canscope::PropertyDelegate
-  virtual canscope::DevicePropertyStore* GetDevicePropertyStore() {
+  virtual DevicePropertyStore* GetDevicePropertyStore() {
     return &(prefs_);
   }
 
@@ -83,6 +84,7 @@ public:
 
 
   MOCK_METHOD1(PostDeviceTask, void(const Closure&));
+  MOCK_METHOD0(IsDeviceThread, bool());
 
   virtual void FetchNewPref() {
     prefs_.ChangeContent(device_.prefs_.Serialize());
@@ -121,7 +123,7 @@ private:
 };
  
 class DevicePropertyObserverMock
-    : public canscope::DevicePropertyStore::Observer {
+    : public DevicePropertyStore::Observer {
 public:
   DevicePropertyObserverMock() {}
   virtual ~DevicePropertyObserverMock() {}
@@ -209,7 +211,7 @@ public:
   }
 
   void InitOneThread() {
-    ON_CALL(g_DeviceThreadMock.Get(), IsDeviceThread()).WillByDefault(Return(true));
+    ON_CALL(handle, IsDeviceThread()).WillByDefault(Return(true));
     ON_CALL(handle, PostDeviceTask(_)).WillByDefault(NotReached());
     ON_CALL(handle, IsBatchMode()).WillByDefault(Return(false));
   }
@@ -221,7 +223,7 @@ public:
     device.prefs_.DetachFromThread();
 
     // mock Post and check device thread
-    ON_CALL(g_DeviceThreadMock.Get(), IsDeviceThread())
+    ON_CALL(handle, IsDeviceThread())
         .WillByDefault(ReturnIsDeviceThread(&device_thread));
     ON_CALL(handle, PostDeviceTask(_))
         .WillByDefault(PostDeviceTaskAction(&device_thread));

@@ -2,8 +2,9 @@
 
 #include "base/values.h"
 
-#include "canscope/device/property/enum_store_member.h"
-#include "canscope/device/property/value_map_device_property_store.h"
+#include "device/property/store_member.h"
+#include "device/property/enum_store_member.h"
+#include "device/property/value_map_device_property_store.h"
 
 namespace canscope {
 
@@ -125,30 +126,30 @@ public:
 
   void DetachFromThread();
 
-  ValueMapDevicePropertyStore prefs_;
+  ::device::ValueMapDevicePropertyStore prefs_;
 
   // CAN-H
   VoltRangeStoreMember range_can_h;
-  DoubleStoreMember offset_can_h;
+  ::device::DoubleStoreMember offset_can_h;
   CouplingStoreMember coupling_can_h;
 
   // CAN-L
   VoltRangeStoreMember range_can_l;
-  DoubleStoreMember offset_can_l;
+  ::device::DoubleStoreMember offset_can_l;
   CouplingStoreMember coupling_can_l;
 
   // CAN-DIFF
   VoltRangeStoreMember range_can_diff;
-  DoubleStoreMember offset_can_diff;
+  ::device::DoubleStoreMember offset_can_diff;
 
   DiffCtrlStoreMember diff_ctrl;
 
   // time
   TimeBaseStoreMember time_base;
-  DoubleStoreMember time_offset;
+  ::device::DoubleStoreMember time_offset;
 
   // unit ms
-  DoubleStoreMember auto_time;
+  ::device::DoubleStoreMember auto_time;
 
   // trigger
   TriggerSourceStoreMember trigger_source;
@@ -156,9 +157,9 @@ public:
   TriggerModeStoreMember trigger_mode;
   TriggerSensStoreMember trigger_sens;
   CompareTypeStoreMember compare;
-  DoubleStoreMember trigger_volt;
+  ::device::DoubleStoreMember trigger_volt;
   // unit ns
-  DoubleStoreMember time_param;
+  ::device::DoubleStoreMember time_param;
 
 protected:
 

@@ -28,6 +28,18 @@ static const uint32 kTimeBaseValue[] = {
 
 }
 namespace canscope {
+
+IMPLEMENT_ENUM_STORE_MEMBER_INT(Chnl);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(VoltRange);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TimeBase);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(Coupling);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(DiffCtrl);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerSource);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerType);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerMode);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerSens);
+IMPLEMENT_ENUM_STORE_MEMBER_INT(CompareType);
+
 double Volt(VoltRange range) {
   switch (range) {
   case k1V: return 1; break;
@@ -58,17 +70,6 @@ Chnl TriggerSource2Chnl(TriggerSource trigger_source) {
   default: NOTREACHED(); return CAN_H;
   }
 }
-
-IMPLEMENT_ENUM_STORE_MEMBER_INT(Chnl);
-IMPLEMENT_ENUM_STORE_MEMBER_INT(VoltRange);
-IMPLEMENT_ENUM_STORE_MEMBER_INT(TimeBase);
-IMPLEMENT_ENUM_STORE_MEMBER_INT(Coupling);
-IMPLEMENT_ENUM_STORE_MEMBER_INT(DiffCtrl);
-IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerSource);
-IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerType);
-IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerMode);
-IMPLEMENT_ENUM_STORE_MEMBER_INT(TriggerSens);
-IMPLEMENT_ENUM_STORE_MEMBER_INT(CompareType);
 
 void OscDeviceProperty::Init(base::Value* dict) {
   DCHECK(dict->IsType(Value::TYPE_DICTIONARY));

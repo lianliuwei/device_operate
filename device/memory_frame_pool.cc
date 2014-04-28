@@ -4,6 +4,7 @@
 
 using namespace std;
 using namespace base;
+
 uint8* MemoryFramePool::Alloc() {
   AutoLock lock(lock_);
 
@@ -24,6 +25,8 @@ uint8* MemoryFramePool::Alloc() {
 
 void MemoryFramePool::Free(uint8* frame) {
   bool notify = false;
+  Closure have_free;
+
   DCHECK(frame != NULL);
   {
   AutoLock lock(lock_);
@@ -31,12 +34,14 @@ void MemoryFramePool::Free(uint8* frame) {
   list<uint8*>::iterator it = find(alloced.begin(), alloced.end(), frame);
   CHECK(it != alloced.end()) << "this frame no belong here";
   alloced.erase(it);
-  if (free.size() == 0)
+  if (free.size() == 0) {
     notify = true;
+    have_free = have_free_;
+  }
   free.push(frame);
   }
-  if (notify && !have_free_.is_null()) {
-    have_free_.Run();
+  if (notify && !have_free.is_null()) {
+    have_free.Run();
   }
 }
 
@@ -72,7 +77,14 @@ void MemoryFramePool::ReleaseFree() {
 }
 
 void MemoryFramePool::set_have_free_callback(base::Closure have_free) {
+  bool notify = false;
+  {
   AutoLock lock(lock_);
   have_free_ = have_free;
+  notify = free.size() != 0;
+  }
+  if (notify && !have_free.is_null()) {
+    have_free.Run();
+  }
 }
 

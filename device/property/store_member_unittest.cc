@@ -3,10 +3,10 @@
 
 #include <string>
 
-#include "canscope/device/property/store_member.h"
-#include "canscope/device/property/value_map_device_property_store.h"
+#include "device/property/store_member.h"
+#include "device/property/value_map_device_property_store.h"
 
-using namespace canscope;
+using namespace device;
 using namespace base;
 using namespace std;
 using testing::_;

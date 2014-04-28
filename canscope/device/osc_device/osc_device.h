@@ -70,7 +70,7 @@ public:
 
 private:
   // implement DeviceBase
-  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { return &prefs_; }
+  virtual ::device::ValueMapDevicePropertyStore* DevicePrefs() { return &prefs_; }
 
   // set register according to property
   void SetAnalogCtrl(Chnl chnl);

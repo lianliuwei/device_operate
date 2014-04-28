@@ -8,10 +8,10 @@
 #include "base/json/json_string_value_serializer.h"
 #include "base/json/json_reader.h"
 
-#include "canscope/device/property/value_map_device_property_store.h"
-#include "canscope/device/property/device_property_observer_mock.h"
+#include "device/property/value_map_device_property_store.h"
+#include "device/property/device_property_observer_mock.h"
 
-using namespace canscope;
+using namespace device;
 using namespace base;
 using namespace std;
 using testing::_;

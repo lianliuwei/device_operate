@@ -5,10 +5,10 @@
 #include "base/debug/trace_event.h"
 #include "base/prefs/pref_value_map.h"
 
-#include "canscope/device/property/device_property_store.h"
-#include "canscope/device/property/property_notifiter.h"
+#include "device/property/device_property_store.h"
+#include "device/property/property_notifiter.h"
 
-namespace canscope {
+namespace device {
 class ValueMapDevicePropertyStore : public DevicePropertyStore {
 public:
   ValueMapDevicePropertyStore();
@@ -52,4 +52,4 @@ private:
   DISALLOW_COPY_AND_ASSIGN(ValueMapDevicePropertyStore);
 };
 
-} // namespace canscope
+} // namespace device

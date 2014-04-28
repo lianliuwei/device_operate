@@ -5,9 +5,9 @@
 #include "base/debug/trace_event.h"
 
 #include "common/notification/notification_service.h"
+#include "device/property/value_map_device_property_store.h"
 
 #include "canscope/device/config_manager.h"
-#include "canscope/device/property/value_map_device_property_store.h"
 #include "canscope/canscope_notification_types.h"
 
 using namespace base;

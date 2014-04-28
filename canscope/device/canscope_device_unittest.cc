@@ -8,12 +8,13 @@
 #include "testing/gtest/include/gtest/gtest.h"
 #include "testing/gmock/include/gmock/gmock.h"
 
+#include "device/property/device_property_observer_mock.h"
+
 #include "canscope/test/test_process.h"
 #include "canscope/device/canscope_device.h"
 #include "canscope/device/canscope_device_handle.h"
 #include "canscope/canscope_notification_types.h"
 #include "canscope/device/canscope_device_property_constants.h"
-#include "canscope/device/property/device_property_observer_mock.h"
 #include "canscope/device/scoped_device_property_commit.h"
 #include "canscope/device/test/test_util.h"
 #include "canscope/device/sync_call.h"

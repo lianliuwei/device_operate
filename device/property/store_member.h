@@ -11,12 +11,13 @@
 #include "base/memory/ref_counted.h"
 #include "base/message_loop_proxy.h"
 #include "base/values.h"
+#include "base/value_conversions.h"
 
-#include "canscope/device/property/device_property_store.h"
+#include "device/property/device_property_store.h"
 
 // modify from base/prefs/pref_member.h
 // NOTICE NamedChangeCallback are no call when setting for current StoreMember
-namespace canscope {
+namespace device {
 
 namespace subtle {
 
@@ -146,12 +147,16 @@ public:
     setting_value_ = false;
   }
   
-private:
-  virtual bool UpdateValueInternal(const base::Value& value) const OVERRIDE;
+protected:
+  virtual bool UpdateValueInternal(const base::Value& value) const OVERRIDE {
+    NOTIMPLEMENTED();
+    return true;
+  }
 
   // This method is used to do the actual sync with pref of the specified type.
-  void UpdatePref(const ValueType& value);
-
+  virtual void UpdatePref(const ValueType& value) {
+    NOTIMPLEMENTED();
+  }
 
   mutable ValueType value_;
 
@@ -159,29 +164,51 @@ private:
 };
 
 template <>
-void StoreMember<bool>::UpdatePref(const bool& value);
+inline void StoreMember<bool>::UpdatePref(const bool& value) {
+  prefs()->SetValue(pref_name(), new base::FundamentalValue(value));
+}
 template <>
-bool StoreMember<bool>::UpdateValueInternal(const Value& value) const;
+inline bool StoreMember<bool>::UpdateValueInternal(const base::Value& value) const {
+  return value.GetAsBoolean(&value_);
+}
 
 template <>
-void StoreMember<int>::UpdatePref(const int& value);
+inline void StoreMember<int>::UpdatePref(const int& value) {
+  prefs()->SetValue(pref_name(), new base::FundamentalValue(value));
+}
 template <>
-bool StoreMember<int>::UpdateValueInternal(const Value& value) const;
+inline bool StoreMember<int>::UpdateValueInternal(const base::Value& value) const {
+  return value.GetAsInteger(&value_);
+}
 
 template <>
-void StoreMember<double>::UpdatePref(const double& value);
+inline void StoreMember<double>::UpdatePref(const double& value) {
+  prefs()->SetValue(pref_name(), new base::FundamentalValue(value));
+}
 template <>
-bool StoreMember<double>::UpdateValueInternal(const Value& value) const;
+inline bool StoreMember<double>::UpdateValueInternal(const base::Value& value) const {
+  return value.GetAsDouble(&value_);
+}
 
 template <>
-void StoreMember<std::string>::UpdatePref(const std::string& value);
+inline void StoreMember<std::string>::UpdatePref(const std::string& value) {
+  prefs()->SetValue(pref_name(), new base::StringValue(value));
+}
 template <>
-bool StoreMember<std::string>::UpdateValueInternal(const Value& value) const;
+inline bool StoreMember<std::string>::UpdateValueInternal(
+    const base::Value& value) const {
+  return value.GetAsString(&value_);
+}
 
 template <>
-void StoreMember<base::FilePath>::UpdatePref(const base::FilePath& value);
+inline void StoreMember<base::FilePath>::UpdatePref(const base::FilePath& value) {
+  prefs()->SetValue(pref_name(), base::CreateFilePathValue(value));
+}
 template <>
-bool StoreMember<base::FilePath>::UpdateValueInternal(const Value& value) const;
+inline bool StoreMember<base::FilePath>::UpdateValueInternal(
+    const base::Value& value) const {
+  return base::GetValueAsFilePath(value, &value_);
+}
 
 typedef StoreMember<bool> BooleanStoreMember;
 typedef StoreMember<int> IntegerStoreMember;
@@ -189,4 +216,4 @@ typedef StoreMember<double> DoubleStoreMember;
 typedef StoreMember<std::string> StringStoreMember;
 typedef StoreMember<base::FilePath> FilePathStoreMember;
 
-} // namespace canscope
+} // namespace device

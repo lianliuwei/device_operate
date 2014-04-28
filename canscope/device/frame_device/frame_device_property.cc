@@ -7,19 +7,6 @@
 
 namespace canscope {
 
-template <>
-void StoreMember<uint16>::UpdatePref(const uint16& value) {
-  prefs()->SetValue(pref_name(), new base::FundamentalValue(value));
-}
-template <>
-bool StoreMember<uint16>::UpdateValueInternal(const base::Value& value) const {
-  int temp;
-  bool ret = value.GetAsInteger(&temp);
-  value_ = static_cast<uint16>(temp);
-  return ret;
-}
-
-
 void FrameDeviceProperty::Init(base::Value* dict) {
   DCHECK(dict->IsType(Value::TYPE_DICTIONARY));
   DictionaryValue* dict_value;

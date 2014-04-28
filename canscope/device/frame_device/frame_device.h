@@ -40,7 +40,7 @@ private:
   int GetFrameStorageSize();
 
   // implement DeviceBase
-  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { return &prefs_; }
+  virtual ::device::ValueMapDevicePropertyStore* DevicePrefs() { return &prefs_; }
 
   device::Error WriteDevice(::device::RegisterMemory& memory);
   device::Error ReadDevice(::device::RegisterMemory& memory);

@@ -18,13 +18,15 @@ public:
   uint8* Alloc();
   void Free(uint8* frame);
 
-  int frame_size();
-  int pool_size();
+  int frame_size() const { return frame_size_; }
+  int pool_size() const { return pool_size_; }
   
   // Left Frame
   int Left();
 
   // from zero free to at least one free
+  // after reset the callback the have_free may be call. 
+  // duty to need callback in no lock state
   void set_have_free_callback(base::Closure have_free);
 
 private:

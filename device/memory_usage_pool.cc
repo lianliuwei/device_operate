@@ -20,6 +20,7 @@ uint8* MemoryUsagePool::Alloc(int size) {
 
 void MemoryUsagePool::Free(uint8* free) {
   bool notify = false;
+  HaveFreeCallbackType have_free;
   int amount;
   {
   AutoLock lock(lock_);
@@ -35,10 +36,11 @@ void MemoryUsagePool::Free(uint8* free) {
   if (need_call_ && need_amount_ <= amount) {
     notify = true;
     need_call_ = false;
+    have_free = have_free_;
   }
   }
-  if (notify && !have_free_.is_null()) {
-    have_free_.Run(amount);
+  if (notify && !have_free.is_null()) {
+    have_free.Run(amount);
   }
 }
 

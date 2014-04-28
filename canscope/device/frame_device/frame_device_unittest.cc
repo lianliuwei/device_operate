@@ -10,6 +10,7 @@
 #include "canscope/device/frame_device/frame_data_collecter.h"
 #include "canscope/device/sync_call.h"
 #include "canscope/device/register/soft_diff_register.h"
+#include "canscope/device/register/sja1000_register.h"
 #include "canscope/device/config_manager.h"
 #include "canscope/test/test_process.h"
 
@@ -122,6 +123,15 @@ Error WriteDeviceRange(DeviceDelegate* device_delegate,
       memory.start_addr() + start_offset, memory.PtrByRelative(start_offset), size);
 }
 
+Error ReadDeviceRange(DeviceDelegate* device_delegate, 
+                       ::device::RegisterMemory& memory, 
+                       int start_offset, 
+                       int size) {
+  DCHECK(start_offset + size <= memory.size());
+  return device_delegate->ReadDevice(
+      memory.start_addr() + start_offset, memory.PtrByRelative(start_offset), size);
+}
+
 TEST_F(FrameDeviceTest, Send) {
   FpgaFrameData data;
   for (int i = 0; i < arraysize(data.data); ++i) {
@@ -179,6 +189,19 @@ TEST(FrameDeviceTest2, TestRegister) {
 
   EXPECT_TRUE_OR_RET(open_device.IsOpen());
   
+  SJA1000Register sja1000;
+  sja1000.slient.set_value(true);
+  sja1000.sja_btr.set_value(0x1400);
+  err = WriteDeviceRange(device_delegate.get(), sja1000.memory, 0, 4);
+  EXPECT_OK_OR_RET(err);
+  while (true) {
+    err = ReadDeviceRange(device_delegate.get(), sja1000.memory, 0x14, 4);
+    EXPECT_OK_OR_RET(err);
+    if (sja1000.cfg.value()) {
+      break;
+    }
+  }
+
   FrameStorageRegister frame_storage;
   frame_storage.frame_depth.set_value(48 * 1000);
   err = WriteDevice(device_delegate.get(), frame_storage.memory);  
@@ -189,12 +212,6 @@ TEST(FrameDeviceTest2, TestRegister) {
   wave_storage.wave_start.set_value(200000);
   wave_storage.wave_end.set_value(200000000);
   err = WriteDevice(device_delegate.get(), wave_storage.memory);
-  EXPECT_OK_OR_RET(err);
-
-  SJA1000Register sja1000;
-  sja1000.slient.set_value(false);
-  sja1000.sja_btr.set_value(0x1440);
-  err = WriteDevice(device_delegate.get(), sja1000.memory);
   EXPECT_OK_OR_RET(err);
 
   SleepMs(100);
@@ -219,6 +236,10 @@ TEST(FrameDeviceTest2, TestRegister) {
   send_register.set_frame_data(data);
   err = WriteDeviceRange(device_delegate.get(),
       send_register.memory, 0, 0x1C);
+  send_register.start_send.set_value(true);
+  err = WriteDeviceRange(device_delegate.get(),
+    send_register.memory, send_register.StateOffset(), send_register.StateSize());
+  EXPECT_OK_OR_RET(err);
 
   SleepMs(100);
   err = ReadDevice(device_delegate.get(), frame_storage.memory);

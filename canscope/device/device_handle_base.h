@@ -19,9 +19,10 @@ public:
   virtual ~DeviceHandleBase() {}
 
   // PropertyDelegate
-  virtual canscope::DevicePropertyStore* GetDevicePropertyStore();
+  virtual ::device::DevicePropertyStore* GetDevicePropertyStore();
   virtual bool IsBatchMode() { return batch_mode_; }
   virtual void PostDeviceTask(const base::Closure& task);
+  virtual bool IsDeviceThread();
   virtual void FetchNewPref();
   virtual void SetPropertyFinish(const std::string& reason);
 
@@ -37,7 +38,7 @@ public:
 protected:
   friend class ScopedDevicePropertyCommit;
 
-  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() = 0;
+  virtual ::device::ValueMapDevicePropertyStore* DevicePrefs() = 0;
 
 private:
   virtual void Observe(int type, 

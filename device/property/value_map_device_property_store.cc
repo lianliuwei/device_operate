@@ -1,4 +1,4 @@
-#include "canscope/device/property/value_map_device_property_store.h"
+#include "device/property/value_map_device_property_store.h"
 
 #include "base/memory/scoped_ptr.h"
 #include "base/stringprintf.h"
@@ -88,7 +88,7 @@ namespace base {
 namespace debug {
 template<> 
 template<>
-void TraceScopedTrackableObject<canscope::ValueMapDevicePropertyStore*>::
+void TraceScopedTrackableObject<device::ValueMapDevicePropertyStore*>::
     snapshot<scoped_ptr<PropertyFormat>* >(scoped_ptr<PropertyFormat>* snapshot) {
   bool ret = false;
   TRACE_EVENT_CATEGORY_GROUP_ENABLED("PropertyStore", &ret);
@@ -104,7 +104,7 @@ void TraceScopedTrackableObject<canscope::ValueMapDevicePropertyStore*>::
 }
 }
 
-namespace canscope {
+namespace device {
 
 ValueMapDevicePropertyStore::ValueMapDevicePropertyStore()
     : trace_object_("PropertyStore", "ValueMapDevicePropertyStore", this) {
@@ -238,4 +238,4 @@ void ValueMapDevicePropertyStore::DetachFromThread() {
   notifier_.DetachFromThread();
 }
 
-} // namespace canscope
+} // namespace device

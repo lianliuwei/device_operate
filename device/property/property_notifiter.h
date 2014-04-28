@@ -9,11 +9,11 @@
 #include "base/observer_list.h"
 #include "base/threading/thread_checker.h"
 
-#include "canscope/device/property/device_property_store.h"
+#include "device/property/device_property_store.h"
 
 class PropertyNotifiter {
  public:
-  typedef canscope::DevicePropertyStore::Observer PrefObserver;
+  typedef device::DevicePropertyStore::Observer PrefObserver;
 
   PropertyNotifiter();
   virtual ~PropertyNotifiter();

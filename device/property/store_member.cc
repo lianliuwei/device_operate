@@ -1,11 +1,10 @@
-#include "canscope/device/property/store_member.h"
+#include "device/property/store_member.h"
 
 #include "base/bind_helpers.h"
 #include "base/callback.h"
 #include "base/location.h"
-#include "base/value_conversions.h"
 
-namespace canscope {
+namespace device {
 namespace subtle {
 
 StoreMemberBase::StoreMemberBase()
@@ -89,51 +88,4 @@ void StoreMemberBase::DetachFromThread() {
 
 } // namespace subtle
 
-template <>
-void StoreMember<bool>::UpdatePref(const bool& value) {
-  prefs()->SetValue(pref_name(), new base::FundamentalValue(value));
-}
-template <>
-bool StoreMember<bool>::UpdateValueInternal(const base::Value& value) const {
-  return value.GetAsBoolean(&value_);
-}
-
-template <>
-void StoreMember<int>::UpdatePref(const int& value) {
-  prefs()->SetValue(pref_name(), new base::FundamentalValue(value));
-}
-template <>
-bool StoreMember<int>::UpdateValueInternal(const base::Value& value) const {
-  return value.GetAsInteger(&value_);
-}
-
-template <>
-void StoreMember<double>::UpdatePref(const double& value) {
-  prefs()->SetValue(pref_name(), new base::FundamentalValue(value));
-}
-template <>
-bool StoreMember<double>::UpdateValueInternal(const base::Value& value) const {
-  return value.GetAsDouble(&value_);
-}
-
-template <>
-void StoreMember<std::string>::UpdatePref(const std::string& value) {
-  prefs()->SetValue(pref_name(), new base::StringValue(value));
-}
-template <>
-bool StoreMember<std::string>::UpdateValueInternal(
-    const base::Value& value) const {
-  return value.GetAsString(&value_);
-}
-
-template <>
-void StoreMember<base::FilePath>::UpdatePref(const base::FilePath& value) {
-  prefs()->SetValue(pref_name(), base::CreateFilePathValue(value));
-}
-template <>
-bool StoreMember<base::FilePath>::UpdateValueInternal(
-    const base::Value& value) const {
-  return base::GetValueAsFilePath(value, &value_);
-}
-
-} // namespace canscope
+} // namespace device

@@ -34,6 +34,15 @@
         'sequenced_bulk_queue.cc',
         'memory_usage_pool.h',
         'memory_usage_pool.cc',
+        'property/property_notifiter.h',
+        'property/property_notifiter.cc',
+        'property/store_member.h',
+        'property/store_member.cc',
+        'property/enum_store_member.h',
+        'property/device_property_store.h',
+        'property/value_map_device_property_store.h',
+        'property/value_map_device_property_store.cc',
+  
       ], 
     },
     {
@@ -49,6 +58,10 @@
         'memory_usage_pool_unittest.cc',
         'memory_frame_pool_unittest.cc',
         'sequenced_bulk_queue_unittest.cc',
+        'property/device_property_observer_mock.h',
+        'property/enum_store_member_unittest.cc',
+        'property/store_member_unittest.cc',
+        'property/value_map_device_property_store_unittest.cc',
       ],
       
       'include_dirs': [

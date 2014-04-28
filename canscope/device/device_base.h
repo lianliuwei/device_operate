@@ -14,7 +14,7 @@ namespace base {
 class Value;
 }
 
-namespace canscope {
+namespace device {
 class ValueMapDevicePropertyStore;
 }
 
@@ -56,7 +56,7 @@ protected:
 
   virtual void LockStatusChanged();
 
-  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() = 0;
+  virtual ::device::ValueMapDevicePropertyStore* DevicePrefs() = 0;
 
 private:
   int IncSeq();

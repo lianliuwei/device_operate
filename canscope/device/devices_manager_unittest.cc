@@ -6,13 +6,13 @@
 #include "testing/gtest/include/gtest/gtest.h"
 #include "testing/gmock/include/gmock/gmock.h"
 
+#include "device/property/device_property_observer_mock.h"
+
 #include "canscope/test/test_process.h"
 #include "canscope/device/canscope_device.h"
 #include "canscope/device/canscope_device_handle.h"
 #include "canscope/canscope_notification_types.h"
 #include "canscope/device/canscope_device_property_constants.h"
-#include "canscope/device/device_thread_mock.h"
-#include "canscope/device/property/device_property_observer_mock.h"
 #include "canscope/device/scoped_device_property_commit.h"
 #include "canscope/device/devices_manager.h"
 #include "canscope/device/canscope_device_constants.h"
@@ -63,10 +63,6 @@ static const char kCANScopeConfig [] =  {" \
 } \
 "};
 
-bool ActionIsDeviceThread() {
-  return CommonThread::CurrentlyOn(CommonThread::DEVICE);
-}
-
 }
 
 class DevicesManagerTest : public testing::Test
@@ -77,8 +73,6 @@ public:
   virtual ~DevicesManagerTest() {}
 
   static void SetUpTestCase() {
-    ON_CALL(g_DeviceThreadMock.Get(),
-        IsDeviceThread()).WillByDefault(Invoke(&ActionIsDeviceThread));
     new TestProcess();
     GetTestProcess()->Init();
   }

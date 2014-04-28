@@ -30,7 +30,7 @@ public:
 
     void AddReader(ReaderBase* reader) { wait_list_.insert(reader); }
     void RemoveReader(ReaderBase* reader) { wait_list_.erase(reader); }
-
+    bool HasReader(ReaderBase* reader) { return wait_list_.find(reader) != wait_list_.end(); }
     void Wait();
 
     // return true wait success, return false timeout
@@ -206,7 +206,9 @@ public:
   // sync reader method use in another thread.
   class Reader : public ReaderBase {
   public:
-    Reader(SequencedBulkQueue* seq) : ReaderBase(seq) {}
+    Reader(SequencedBulkQueue* seq) 
+        : ReaderBase(seq)
+        , temp_count_(0xdeadbeef) {}
     ~Reader() {}
 
     // return true if bulk get, bulk_count >= last_count

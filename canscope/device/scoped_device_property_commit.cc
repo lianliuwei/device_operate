@@ -1,8 +1,9 @@
 #include "canscope/device/scoped_device_property_commit.h"
 
+#include "device/property/value_map_device_property_store.h"
+
 #include "canscope/device/device_base.h"
 #include "canscope/device/device_handle_base.h"
-#include "canscope/device/property/value_map_device_property_store.h"
 
 ScopedDevicePropertyCommit::ScopedDevicePropertyCommit(
     DeviceHandleBase* handle, 

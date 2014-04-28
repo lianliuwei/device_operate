@@ -41,6 +41,17 @@ bool ThreadedLoopRun::IsRunning() const {
   return running_;
 }
 
+bool ThreadedLoopRun::StartOrStarting() const {
+  base::AutoLock lock(lock_);
+  return running_ || start_ ;
+}
+
+
+bool ThreadedLoopRun::StopOrStoping() const {
+  base::AutoLock lock(lock_);
+  return !running_ || stop_;
+}
+
 bool ThreadedLoopRun::NeedStop() const {
   base::AutoLock lock(lock_);
   return stop_;
@@ -89,7 +100,7 @@ void ThreadedLoopRun::LoopRun() {
     bool state_change = false;
     {
       base::AutoLock lock(lock_);
-      if (stop_) { 
+      if (stop_) {
         stop = true;
         state_change = true;
         running_ = false;
@@ -110,7 +121,7 @@ void ThreadedLoopRun::LoopRun() {
       return;
     }
   }
-  run_thread_->PostDelayedTask(FROM_HERE, 
+  run_thread_->PostDelayedTask(FROM_HERE,
       Bind(&ThreadedLoopRun::LoopRun, this), next_loop_delay_);
 }
 

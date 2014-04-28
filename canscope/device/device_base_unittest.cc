@@ -18,7 +18,7 @@ public:
   MOCK_METHOD0(LockStatusChanged, void());
 
 private:
-  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() {
+  virtual ::device::ValueMapDevicePropertyStore* DevicePrefs() {
     NOTIMPLEMENTED();
     return NULL;
   }

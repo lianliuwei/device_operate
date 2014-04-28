@@ -1,4 +1,4 @@
-#include "canscope/device/property/property_notifiter.h"
+#include "device/property/property_notifiter.h"
 
 #include "base/logging.h"
 #include "base/stl_util.h"

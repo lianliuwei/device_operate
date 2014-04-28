@@ -4,10 +4,10 @@
 
 #include "testing/gmock/include/gmock/gmock.h"
 
-#include "canscope/device/property/device_property_store.h"
+#include "device/property/device_property_store.h"
 
 class DevicePropertyObserverMock 
-    : public canscope::DevicePropertyStore::Observer {
+    : public device::DevicePropertyStore::Observer {
 public:
   DevicePropertyObserverMock() {}
   ~DevicePropertyObserverMock() {}

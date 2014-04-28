@@ -40,7 +40,7 @@ public:
 
 private:
   // implement DeviceHandleBase
-  virtual canscope::ValueMapDevicePropertyStore* DevicePrefs() { 
+  virtual ::device::ValueMapDevicePropertyStore* DevicePrefs() { 
     return &(properties_.prefs_); 
   }
 
