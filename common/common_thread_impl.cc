@@ -34,8 +34,7 @@ static const char* g_browser_thread_names[CommonThread::ID_COUNT] = {
 };
 
 struct BrowserThreadGlobals {
-  BrowserThreadGlobals()
-      : blocking_pool(new base::SequencedWorkerPool(3, "CommonBlocking")) {
+  BrowserThreadGlobals() {
     memset(threads, 0, CommonThread::ID_COUNT * sizeof(threads[0]));
     memset(thread_delegates, 0,
            CommonThread::ID_COUNT * sizeof(thread_delegates[0]));
@@ -55,7 +54,7 @@ struct BrowserThreadGlobals {
   // by this array, rather by whoever calls BrowserThread::SetDelegate.
   CommonThreadDelegate* thread_delegates[CommonThread::ID_COUNT];
 
-  const scoped_refptr<base::SequencedWorkerPool> blocking_pool;
+  scoped_refptr<base::SequencedWorkerPool> blocking_pool;
 };
 
 base::LazyInstance<BrowserThreadGlobals>::Leaky
@@ -75,6 +74,12 @@ CommonThreadImpl::CommonThreadImpl(ID identifier,
   set_message_loop(message_loop);
   Initialize();
 }
+// static
+void CommonThreadImpl::SetUpThreadPool() {
+  BrowserThreadGlobals& globals = g_globals.Get();
+  DCHECK(!globals.blocking_pool.get()) << "already Inited";
+  globals.blocking_pool = new base::SequencedWorkerPool(3, "CommonBlocking");
+}
 
 // static
 void CommonThreadImpl::ShutdownThreadPool() {
@@ -85,6 +90,7 @@ void CommonThreadImpl::ShutdownThreadPool() {
   const int kMaxNewShutdownBlockingTasks = 1000;
   BrowserThreadGlobals& globals = g_globals.Get();
   globals.blocking_pool->Shutdown(kMaxNewShutdownBlockingTasks);
+  globals.blocking_pool = NULL;
 }
 
 // static
@@ -105,7 +111,7 @@ void CommonThreadImpl::Init() {
   CommonThreadDelegate* delegate =
       reinterpret_cast<CommonThreadDelegate*>(stored_pointer);
   if (delegate)
-    delegate->Init();
+    delegate->Init(identifier_);
 }
 
 // We disable optimizations for this block of functions so the compiler doesn't
@@ -166,6 +172,12 @@ NOINLINE void CommonThreadImpl::IOThreadRun(base::MessageLoop* message_loop) {
   CHECK_GT(line_number, 0);
 }
 
+NOINLINE void CommonThreadImpl::DeviceThreadRun(base::MessageLoop* message_loop) {
+  volatile int line_number = __LINE__;
+  Thread::Run(message_loop);
+  CHECK_GT(line_number, 0);
+}
+
 MSVC_POP_WARNING()
 MSVC_ENABLE_OPTIMIZE();
 
@@ -183,6 +195,8 @@ void CommonThreadImpl::Run(base::MessageLoop* message_loop) {
 //       return WebKitThreadRun(message_loop);
      case CommonThread::FILE:
        return FileThreadRun(message_loop);
+     case CommonThread::DEVICE:
+       return DeviceThreadRun(message_loop);
 //     case CommonThread::FILE_USER_BLOCKING:
 //       return FileUserBlockingThreadRun(message_loop);
 //     case CommonThread::PROCESS_LAUNCHER:
@@ -209,7 +223,7 @@ void CommonThreadImpl::CleanUp() {
       reinterpret_cast<CommonThreadDelegate*>(stored_pointer);
 
   if (delegate)
-    delegate->CleanUp();
+    delegate->CleanUp(identifier_);
 }
 
 void CommonThreadImpl::Initialize() {

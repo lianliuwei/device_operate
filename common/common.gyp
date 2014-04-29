@@ -4,7 +4,7 @@
   },
   'targets': [
     {
-      'target_name': 'common_thread',
+      'target_name': 'common',
       'type': 'static_library',
       'dependencies': [
         '../third_party/chromium/base/base_bin.gyp:base_bin',
@@ -24,15 +24,6 @@
         'common_thread_impl.cc',
         'common_thread_manager.h',
         'common_thread_manager.cc',
-        'canscope_thread.h',
-        'canscope_thread.cc',
-      ],
-    },
-    
-    {
-      'target_name': 'notification',
-      'type': 'static_library',
-      'sources': [
         'notification/notification_details.h',
         'notification/notification_observer.h',
         'notification/notification_registrar.cc',
@@ -42,17 +33,7 @@
         'notification/notification_types.h',
         'notification/notification_service_impl.h',
         'notification/notification_service_impl.cc',
-       ],
-      'include_dirs': [
-          '..',
       ],
-      'defines': [
-         'COMMON_IMPLEMENTATION',
-      ],
-      'dependencies': [
-        '../third_party/chromium/base/base_bin.gyp:base_bin',
-      ],
-    },
-    
+    },   
   ],
 }

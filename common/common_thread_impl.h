@@ -23,6 +23,7 @@ class COMMON_EXPORT CommonThreadImpl : public CommonThread,
                    base::MessageLoop* message_loop);
   virtual ~CommonThreadImpl();
 
+  static void SetUpThreadPool();
   static void ShutdownThreadPool();
 
   virtual void Init() OVERRIDE;
@@ -45,6 +46,7 @@ class COMMON_EXPORT CommonThreadImpl : public CommonThread,
   void ProcessLauncherThreadRun(base::MessageLoop* message_loop);
   void CacheThreadRun(base::MessageLoop* message_loop);
   void IOThreadRun(base::MessageLoop* message_loop);
+  void DeviceThreadRun(base::MessageLoop* message_loop);
 
   static bool PostTaskHelper(
       CommonThread::ID identifier,

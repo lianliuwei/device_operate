@@ -25,6 +25,7 @@ void CommonThreadManager::Init() {
   TRACE_EVENT0("startup", "CommonThreadManager::Init")
   InitializeMainThread();
   CreateThreads();
+  CommonThreadImpl::SetUpThreadPool();
 }
 
 void CommonThreadManager::InitializeMainThread() {
@@ -81,6 +82,10 @@ void CommonThreadManager::CreateThreads() {
         options = &io_message_loop_options;
 #endif
         break;
+      case CommonThread::DEVICE:
+        options = &io_message_loop_options;
+        break;
+
 //       case CommonThread::CACHE:
 //         options = &io_message_loop_options;
 //         break;

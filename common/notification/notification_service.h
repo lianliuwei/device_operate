@@ -5,6 +5,7 @@
 // This file describes a central switchboard for notifications that might
 // happen in various parts of the application, and allows users to register
 // observers for various classes of events that they're interested in.
+
 #pragma once
 
 #include "common/notification/notification_details.h"
@@ -59,8 +60,8 @@ class COMMON_EXPORT NotificationService {
  
 // notification all thread the have NotificationService
 // implement in CommonThreadManager
-void NotifyAll(int type,
-               const NotificationSource& source,
-               const NotificationDetails& details);
+COMMON_EXPORT void NotifyAll(int type,
+                  const NotificationSource& source,
+                  const NotificationDetails& details);
 
 }  // namespace common

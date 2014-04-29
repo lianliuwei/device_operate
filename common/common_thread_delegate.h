@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "common/common_thread.h"
+
 namespace common {
 
 // A class with this type may be registered via
@@ -19,10 +21,10 @@ class CommonThreadDelegate {
   virtual ~CommonThreadDelegate() {}
 
   // Called just prior to starting the message loop.
-  virtual void Init() = 0;
+  virtual void Init(CommonThread::ID id) = 0;
 
   // Called just after the message loop ends.
-  virtual void CleanUp() = 0;
+  virtual void CleanUp(CommonThread::ID id) = 0;
 };
 
 }  // namespace common

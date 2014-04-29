@@ -3,7 +3,7 @@
 #include "base/basictypes.h"
 #include "base/memory/scoped_ptr.h"
 #include "common/common_thread.h"
-#include "common/canscope_thread.h"
+#include "common/common_thread_impl.h"
 
 namespace base {
 class MessageLoop;
@@ -12,10 +12,10 @@ class MessageLoop;
 namespace common {
 class CommonThreadImpl;
 
-class CommonThreadManager {
+class COMMON_EXPORT CommonThreadManager {
  public:
-  typedef CANScopeThread MainThreadType;
-  typedef CANScopeThread ThreadType;
+  typedef CommonThreadImpl MainThreadType;
+  typedef CommonThreadImpl ThreadType;
 
   CommonThreadManager();
   virtual ~CommonThreadManager();
