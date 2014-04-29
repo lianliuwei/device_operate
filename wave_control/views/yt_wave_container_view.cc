@@ -167,4 +167,9 @@ YTWaveContainerView::~YTWaveContainerView() {
   wave_bar_->RemoveObserver(yt_view_->GetWaveBarDelegate());
   horiz_offset_bar_->RemoveObserver(yt_view_->GetHorizOffsetBarDelegate());
   trigger_bar_->RemoveObserver(yt_view_->GetTriggerBarDelegate());
+
+  // set model to NULL first or views delete order is no safe
+  wave_bar_->SetModel(NULL);
+  horiz_offset_bar_->SetModel(NULL);
+  trigger_bar_->SetModel(NULL);
 }
