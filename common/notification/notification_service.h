@@ -5,6 +5,7 @@
 // This file describes a central switchboard for notifications that might
 // happen in various parts of the application, and allows users to register
 // observers for various classes of events that they're interested in.
+#pragma once
 
 #include "common/notification/notification_details.h"
 #include "common/notification/notification_source.h"
