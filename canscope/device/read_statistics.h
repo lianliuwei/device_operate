@@ -1,11 +1,9 @@
 #pragma once
 
-#include "canrecord/canrecord_export.h"
-
 #include "base/synchronization/lock.h"
 
 // thread safe read statistics
-class CANRECORD_DEVICE_EXPORT ReadStatistics {
+class ReadStatistics {
 public:
   ReadStatistics();
   ~ReadStatistics() {}

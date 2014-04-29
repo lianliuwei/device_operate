@@ -1,4 +1,4 @@
-#include "canrecord/device/read_statistics.h"
+#include "canscope/device/read_statistics.h"
 
 using namespace base;
 

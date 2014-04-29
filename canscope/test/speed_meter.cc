@@ -5,7 +5,6 @@
 using namespace std;
 using namespace base;
 
-namespace {
 string FormatByte(int64 byte_size) {
   int64 temp = byte_size;
   int i = 0;
@@ -18,9 +17,6 @@ string FormatByte(int64 byte_size) {
     i = arraysize(ByteSuffix);
   } 
   return StringPrintf("%.2lf %s", byte_size / pow(1024.0, i), ByteSuffix[i]);
- 
-}
-
 }
 
 void SpeedMeter::Start() {
@@ -57,6 +53,11 @@ bool SpeedMeter::DeltaPass() {
 
 SpeedMeter::SpeedMeter(base::TimeDelta delta)
     : delta_(delta) {
+  Start();
+}
+
+SpeedMeter::SpeedMeter(int64 ms)
+    : delta_(TimeDelta::FromMilliseconds(ms)){
   Start();
 }
 

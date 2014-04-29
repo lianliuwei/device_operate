@@ -3,19 +3,28 @@
 #include <string>
 
 #include "base/time.h"
+#include "base/basictypes.h"
+#include "base/values.h"
 
-class SpeedMeter {
+void SleepMS(int64 ms);
+void SleepDelta(base::TimeDelta delta);
+
+// parse config, fault will EXPECT_TRUE
+base::DictionaryValue* GetConfig(const char* config);
+
+class SpeedSense {
 public:
-  explicit SpeedMeter(base::TimeDelta delta);
-  explicit SpeedMeter(int64 ms);
-  ~SpeedMeter() {}
+  explicit SpeedSense(base::TimeDelta delta);
+  explicit SpeedSense(int64 ms);
+  ~SpeedSense() {}
 
   void Start();
 
-  // delta pass, need set data 
   bool DeltaPass();
 
-  void set_size(int64 size);
+  void Update(int64 size, int64 count);
+
+  base::TimeDelta NextDelta();
 
   std::string FormatSpeed();
   std::string FormatSpeedAndTotal();
@@ -38,5 +47,3 @@ private:
   int64 total_size_;
   int64 total_count_;
 };
-  
-std::string FormatByte(int64 byte_size);
