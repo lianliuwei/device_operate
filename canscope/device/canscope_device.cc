@@ -8,32 +8,12 @@
 
 #include "canscope/canscope_notification_types.h"
 #include "canscope/device/canscope_device_property_constants.h"
+#include "canscope/device/config_util.h"
 
 using namespace common;
 using namespace std;
 using namespace base;
 
-namespace {
-
-base::DictionaryValue* GetSubDict(base::Value* value, string key) {
-  if (!value) {
-    return NULL;
-  }
-  if (!value->IsType(Value::TYPE_DICTIONARY)) {
-    return NULL;
-  }
-  DictionaryValue* dict_value;
-  value->GetAsDictionary(&dict_value);
-
-  DictionaryValue* sub_dict;
-  bool ret = dict_value->GetDictionary(key, &sub_dict);
-  if (!ret) {
-    return NULL;
-  }
-  return sub_dict;
-}
-
-}
 
 namespace canscope {
 

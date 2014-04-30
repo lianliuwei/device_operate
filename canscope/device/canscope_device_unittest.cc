@@ -16,7 +16,7 @@
 #include "canscope/canscope_notification_types.h"
 #include "canscope/device/canscope_device_property_constants.h"
 #include "canscope/device/scoped_device_property_commit.h"
-#include "canscope/device/test/test_util.h"
+#include "canscope/device/config_util.h"
 #include "canscope/device/sync_call.h"
 
 using namespace base;

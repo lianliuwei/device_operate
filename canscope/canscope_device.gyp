@@ -38,6 +38,8 @@
         'device/scoped_device_lock.cc',
         'device/config_manager.h',
         'device/config_manager.cc',
+        'device/config_util.h',
+        'device/config_util.cc',
         'device/scoped_device_property_commit.h',
         'device/scoped_device_property_commit.cc',
         'device/data_collecter.h',
@@ -178,8 +180,6 @@
          
         'device/test/scoped_open_device.h',
         'device/test/scoped_open_device.cc',
-        'device/test/test_util.h',
-        'device/test/test_util.cc',
         'test/test_process.h',
         'test/test_process.cc',
       ],

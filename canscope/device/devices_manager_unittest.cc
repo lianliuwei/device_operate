@@ -17,7 +17,7 @@
 #include "canscope/device/devices_manager.h"
 #include "canscope/device/canscope_device_constants.h"
 #include "canscope/test/speed_meter.h"
-#include "canscope/device/test/test_util.h"
+#include "canscope/device/config_util.h"
 #include "canscope/device/sync_call.h"
 
 using namespace std;

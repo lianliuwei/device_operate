@@ -6,7 +6,7 @@
 
 #include "base/time.h"
 
-#include "canscope/device/test/test_util.h"
+#include "canscope/device/config_util.h"
 
 using namespace base;
 using namespace device;
@@ -14,29 +14,6 @@ using namespace canscope::device;
 using namespace canscope;
 
 namespace {
-static const char kOscConfig [] =  {" \
-{ \
-  \"CANH.Range\" : 3, \
-  \"CANH.Offset\" : 0.0, \
-  \"CANH.Coupling\" : 1, \
-  \"CANL.Range\" : 3, \
-  \"CANL.Offset\" : 0.0, \
-  \"CANL.Coupling\" : 1, \
-  \"CANDIFF.Range\" : 3, \
-  \"CANDIFF.Offset\" : 0.0, \
-  \"DiffCtrl\" : 0, \
-  \"Time.Base\" : 4, \
-  \"Time.Offset\" : 0.0, \
-  \"Trigger.AutoTime\" : 100.0, \
-  \"Trigger.Source\" : 2, \
-  \"Trigger.Type\" : 0, \
-  \"Trigger.Mode\" : 0, \
-  \"Trigger.Sens\" : 0, \
-  \"Trigger.Compare\" : 0, \
-  \"Trigger.Volt\" : 0.0, \
-  \"TimeParam\" : 1.0 \
-} \
-"};
 
 static const double kVRange = 3; // unit V
 static const double kHMoveUnit = 2000; // ns  each s wave move
@@ -194,7 +171,7 @@ OscDeviceSimulate::OscDeviceSimulate(CANScopeDeviceRegisterGroup* group,
     , device_type_(device_type) {
   group->SetCallback(group->trigger_state.memory, 
       Bind(&OscDeviceSimulate::OnTriggerState, Unretained(this)));
-  Init(GetConfig(kOscConfig));
+  Init(GetDefaultOscDeviceConfig());
 }
 
 } // namespace canscope

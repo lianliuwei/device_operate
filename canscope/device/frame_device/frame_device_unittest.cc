@@ -4,7 +4,7 @@
 
 #include "canscope/device/device_delegate.h"
 #include "canscope/device/test/scoped_open_device.h"
-#include "canscope/device/test/test_util.h"
+#include "canscope/device/config_util.h"
 #include "canscope/device/frame_device/frame_device.h"
 #include "canscope/device/frame_device/frame_device_handle.h"
 #include "canscope/device/frame_device/frame_data_collecter.h"
