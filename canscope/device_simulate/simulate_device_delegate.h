@@ -4,6 +4,7 @@
 
 #include "canscope/device/device_delegate.h"
 #include "canscope/device_simulate/canscope_device_register_group.h"
+#include "canscope/device_simulate/osc_device_simulate.h"
 
 namespace canscope {
 
@@ -26,11 +27,11 @@ public:
 
 protected:
   CANScopeDeviceRegisterGroup group_;
+  OscDeviceSimulate osc_device_;
 
   void CheckOpen();
   void CheckConfig();
   void CheckThread();
-
 
 private:
   base::ThreadChecker thread_check_;

@@ -16,7 +16,9 @@ namespace canscope {
 SimulateDeviceDelegate::SimulateDeviceDelegate(bool check_thread) 
     : opened_(false)
     , load_fpga_(false)
-    , check_thread_(check_thread) {
+    , check_thread_(check_thread)
+    , group_()
+    , osc_device_(&group_, DT_CS1203) {
   // pro device
   group_.device_info.fpage_version.set_value(0xFFFFFFFF);
   group_.device_info.device_type.set_value(0x1203);
@@ -80,7 +82,7 @@ Error SimulateDeviceDelegate::ReadDevice(uint32 addr, uint8* buffer, int size) {
 
 device::Error SimulateDeviceDelegate::ReadOscData(uint8* buffer, int size) {
   CheckThread();
-  return ERR_READ_DEVICE;
+  return osc_device_.ReadOscData(buffer, size);
 }
 
 device::Error SimulateDeviceDelegate::ReadFrameData(uint8* buffer, int size) {

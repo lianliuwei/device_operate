@@ -18,6 +18,8 @@
         'simulate_device_delegate.cc',
         'canscope_device_register_group.h',
         'canscope_device_register_group.cc',
+        'osc_device_simulate.h',
+        'osc_device_simulate.cc',
       ], 
     },
   ],
