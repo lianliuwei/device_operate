@@ -62,5 +62,4 @@ Error UsbPortDeviceDelegate::ReadFrameData(uint8* buffer, int size) {
   return ret ? device::OK : ERR_READ_DEVICE;
 }
 
-
 } // namespace canscope

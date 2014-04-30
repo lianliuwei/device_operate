@@ -1,12 +1,17 @@
 #pragma once
 
-#include "canscope/device/device_delegate.h"
+#include "base/threading/thread_checker.h"
 
-#include "canscope/device/usb/usb_port.h"
+#include "canscope/device/device_delegate.h"
+#include "canscope/device_simulate/canscope_device_register_group.h"
 
 namespace canscope {
-class UsbPortDeviceDelegate : public DeviceDelegate {
+
+class SimulateDeviceDelegate : public DeviceDelegate {
 public:
+  SimulateDeviceDelegate(bool check_thread);
+  virtual ~SimulateDeviceDelegate() {}
+
   // implement DeviceDelegate
   virtual device::Error EnumDevices(std::vector<string16>* devices);
   virtual device::Error OpenDevice(string16 device_path);
@@ -17,12 +22,23 @@ public:
   virtual device::Error GetDeviceInfo(DeviceInfo* device_info);
   virtual device::Error ReadOscData(uint8* buffer, int size);
   virtual device::Error ReadFrameData(uint8* buffer, int size);
-  virtual void DetachFromThread() {}
+  virtual void DetachFromThread() { thread_check_.DetachFromThread(); }
 
-  UsbPortDeviceDelegate();
-  virtual ~UsbPortDeviceDelegate();
+protected:
+  CANScopeDeviceRegisterGroup group_;
+
+  void CheckOpen();
+  void CheckConfig();
+  void CheckThread();
+
 
 private:
-  UsbPort usb_port_;
+  base::ThreadChecker thread_check_;
+
+  bool opened_;
+  bool load_fpga_;
+  bool check_thread_;
+  
 };
+
 } // namespace canscope

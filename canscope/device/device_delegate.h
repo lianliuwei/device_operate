@@ -25,6 +25,9 @@ public:
   virtual device::Error ReadFrameData(uint8* buffer, int size) = 0;
   // I2C
 
+  // thread check
+  virtual void DetachFromThread() = 0;
+
   DeviceDelegate() {}
   virtual ~DeviceDelegate() {}
 };
