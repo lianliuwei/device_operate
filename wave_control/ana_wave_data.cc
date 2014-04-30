@@ -27,8 +27,8 @@ PeakValue AnaWaveData::GetRangePeak(int start, int range_size) {
   DCHECK(data_ptr);
   DCHECK(start >=0 && start < data_size - 1);
   DCHECK(range_size > 0 &&  start + range_size - 1 < data_size - 1);
-  double max = data_ptr[0]; 
-  double min = data_ptr[0];
+  double max = data_ptr[start]; 
+  double min = data_ptr[start];
   for (int i = start; i < start + range_size; ++i) {
     if (max < data_ptr[i]) {
       max = data_ptr[i];
@@ -37,7 +37,7 @@ PeakValue AnaWaveData::GetRangePeak(int start, int range_size) {
       min = data_ptr[i];
     }
   }
-  PeakValue peak = { data_ptr[0], data_ptr[start + range_size - 1], max, min };
+  PeakValue peak = { data_ptr[start], data_ptr[start + range_size - 1], max, min };
   return peak;
 }
 

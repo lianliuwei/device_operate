@@ -133,8 +133,8 @@ void AnaWaveDataView::PaintWave(gfx::Canvas* canvas) {
       PeakValue peak = buffer->GetRangePeak(begin_index, end_index - begin_index);
       int begin = TransformY(data_transform_, peak.begin);
       int end = TransformY(data_transform_, peak.end);
-      int max = TransformY(data_transform_, peak.min);
-      int min = TransformY(data_transform_, peak.max);
+      int max = TransformY(data_transform_, peak.max);
+      int min = TransformY(data_transform_, peak.min);
       
       if (draw_line) {
         canvas->DrawLine(Point(i, begin_y), Point(i + 1, begin), line_paint);
