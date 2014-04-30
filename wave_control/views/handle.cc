@@ -50,5 +50,10 @@ void Handle::OnMouseReleased(const ui::MouseEvent& event) {
   bar_->OnHandleReleased(tag());
 }
 
+void Handle::OnMouseCaptureLost() {
+  bar_->OnHandleReleased(tag());
+}
+
+
 
 
