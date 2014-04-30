@@ -56,6 +56,7 @@ namespace canscope {
 uint16 CH_ZERO(VoltRange range, double offset) {
   return static_cast<uint16>((offset * 250.0)/ Volt(range) + 127);
 }
+
 bool Attenuation(VoltRange range) {
   return range >= k8V;
 }
@@ -63,6 +64,7 @@ bool Attenuation(VoltRange range) {
 bool GetDiffCtrl(DiffCtrl diff_ctrl) {
   return diff_ctrl == kAverage;
 }
+
 bool GetCoupling(Coupling coupling) {
   return coupling == kDC;
 }
@@ -174,11 +176,11 @@ void OscDevice::SetTrigger1(DeviceType device_type) {
   uint32 temp;
   uint32 k = DeviceK(device_type);
   temp = static_cast<uint32>(
-      ((time_base_value*5*k + time_offset_value) /samet) * 2);
+      ((base_value*5*k + time_offset_value) /samet) * 2);
   temp &= 0xFFFFFFFC; // div by 4
   trigger1_.trig_pre.set_value(temp);
   temp = std::max(8U, static_cast<uint32>(
-            ((time_base_value*5*k - time_offset_value)/samet) * 2));
+            ((base_value*5*k - time_offset_value)/samet) * 2));
   temp &= 0xFFFFFFFC; // div by 4
   trigger1_.trig_post.set_value(temp);
   trigger1_.auto_time.set_value(static_cast<uint32>(
