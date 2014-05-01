@@ -18,8 +18,13 @@ void SimpleAnaWaveView::OnSimpleAnaWaveChanged(SimpleAnaWave* ana_wave, int chan
   }
 }
 
-void SimpleAnaWaveView::UpdateTransform() {
+
+gfx::Transform SimpleAnaWaveView::CalcTransform() {
   gfx::Transform transform;
+
+  if (size() == gfx::Size(0, 0)) {
+    return transform;
+  }
 
   int y_window_size, x_window_size;
   double y_data_size, x_data_size;
@@ -41,7 +46,15 @@ void SimpleAnaWaveView::UpdateTransform() {
   transform.Scale(x_window_size / x_data_size, y_window_size / y_data_size);
   transform.Translate(-x_offset, -y_offset);
 
-  set_data_transform(transform);
+  return transform;
+}
+
+void SimpleAnaWaveView::UpdateTransform() {
+  set_data_transform(CalcTransform());
+}
+
+gfx::Transform SimpleAnaWaveView::GetDataTransform() {
+  return CalcTransform();
 }
 
 void SimpleAnaWaveView::UpdateData() {

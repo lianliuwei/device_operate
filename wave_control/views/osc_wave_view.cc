@@ -18,8 +18,13 @@ void OscWaveView::OnOscWaveChanged(OscWave* osc_wave, int change_set) {
   }
 }
 
-void OscWaveView::UpdateTransform() {
+
+gfx::Transform OscWaveView::CalcTransform() {
   gfx::Transform transform;
+
+  if (size() == gfx::Size(0, 0)) {
+    return transform;
+  }
 
   int y_window_size, x_window_size;
   double y_data_size, x_data_size;
@@ -44,7 +49,15 @@ void OscWaveView::UpdateTransform() {
   transform.Scale(x_window_size / x_data_size, y_window_size / y_data_size);
   transform.Translate(-x_offset, -y_offset);
 
-  set_data_transform(transform);
+  return transform;
+}
+
+void OscWaveView::UpdateTransform() {
+  set_data_transform(CalcTransform());
+}
+
+gfx::Transform OscWaveView::GetDataTransform() {
+  return CalcTransform();
 }
 
 void OscWaveView::UpdateData() {

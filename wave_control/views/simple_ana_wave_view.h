@@ -19,6 +19,9 @@ public:
   virtual bool OnMouseDragged(const ui::MouseEvent& event) OVERRIDE;
   virtual void OnMouseReleased(const ui::MouseEvent& event) OVERRIDE;
 
+  // see comment in OscWaveView
+  gfx::Transform GetDataTransform();
+
 private:
   // implement SimpleAnaWaveObserver
   virtual void OnSimpleAnaWaveChanged(SimpleAnaWave* ana_wave, int change_set);
@@ -28,6 +31,8 @@ private:
 
   void UpdateTransform();
   void UpdateData();
+
+  gfx::Transform CalcTransform();
 
   double handle_offset_;
 

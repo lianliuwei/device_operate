@@ -598,7 +598,9 @@ void HandleBarDelegate::NotifyHandleMoved(int id) {
 }
 
 YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
-    : container_(container) {
+    : container_(container)
+    , measure_line_view_(NULL)
+    , inited_measure_line_(NULL) {
   set_border(Border::CreateSolidBorder(kBorderThickness, kBorderColor));
   SetLayoutManager(new AllFillLayout());
 
@@ -709,7 +711,7 @@ void YTWaveContainerInnerView::ListItemsChanged(size_t start, size_t count) {
 gfx::Transform YTWaveContainerInnerView::OscWaveTransform(OscWave* osc_wave) {
   int id = container_->WaveAt(osc_wave);
   OscWaveView* wave_view = static_cast<OscWaveView*>(child_at(WaveIDToViewID(id)));
-  return wave_view->data_transform();
+  return wave_view->GetDataTransform();
 }
 
 HandleBarDelegate* YTWaveContainerInnerView::GetWaveBarDelegate() {
@@ -779,7 +781,7 @@ void YTWaveContainerInnerView::SelectWave(Wave* wave) {
 }
 
 gfx::Transform YTWaveContainerInnerView::SimpleAnaWaveTransform(SimpleAnaWave* ana_wave) {
-  return GetSimpleAnaWaveView(ana_wave)->data_transform();
+  return GetSimpleAnaWaveView(ana_wave)->GetDataTransform();
 }
 
 SimpleAnaWaveView* YTWaveContainerInnerView::GetSimpleAnaWaveView(SimpleAnaWave* ana_wave) {
