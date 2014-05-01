@@ -73,7 +73,8 @@ void SingleLineView::OnPosChanged(MeasureLinePartView* part_view, int pos) {
   } else if (state_ == kNoWave) {
     
   } else if (state_ == kHadWave) {
-    pos_ = horiz_ ? TransformReverseX(transform_, pos) 
+    pos_ = horiz_ 
+        ? TransformReverseX(transform_, pos) 
         : TransformReverseY(transform_, pos);
   }
 
@@ -100,14 +101,17 @@ void SingleLineView::LayoutLabel(int pos) {
 
 void SingleLineView::UpdateLabel() {
   if (pos_label_) {
-    double pos_value = TransformReverseX(transform_, line_->line_point());
+    double pos_value = horiz_ 
+        ? TransformReverseX(transform_, line_->line_point()) 
+        : TransformReverseY(transform_, line_->line_point());
     pos_label_->SetText(StringPrintf(L"%.4f", pos_value));
   }
 
   if (value_label_) {
     double value;
     int x_point = line_->line_point();
-    bool ret = container_view()->ValueForPoint(wave_, TransformReverseX(transform_, x_point), &value);
+    bool ret = container_view()->ValueForPoint(wave_, 
+        TransformReverseX(transform_, x_point), &value);
     if (!ret) {
       value_label_->SetVisible(false);
       has_value_ = false;
@@ -143,10 +147,12 @@ void SingleLineView::WaveChanged(Wave* wave, const gfx::Transform& transform) {
     pos_label_->SetBackgroundColor(kWaveViewBackgroundColor);
     pos_label_->SetEnabledColor(kMeasureLineColor);
     AddChildView(pos_label_);
-    value_label_ = new Label();
-    value_label_->SetBackgroundColor(kWaveViewBackgroundColor);
-    value_label_->SetEnabledColor(kMeasureLineColor);
-    AddChildView(value_label_);
+    if (horiz_) {
+      value_label_ = new Label();
+      value_label_->SetBackgroundColor(kWaveViewBackgroundColor);
+      value_label_->SetEnabledColor(kMeasureLineColor);
+      AddChildView(value_label_);
+    }
     state_ = kHadWave;
 
   } else if (state_ == kHadWave) {
@@ -164,7 +170,8 @@ void SingleLineView::WaveChanged(Wave* wave, const gfx::Transform& transform) {
       wave_ = wave;
       transform_ = transform;
       // use current line_pos update pos_ so measure line keep pos in view
-      pos_ = horiz_ ? TransformReverseX(transform, line_->line_point()) 
+      pos_ = horiz_ 
+          ? TransformReverseX(transform, line_->line_point()) 
           : TransformReverseY(transform, line_->line_point());
     }
 

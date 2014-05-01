@@ -189,6 +189,30 @@ void MeasureLineContainerView::ToggleShowHorizSingle() {
   ShowHorizSingle(!IsShowHorizSingle());
 }
 
+
+void MeasureLineContainerView::ShowVerticalSingle(bool show) {
+  if (show == IsShowVerticalSingle()) {
+    return;
+  }
+  if (show) {
+    vertical_single_ = new SingleLineView(false);
+    AddChildView(vertical_single_);
+    InitMeasureLine(vertical_single_);
+  } else {
+    RemoveChildView(vertical_single_);
+    delete vertical_single_;
+    vertical_single_ = NULL;
+  }
+}
+
+bool MeasureLineContainerView::IsShowVerticalSingle() {
+  return vertical_single_ != NULL;
+}
+
+void MeasureLineContainerView::ToggleShowVerticalSingle() {
+  return ShowVerticalSingle(!IsShowVerticalSingle());
+}
+
 void MeasureLineContainerView::InitMeasureLine(MeasureLine* measure_line) {
   if (!inited_) {
     return;
@@ -263,7 +287,7 @@ bool MeasureLineContainerView::HitTestRect(const gfx::Rect& rect) const  {
     }
   }
   if (vertical_single_) {
-    ret = horiz_single_->HitTestRect(rect);
+    ret = vertical_single_->HitTestRect(rect);
     if (ret) {
       return true;
     }
@@ -280,5 +304,4 @@ void MeasureLineContainerView::InitMeasureLine() {
   }
   inited_ = true;
 }
-
 
