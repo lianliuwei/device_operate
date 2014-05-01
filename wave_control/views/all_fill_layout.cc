@@ -18,3 +18,7 @@ gfx::Size AllFillLayout::GetPreferredSize(View* host) {
   rect.Inset(-host->GetInsets());
   return rect.size();
 }
+
+void AllFillLayout::ViewAdded(View* host, View* view) {
+  view->SetBoundsRect(host->GetContentsBounds());
+}

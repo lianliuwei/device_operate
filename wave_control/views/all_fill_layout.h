@@ -12,6 +12,7 @@ public:
   // Overridden from LayoutManager:
   virtual void Layout(views::View* host) OVERRIDE;
   virtual gfx::Size GetPreferredSize(views::View* host) OVERRIDE;
+  virtual void ViewAdded(views::View* host, views::View* view) OVERRIDE;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(AllFillLayout);
