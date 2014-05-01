@@ -26,7 +26,6 @@ public:
   virtual void TransformChanged(const gfx::Transform& transform);
   virtual void DataChanged();
 
-
 private:
   // implement MeasureLinePartView::Delegate
   virtual void OnPosChanged(MeasureLinePartView* part_view, int pos);
@@ -52,10 +51,6 @@ private:
 
   gfx::Transform transform_;
   Wave* wave_;
-
-  // init wave set before kInitNoWave
-  gfx::Transform init_transform_;
-  Wave* init_wave_;
 
   bool horiz_;
 };

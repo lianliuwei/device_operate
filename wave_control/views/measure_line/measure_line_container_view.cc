@@ -155,7 +155,8 @@ void WaveObserver::SetWave(Wave* wave) {
 MeasureLineContainerView::MeasureLineContainerView(Delegate* delegate)
     : delegate_(delegate)
     , horiz_single_(NULL)
-    , vertical_single_(NULL) {
+    , vertical_single_(NULL)
+    , inited_(false) {
   SetLayoutManager(new AllFillLayout);
   wave_observer_.reset(new WaveObserver(this));
 }
@@ -172,7 +173,7 @@ void MeasureLineContainerView::ShowHorizSingle(bool show) {
   if (show) {
     horiz_single_ = new SingleLineView(true);
     AddChildView(horiz_single_);
-    NotifyMeasureLineWaveChanged(horiz_single_);
+    InitMeasureLine(horiz_single_);
   } else {
     RemoveChildView(horiz_single_);
     delete horiz_single_;
@@ -188,13 +189,12 @@ void MeasureLineContainerView::ToggleShowHorizSingle() {
   ShowHorizSingle(!IsShowHorizSingle());
 }
 
-void MeasureLineContainerView::NotifyMeasureLineWaveChanged(MeasureLine* measure_line) {
+void MeasureLineContainerView::InitMeasureLine(MeasureLine* measure_line) {
+  if (!inited_) {
+    return;
+  }
   measure_line->WaveChanged(delegate_->GetMeasureWave(), 
       delegate_->GetMeasureWaveTransform());
-}
-
-void MeasureLineContainerView::OnBoundsChanged(const gfx::Rect& previous_bounds) {
-  TransformChanged();
 }
 
 void MeasureLineContainerView::MeasureWaveChanged() {
@@ -207,6 +207,9 @@ void MeasureLineContainerView::MeasureWaveChanged() {
 }
 
 void MeasureLineContainerView::TransformChanged() {
+  if (!inited_) {
+    return;
+  }
   vector<MeasureLine*> lines = measure_lines();
   for (size_t i = 0; i < lines.size(); ++i) {
     (lines[i])->TransformChanged(delegate_->GetMeasureWaveTransform());
@@ -214,6 +217,9 @@ void MeasureLineContainerView::TransformChanged() {
 }
 
 void MeasureLineContainerView::DataChanged() {
+  if (!inited_) {
+    return;
+  }
   vector<MeasureLine*> lines = measure_lines();
   for (size_t i = 0; i < lines.size(); ++i) {
     (lines[i])->DataChanged();
@@ -263,6 +269,16 @@ bool MeasureLineContainerView::HitTestRect(const gfx::Rect& rect) const  {
     }
   }
   return false;
+}
+
+void MeasureLineContainerView::InitMeasureLine() {
+  DCHECK(!inited_);
+  vector<MeasureLine*> lines = measure_lines();
+  for (size_t i = 0; i < lines.size(); ++i) {
+    (lines[i])->WaveChanged(delegate_->GetMeasureWave(), 
+        delegate_->GetMeasureWaveTransform());
+  }
+  inited_ = true;
 }
 
 

@@ -45,13 +45,15 @@ public:
   void TransformChanged();
   void DataChanged();
 
+  // after parent layout finish call this to init the measure line pos.
+  void InitMeasureLine();
+
 private:
   // override views::View
   // size changed means the transform is changed. so just pull it.
-  virtual void OnBoundsChanged(const gfx::Rect& previous_bounds) OVERRIDE;
   virtual bool HitTestRect(const gfx::Rect& rect) const OVERRIDE;
 
-  void NotifyMeasureLineWaveChanged(MeasureLine* measure_line);
+  void InitMeasureLine(MeasureLine* measure_line);
   
   std::vector<MeasureLine*> measure_lines();
 
@@ -61,6 +63,8 @@ private:
   Delegate* delegate_;
 
   scoped_ptr<WaveObserver> wave_observer_;
+
+  bool inited_;
 
   DISALLOW_COPY_AND_ASSIGN(MeasureLineContainerView);
 };

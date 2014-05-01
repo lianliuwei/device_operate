@@ -36,13 +36,6 @@ void SingleLineView::Layout() {
   line_->SetBoundsRect(rect);
 
   LayoutLabel(point);
-
-  // NOTE may need parent to call to init wave, if parent have animation
-  // init is for put line in middle so change state after done.
-  if (state_ == kInitNoWave && init_wave_ != NULL) {
-    state_ = kNoWave;
-    WaveChanged(init_wave_, init_transform_);
-  }
 }
 
 SingleLineView::SingleLineView(bool horiz)
@@ -128,10 +121,12 @@ void SingleLineView::UpdateLabel() {
 }
 
 void SingleLineView::WaveChanged(Wave* wave, const gfx::Transform& transform) {
-  // just remember, after init, recall WaveChanged.
   if (state_ == kInitNoWave) {
-    init_wave_ = wave;
-    init_transform_ = transform;
+    if (wave == NULL) {
+      return;
+    }
+    state_ = kNoWave;
+    WaveChanged(wave, transform);
     return;
   }
   else if (state_ == kNoWave) {
@@ -181,13 +176,10 @@ void SingleLineView::WaveChanged(Wave* wave, const gfx::Transform& transform) {
 }
 
 void SingleLineView::TransformChanged(const gfx::Transform& transform) {
-  if (state_ == kHadWave) {
-    transform_ = transform;
-    UpdateLabel();
-    Layout();
-  } else if (state_ == kInitNoWave) {
-    init_transform_ = transform;
-  }
+  DCHECK(state_ == kHadWave);
+  transform_ = transform;
+  UpdateLabel();
+  Layout();
 }
 
 void SingleLineView::DataChanged() {

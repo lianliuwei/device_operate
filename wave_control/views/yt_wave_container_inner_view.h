@@ -90,6 +90,7 @@ public:
   gfx::Size GetMinimumSize() OVERRIDE;
   virtual void OnBoundsChanged(const gfx::Rect& previous_bounds) OVERRIDE;
   virtual View* GetEventHandlerForPoint(const gfx::Point& point) OVERRIDE;
+  virtual void Layout() OVERRIDE;
 
 private:
   // implement ui::ListModelObserver
@@ -114,6 +115,7 @@ private:
   scoped_ptr<OscWaveGroup> wave_group_;
 
   MeasureLineContainerView* measure_line_view_;
+  bool inited_measure_line_;
 
   YTWaveContainer* container_;
 

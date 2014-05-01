@@ -840,3 +840,15 @@ View* YTWaveContainerInnerView::GetEventHandlerForPoint(const gfx::Point& point)
   return this;
 }
 
+void YTWaveContainerInnerView::Layout() {
+  View::Layout();
+
+  if (!inited_measure_line_) {
+    measure_line_view_->InitMeasureLine();
+    inited_measure_line_ = true;
+  } else {
+    // after layout changed, call MeasureLineView to Update Transform.
+    measure_line_view_->TransformChanged();
+  }
+}
+
