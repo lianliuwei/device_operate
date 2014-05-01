@@ -248,4 +248,21 @@ bool MeasureLineContainerView::ValueForPoint(Wave* wave, double x_pos, double* v
   return true;
 }
 
+bool MeasureLineContainerView::HitTestRect(const gfx::Rect& rect) const  {
+  bool ret;
+  if (horiz_single_) {
+    ret = horiz_single_->HitTestRect(rect);
+    if (ret) {
+      return true;
+    }
+  }
+  if (vertical_single_) {
+    ret = horiz_single_->HitTestRect(rect);
+    if (ret) {
+      return true;
+    }
+  }
+  return false;
+}
+
 

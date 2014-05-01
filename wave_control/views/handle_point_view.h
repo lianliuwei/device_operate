@@ -14,6 +14,7 @@ public:
 
   // overridden views::View
   virtual void OnPaint(gfx::Canvas* canvas) OVERRIDE;
+  virtual bool HitTestRect(const gfx::Rect& rect) const { return false; }
 
   // implement HandleBarObserver
   virtual void OnHandlePressed(int id, int offset, bool horiz);

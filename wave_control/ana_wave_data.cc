@@ -14,8 +14,8 @@ double AnaWaveData::GetValue(double offset) {
     return data_ptr[0];
   }
   double range_size =  range.end - range.begin;
-  transform.Scale(range_size / size() - 1, 1);
   transform.Translate(range.begin, 0);
+  transform.Scale(range_size / (size() - 1), 1);
   int index = TransformReverseX(transform, offset);
   CHECK(index >= 0 && index <= size() - 1);
   return data_ptr[index];

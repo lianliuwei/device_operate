@@ -661,7 +661,7 @@ void YTWaveContainerInnerView::ListItemsAdded(size_t start, size_t count) {
     visitor.AddWave(wave);
   }
   if (start == 0) {
-    UpdateAxis();
+    OnSelectWaveChanged();
   }
 }
 
@@ -682,7 +682,7 @@ void YTWaveContainerInnerView::ListItemsRemoved(size_t start, size_t count) {
     delete need_remove[i];
   }
   if (start == 0) {
-    UpdateAxis();
+    OnSelectWaveChanged();
   }
 }
 
@@ -693,7 +693,7 @@ void YTWaveContainerInnerView::ListItemMoved(size_t index, size_t target_index) 
   wave_record_.insert(wave_record_.begin() + target_index, wave);
 
   if (target_index == 0 || index == 0) {
-    UpdateAxis();
+    OnSelectWaveChanged();
   }
 }
 
@@ -702,7 +702,7 @@ void YTWaveContainerInnerView::ListItemsChanged(size_t start, size_t count) {
   ListItemsAdded(start, count);
 
   if (start == 0) {
-    UpdateAxis();
+    OnSelectWaveChanged();
   }
 }
 
@@ -816,5 +816,25 @@ const gfx::Transform YTWaveContainerInnerView::GetMeasureWaveTransform() {
 void YTWaveContainerInnerView::OnSelectWaveChanged() {
   UpdateAxis();
   measure_line_view_->MeasureWaveChanged();
+}
+
+void YTWaveContainerInnerView::OnBoundsChanged(const gfx::Rect& previous_bounds) {
+  if (previous_bounds.size() != gfx::Size(0, 0))
+    measure_line_view_->ShowHorizSingle(true);
+}
+
+// check top first
+View* YTWaveContainerInnerView::GetEventHandlerForPoint(const gfx::Point& point) {
+  for (int i = 0; i < child_count(); ++i) {
+    View* child = child_at(i);
+    if (!child->visible())
+      continue;
+    
+    gfx::Point point_in_child_coords(point);
+    ConvertPointToTarget(this, child, &point_in_child_coords);
+    if (child->HitTestPoint(point_in_child_coords))
+      return child->GetEventHandlerForPoint(point_in_child_coords);
+  }
+  return this;
 }
 

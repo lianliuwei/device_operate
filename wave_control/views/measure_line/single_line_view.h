@@ -19,6 +19,7 @@ public:
   // overridden from views::View
   virtual void OnPaint(gfx::Canvas* canvas) OVERRIDE;
   virtual void Layout() OVERRIDE;
+  virtual bool HitTestRect(const gfx::Rect& rect) const OVERRIDE;
 
   // implement MeasureLine
   virtual void WaveChanged(Wave* wave, const gfx::Transform& transform);
@@ -47,9 +48,14 @@ private:
   views::Label* pos_label_;
   views::Label* value_label_;
   bool has_value_;
-  double y_value;
+  double y_value_;
 
   gfx::Transform transform_;
   Wave* wave_;
+
+  // init wave set before kInitNoWave
+  gfx::Transform init_transform_;
+  Wave* init_wave_;
+
   bool horiz_;
 };

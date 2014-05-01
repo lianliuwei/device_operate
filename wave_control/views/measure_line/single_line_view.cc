@@ -13,6 +13,10 @@ using namespace gfx;
 using namespace views;
 
 void SingleLineView::Layout() {
+  if (size() == Size(0, 0)) {
+    return;
+  }
+
   int point; 
   if (state_ == kInitNoWave) {
     Size v_size = size();
@@ -32,13 +36,22 @@ void SingleLineView::Layout() {
   line_->SetBoundsRect(rect);
 
   LayoutLabel(point);
+
+  // NOTE may need parent to call to init wave, if parent have animation
+  // init is for put line in middle so change state after done.
+  if (state_ == kInitNoWave && init_wave_ != NULL) {
+    state_ = kNoWave;
+    WaveChanged(init_wave_, init_transform_);
+  }
 }
 
 SingleLineView::SingleLineView(bool horiz)
     : horiz_(horiz)
     , state_(kInitNoWave)
     , pos_(0)
-    , wave_(NULL) {
+    , wave_(NULL)
+    , pos_label_(NULL)
+    , value_label_(NULL) {
   line_ = new MeasureLinePartView(!horiz, this);
   AddChildView(line_);
 }
@@ -46,13 +59,13 @@ SingleLineView::SingleLineView(bool horiz)
 void SingleLineView::OnPaint(gfx::Canvas* canvas) {
   if (state_ == kInitNoWave) {
   } else if (state_ == kHadWave) {
-    if (!horiz_) {
+    if (!horiz_ || !has_value_) {
       return;
     }
     SkPaint paint;
     paint.setStrokeWidth(3);
     paint.setColor(kMeasureLineColor);
-    int y_pos = TransformY(transform_, y_value);
+    int y_pos = TransformY(transform_, y_value_);
     canvas->DrawPoint(Point(line_->line_point(), y_pos), paint);
 
   } else if (state_ == kNoWave) {
@@ -62,8 +75,17 @@ void SingleLineView::OnPaint(gfx::Canvas* canvas) {
 }
 
 void SingleLineView::OnPosChanged(MeasureLinePartView* part_view, int pos) {
+  if (state_ == kInitNoWave) {
+    state_ = kNoWave;
+  } else if (state_ == kNoWave) {
+    
+  } else if (state_ == kHadWave) {
+    pos_ = horiz_ ? TransformReverseX(transform_, pos) 
+        : TransformReverseY(transform_, pos);
+  }
+
   UpdateLabel();
-  LayoutLabel(pos);
+  Layout();
   SchedulePaint();
 }
 
@@ -75,10 +97,10 @@ void SingleLineView::LayoutLabel(int pos) {
   }
 
   if (value_label_ && has_value_) {
-    int y_pos = TransformY(transform_, y_value);
+    int y_pos = TransformY(transform_, y_value_);
     gfx::Size v_size = value_label_->GetPreferredSize();
     gfx::Point v_point(pos + 2, y_pos);
-    pos_label_->SetBoundsRect(Rect(v_point, v_size));
+    value_label_->SetBoundsRect(Rect(v_point, v_size));
   } 
 
 }
@@ -92,19 +114,27 @@ void SingleLineView::UpdateLabel() {
   if (value_label_) {
     double value;
     int x_point = line_->line_point();
-    bool ret = container_view()->ValueForPoint(wave_, TransformX(transform_, x_point), &value);
+    bool ret = container_view()->ValueForPoint(wave_, TransformReverseX(transform_, x_point), &value);
     if (!ret) {
       value_label_->SetVisible(false);
       has_value_ = false;
       return;
     }
-    y_value = value;
-    value_label_->SetText(StringPrintf(L"%.4f", y_value));
+    value_label_->SetVisible(true);
+    y_value_ = value;
+    has_value_ = true;
+    value_label_->SetText(StringPrintf(L"%.4f", y_value_));
   }
 }
 
 void SingleLineView::WaveChanged(Wave* wave, const gfx::Transform& transform) {
-  if (state_ == kInitNoWave || state_ == kNoWave) {
+  // just remember, after init, recall WaveChanged.
+  if (state_ == kInitNoWave) {
+    init_wave_ = wave;
+    init_transform_ = transform;
+    return;
+  }
+  else if (state_ == kNoWave) {
     if (wave == NULL) {
       return;
     }
@@ -114,8 +144,13 @@ void SingleLineView::WaveChanged(Wave* wave, const gfx::Transform& transform) {
     pos_ = horiz_ ? TransformReverseX(transform, line_->line_point()) 
         : TransformReverseY(transform, line_->line_point());
     pos_label_ = new Label();
+    // label will auto calculate color need set background color
+    pos_label_->SetBackgroundColor(kWaveViewBackgroundColor);
+    pos_label_->SetEnabledColor(kMeasureLineColor);
     AddChildView(pos_label_);
     value_label_ = new Label();
+    value_label_->SetBackgroundColor(kWaveViewBackgroundColor);
+    value_label_->SetEnabledColor(kMeasureLineColor);
     AddChildView(value_label_);
     state_ = kHadWave;
 
@@ -146,10 +181,13 @@ void SingleLineView::WaveChanged(Wave* wave, const gfx::Transform& transform) {
 }
 
 void SingleLineView::TransformChanged(const gfx::Transform& transform) {
-  DCHECK(state_ == kHadWave);
-  transform_ = transform;
-  UpdateLabel();
-  Layout();
+  if (state_ == kHadWave) {
+    transform_ = transform;
+    UpdateLabel();
+    Layout();
+  } else if (state_ == kInitNoWave) {
+    init_transform_ = transform;
+  }
 }
 
 void SingleLineView::DataChanged() {
@@ -161,3 +199,11 @@ MeasureLineContainerView* SingleLineView::container_view() {
   View* view = parent();
   return static_cast<MeasureLineContainerView*>(view);
 }
+
+
+bool SingleLineView::HitTestRect(const gfx::Rect& rect) const {
+  gfx::Rect target_rect = rect  -  line_->GetMirroredPosition().OffsetFromOrigin();
+  return line_->HitTestRect(target_rect);
+}
+
+

@@ -71,11 +71,11 @@ gfx::Rect MeasureLinePartView::RectForPoint(int point, gfx::Rect parent_rect) {
   gfx::Rect rect = parent_rect;
   if (horiz_) {
     rect.set_height(kMesaureLineSize);
-    int y = parent_rect.y() + (kMesaureLineSize + 1) / 2 - 1;
+    int y = point - (kMesaureLineSize + 1) / 2 - 1;
     rect.set_y(y);
   } else {
     rect.set_width(kMesaureLineSize);
-    int x = parent_rect.x() + (kMesaureLineSize + 1) / 2 - 1;
+    int x = point - (kMesaureLineSize + 1) / 2 - 1;
     rect.set_x(x);
   }
   return rect;
@@ -85,4 +85,14 @@ MeasureLinePartView::MeasureLinePartView(bool horiz, Delegate* delegate)
     : horiz_(horiz)
     , delegate_(delegate) {
 
+}
+
+gfx::NativeCursor MeasureLinePartView::GetCursor(const ui::MouseEvent& event) {
+  static HCURSOR kHorizArrow = LoadCursor(NULL, IDC_SIZENS);
+  static HCURSOR KVerticalArrow = LoadCursor(NULL, IDC_SIZEWE);
+  if (horiz_) {
+    return kHorizArrow;
+  } else {
+    return KVerticalArrow;
+  }
 }

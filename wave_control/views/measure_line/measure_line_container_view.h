@@ -49,6 +49,7 @@ private:
   // override views::View
   // size changed means the transform is changed. so just pull it.
   virtual void OnBoundsChanged(const gfx::Rect& previous_bounds) OVERRIDE;
+  virtual bool HitTestRect(const gfx::Rect& rect) const OVERRIDE;
 
   void NotifyMeasureLineWaveChanged(MeasureLine* measure_line);
   
