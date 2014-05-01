@@ -71,11 +71,11 @@ gfx::Rect MeasureLinePartView::RectForPoint(int point, gfx::Rect parent_rect) {
   gfx::Rect rect = parent_rect;
   if (horiz_) {
     rect.set_height(kMesaureLineSize);
-    int y = point - (kMesaureLineSize + 1) / 2 - 1;
+    int y = point - ((kMesaureLineSize + 1)/2 - 1);
     rect.set_y(y);
   } else {
     rect.set_width(kMesaureLineSize);
-    int x = point - (kMesaureLineSize + 1) / 2 - 1;
+    int x = point - ((kMesaureLineSize + 1)/2 - 1);
     rect.set_x(x);
   }
   return rect;
