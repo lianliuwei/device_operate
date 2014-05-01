@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
   // The exit manager is in charge of calling the dtors of singleton objects.
   base::AtExitManager exit_manager;
 
-
+  ui::RegisterPathProvider();
   bool icu_result = icu_util::Initialize();
   CHECK(icu_result);
   ui::ResourceBundle::InitSharedInstanceWithLocale("en-US", NULL);
