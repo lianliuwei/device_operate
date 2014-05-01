@@ -1,5 +1,7 @@
 #include "wave_control/views/yt_wave_container_inner_view.h"
 
+#include "base/debug/trace_event.h"
+
 #include "wave_control/wave_visitor.h"
 #include "wave_control/yt_wave_container.h"
 #include "wave_control/views/transform_util.h"
@@ -624,6 +626,7 @@ YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
   SetGrid(kDefaultVDiv, kDefaultHDiv);
 
   measure_line_view_->ShowHorizSingle(true);
+  measure_line_view_->ShowVerticalSingle(true);
 }
 
 YTWaveContainerInnerView::~YTWaveContainerInnerView() {
@@ -849,6 +852,14 @@ void YTWaveContainerInnerView::Layout() {
   } else {
     // after layout changed, call MeasureLineView to Update Transform.
     measure_line_view_->TransformChanged();
+  }
+}
+
+void YTWaveContainerInnerView::PaintChildren(gfx::Canvas* canvas) {
+  TRACE_EVENT0("views", "View::PaintChildren");
+  for (int count = child_count(), i = count - 1; i >= 0; --i) {
+    if (!child_at(i)->layer())
+      child_at(i)->Paint(canvas);
   }
 }
 

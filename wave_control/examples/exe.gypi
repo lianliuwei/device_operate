@@ -8,6 +8,7 @@
     '<(DEPTH)/ui/ui.gyp:ui_resources',
     '<(DEPTH)/chrome/chrome_resources.gyp:packed_resources',
     '<(DEPTH)/ui/views/views.gyp:views',
+    '<(DEPTH)/ui/compositor/compositor.gyp:compositor',
     '<(DEPTH)/third_party/icu/icu.gyp:icui18n',
     '<(DEPTH)/third_party/icu/icu.gyp:icuuc', '<(DEPTH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
   ],
