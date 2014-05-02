@@ -61,6 +61,21 @@ void HandleBar::ActiveHandle(int ID) {
   NotifyHandleActive(ID);
 }
 
+
+bool HandleBar::GetActiveHandleID(int* id) {
+  if (child_count() == 0) {
+    return false;
+  }
+  int ID;
+  View* view = child_at(child_count() - 1);
+  Handle* handle = static_cast<Handle*>(view);
+  ID = handle->tag();
+  if (id) {
+    *id = ID;
+  }
+  return true;
+}
+
 void HandleBar::OnHandlePressed(int id, int dest) {
   Handle* handle = GetHandle(id);
   DCHECK(handle) << "can not find the handle from ID: " << id;

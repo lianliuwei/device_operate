@@ -1,6 +1,7 @@
 #include "wave_control/views/yt_wave_container_inner_view.h"
 
 #include "base/debug/trace_event.h"
+#include "ui/views/widget/widget.h"
 
 #include "wave_control/wave_visitor.h"
 #include "wave_control/yt_wave_container.h"
@@ -9,15 +10,22 @@
 #include "wave_control/views/wave_control_views_constants.h"
 #include "wave_control/views/all_fill_layout.h"
 #include "wave_control/views/handle_point_view.h"
+#include "wave_control/views/yt_wave_container_view.h"
 
 using namespace ui;
 using namespace std;
 using namespace views;
 
 namespace {
+// view id
 static const int kFrontSize = 2;
 static const int kHandlePointViewID = 0;
 static const int kMeasureLineViewID = 1;
+
+// menu
+static const int kWaveMaxNum = 100;
+static const int kHorizSingleMeasureLineID = kWaveMaxNum + 1;
+static const int kVerticalSingleMeasureLineID = kWaveMaxNum + 2;
 
 bool IsSet(int set, int test) {
   return (set & test) != 0;
@@ -624,9 +632,6 @@ YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
   ListItemsAdded(0, container->item_count());
 
   SetGrid(kDefaultVDiv, kDefaultHDiv);
-
-  measure_line_view_->ShowHorizSingle(true);
-  measure_line_view_->ShowVerticalSingle(true);
 }
 
 YTWaveContainerInnerView::~YTWaveContainerInnerView() {
@@ -668,6 +673,7 @@ void YTWaveContainerInnerView::ListItemsAdded(size_t start, size_t count) {
   if (start == 0) {
     OnSelectWaveChanged();
   }
+  CancelMenu();
 }
 
 void YTWaveContainerInnerView::ListItemsRemoved(size_t start, size_t count) {
@@ -689,6 +695,7 @@ void YTWaveContainerInnerView::ListItemsRemoved(size_t start, size_t count) {
   if (start == 0) {
     OnSelectWaveChanged();
   }
+  CancelMenu();
 }
 
 void YTWaveContainerInnerView::ListItemMoved(size_t index, size_t target_index) {
@@ -700,6 +707,7 @@ void YTWaveContainerInnerView::ListItemMoved(size_t index, size_t target_index) 
   if (target_index == 0 || index == 0) {
     OnSelectWaveChanged();
   }
+  CancelMenu();
 }
 
 void YTWaveContainerInnerView::ListItemsChanged(size_t start, size_t count) {
@@ -709,6 +717,7 @@ void YTWaveContainerInnerView::ListItemsChanged(size_t start, size_t count) {
   if (start == 0) {
     OnSelectWaveChanged();
   }
+  CancelMenu();
 }
 
 gfx::Transform YTWaveContainerInnerView::OscWaveTransform(OscWave* osc_wave) {
@@ -863,3 +872,87 @@ void YTWaveContainerInnerView::PaintChildren(gfx::Canvas* canvas) {
   }
 }
 
+bool YTWaveContainerInnerView::OnMousePressed(const ui::MouseEvent& event) {
+  if (!event.IsOnlyRightMouseButton()) {
+    return false;
+  }
+  if (menu_runner_.get() && menu_runner_->IsRunning()) {
+    return true;
+  }
+
+  menu_runner_.reset(new MenuRunner(GetMenuModel()));
+
+  gfx::Point point = event.location();
+  ConvertPointToScreen(this, &point);
+  MenuRunner::RunResult ret = 
+    menu_runner_->RunMenuAt(
+        GetWidget(), NULL,
+        gfx::Rect(point, gfx::Size()), 
+        MenuItemView::TOPLEFT,
+        MenuRunner::HAS_MNEMONICS);
+
+  return true;
+}
+
+bool YTWaveContainerInnerView::IsCommandIdChecked(int command_id) const {
+  if (command_id < kWaveMaxNum) {
+    int id;
+    bool ret = container_view()->GetWaveBarActiveHandleID(&id);
+    DCHECK(ret);
+    return command_id == id;
+  }
+  if (command_id == kHorizSingleMeasureLineID) {
+    return measure_line_view_->IsShowHorizSingle();
+  }
+  if (command_id == kVerticalSingleMeasureLineID) {
+    return measure_line_view_->IsShowVerticalSingle();
+  }
+  return false;
+}
+
+bool YTWaveContainerInnerView::IsCommandIdEnabled(int command_id) const {
+  return true;
+}
+
+bool YTWaveContainerInnerView::GetAcceleratorForCommandId(int command_id, 
+                                                          ui::Accelerator* accelerator) {
+  return false;
+}
+
+void YTWaveContainerInnerView::ExecuteCommand(int command_id, int event_flags) {
+  if (command_id < kWaveMaxNum) {
+    container_view()->ActiveWaveBarHandle(command_id);
+    return;
+  }
+  if (command_id == kHorizSingleMeasureLineID) {
+    measure_line_view_->ToggleShowHorizSingle();
+    return;
+  }
+  if (command_id == kVerticalSingleMeasureLineID) {
+    measure_line_view_->ToggleShowVerticalSingle();
+    return;
+  }
+}
+
+ui::SimpleMenuModel* YTWaveContainerInnerView::GetMenuModel() {
+  menu_model_.reset(new SimpleMenuModel(this));
+  CHECK(wave_bar_->Count() <= kWaveMaxNum);
+  for (int i = 0; i < wave_bar_->Count(); ++i) {
+    string16 name = wave_bar_->GetText(i);
+    menu_model_->AddRadioItem(i, name, 0);
+  }
+  menu_model_->AddSeparator(ui::NORMAL_SEPARATOR);
+  menu_model_->AddCheckItem(kHorizSingleMeasureLineID, L"Horiz Measure");
+  menu_model_->AddCheckItem(kVerticalSingleMeasureLineID, L"Vertical Measure");
+  return menu_model_.get();
+}
+
+void YTWaveContainerInnerView::CancelMenu() {
+  if (menu_runner_.get()) {
+    menu_runner_->Cancel();
+  }
+}
+
+YTWaveContainerView* YTWaveContainerInnerView::container_view() const {
+  return static_cast<YTWaveContainerView*>(const_cast<View*>(parent()));
+}

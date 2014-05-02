@@ -21,6 +21,9 @@ public:
   void show_trigger_bar();
   bool is_show_trigger_bar();
 
+  void ActiveWaveBarHandle(int ID);
+  bool GetWaveBarActiveHandleID(int* id);
+
 private:
   // Overridden from the views::View
   virtual void Layout() OVERRIDE;

@@ -171,3 +171,11 @@ YTWaveContainerView::~YTWaveContainerView() {
   horiz_offset_bar_->SetModel(NULL);
   trigger_bar_->SetModel(NULL);
 }
+
+void YTWaveContainerView::ActiveWaveBarHandle(int ID) {
+  wave_bar_->ActiveHandle(ID);
+}
+
+bool YTWaveContainerView::GetWaveBarActiveHandleID(int* id) {
+  return wave_bar_->GetActiveHandleID(id);
+}

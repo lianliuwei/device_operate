@@ -41,6 +41,7 @@ public:
   
   // put the Active Handle on the Top
   void ActiveHandle(int ID);
+  bool GetActiveHandleID(int* id);
 
   void OnHandlePressed(int id, int dest);
   void OnHandleReleased(int id);

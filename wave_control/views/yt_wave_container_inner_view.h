@@ -2,7 +2,9 @@
 
 #include "base/observer_list.h"
 #include "ui/base/models/list_model_observer.h"
+#include "ui/base/models/simple_menu_model.h"
 #include "ui/views/view.h"
+#include "ui/views/controls/menu/menu_runner.h"
 
 #include "wave_control/wave_container.h"
 #include "wave_control/osc_wave_group/osc_wave_group.h"
@@ -44,12 +46,14 @@ class YTWaveVisitor;
 }
 
 class SimpleAnaWaveView;
+class YTWaveContainerView;
 
 // real YTWaveContainer show view, the YTWaveContainerView
 // just frame
 class YTWaveContainerInnerView : public views::View
                                , public ui::ListModelObserver
-                               , public MeasureLineContainerView::Delegate {
+                               , public MeasureLineContainerView::Delegate
+                               , public ui::SimpleMenuModel::Delegate {
 public:
   YTWaveContainerInnerView(YTWaveContainer* container);
   virtual ~YTWaveContainerInnerView();
@@ -92,8 +96,19 @@ public:
   virtual View* GetEventHandlerForPoint(const gfx::Point& point) OVERRIDE;
   virtual void Layout() OVERRIDE;
   virtual void PaintChildren(gfx::Canvas* canvas) OVERRIDE;
+  virtual bool OnMousePressed(const ui::MouseEvent& event) OVERRIDE;
 
 private:
+  // implement MeasureLineContainerView::Delegate
+  virtual Wave* GetMeasureWave();
+  virtual const gfx::Transform GetMeasureWaveTransform();
+
+  // implement SimpleMenuModel::Delegate
+  virtual bool IsCommandIdChecked(int command_id) const;
+  virtual bool IsCommandIdEnabled(int command_id) const;
+  virtual bool GetAcceleratorForCommandId(int command_id, ui::Accelerator* accelerator);
+  virtual void ExecuteCommand(int command_id, int event_flags);
+
   // implement ui::ListModelObserver
   virtual void ListItemsAdded(size_t start, size_t count);
   virtual void ListItemsRemoved(size_t start, size_t count);
@@ -107,6 +122,11 @@ private:
   void UpdateAxis();
   int WaveIDToViewID(int wave_id);
 
+  ui::SimpleMenuModel* GetMenuModel();
+  void CancelMenu();
+
+  YTWaveContainerView* container_view() const;
+
   friend class YTWaveVisitor;
 
   scoped_ptr<WaveBar> wave_bar_;
@@ -118,15 +138,13 @@ private:
   MeasureLineContainerView* measure_line_view_;
   bool inited_measure_line_;
 
+  scoped_ptr<views::MenuRunner> menu_runner_;
+  scoped_ptr<ui::SimpleMenuModel> menu_model_;
+
   YTWaveContainer* container_;
 
   // HACK for sync with wave LiistModel, the RemoveWave need Wave ptr.
   std::vector<Wave*> wave_record_;
 
   DISALLOW_COPY_AND_ASSIGN(YTWaveContainerInnerView);
-
-  virtual Wave* GetMeasureWave();
-
-  virtual const gfx::Transform GetMeasureWaveTransform();
-
 };
