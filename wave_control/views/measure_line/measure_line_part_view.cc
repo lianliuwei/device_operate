@@ -24,6 +24,9 @@ void MeasureLinePartView::OnPaint(gfx::Canvas* canvas) {
 }
 
 bool MeasureLinePartView::OnMousePressed(const ui::MouseEvent& event) {
+  if (!event.IsOnlyLeftMouseButton()) {
+    return false;
+  }
   start_point_ = event.location();
   if (delegate_) {
     delegate_->OnPosChanged(this, line_point());

@@ -15,6 +15,9 @@ Handle::Handle(HandleBar* bar)
 }
 
 bool Handle::OnMousePressed(const ui::MouseEvent& event) {
+  if (!event.IsOnlyLeftMouseButton()) {
+    return false;
+  }
   bool ret = TextButton::OnMousePressed(event);
   mouse_offset_ = bar_->IsHorizontal() ? event.x() : event.y();
   bar_->ActiveHandle(tag());

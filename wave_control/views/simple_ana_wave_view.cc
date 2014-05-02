@@ -94,6 +94,9 @@ void SimpleAnaWaveView::MoveToY(int y_pos) {
 }
 
 bool SimpleAnaWaveView::OnMousePressed(const ui::MouseEvent& event) {
+  if (!event.IsOnlyLeftMouseButton()) {
+    return false;
+  }
   start_point_ = event.location();
   drag_transform_ = data_transform();
   drag_v_range_ = ana_wave_->vertical_range();
