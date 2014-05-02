@@ -178,6 +178,7 @@ void MeasureLineContainerView::ShowHorizSingle(bool show) {
     RemoveChildView(horiz_single_);
     delete horiz_single_;
     horiz_single_ = NULL;
+    SchedulePaint();
   }
 }
 
@@ -202,6 +203,7 @@ void MeasureLineContainerView::ShowVerticalSingle(bool show) {
     RemoveChildView(vertical_single_);
     delete vertical_single_;
     vertical_single_ = NULL;
+    SchedulePaint();
   }
 }
 
