@@ -20,7 +20,7 @@ void SingleLineView::Layout() {
   int point; 
   if (state_ == kInitNoWave) {
     Size v_size = size();
-    point = horiz_ ? v_size.width() / 2 : v_size.height() / 2; 
+    point = horiz_ ? v_size.width()*3/8 : v_size.height()*3/8; 
 
   } else if (state_ == kHadWave) {
     point = horiz_ ? TransformX(transform_, pos_) : TransformY(transform_, pos_);
