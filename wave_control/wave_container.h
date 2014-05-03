@@ -10,8 +10,11 @@ class YLWaveContainer;
 class XYWaveContainer;
 class WaveContainerVisitor;
 
-class WaveContainer : public ui::ListModel<Wave> {
+class WaveContainer : protected ui::ListModel<Wave> {
 public:
+  WaveContainer();
+  virtual ~WaveContainer() {}
+
   // parent
   WaveControl* wave_control();
 
@@ -29,11 +32,13 @@ public:
 
   virtual void Accept(WaveContainerVisitor* visitor) = 0;
 
-  int WaveAt(Wave* wave);
-  bool HasWave(Wave* wave);
-  void AddWave(Wave* wave); // may layout the wave
-  void RemoveWave(Wave* wave);
+protected:
+  void SetWave(Wave* wave, WaveContainer* container);
 
 private:
+  friend WaveControl;
+
   WaveControl* wave_control_;
+
+  DISALLOW_COPY_AND_ASSIGN(WaveContainer);
 };

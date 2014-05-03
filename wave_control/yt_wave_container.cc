@@ -21,3 +21,47 @@ Wave* YTWaveContainer::GetSelectWave() {
   }
   return GetItemAt(0);
 }
+
+size_t YTWaveContainer::WaveAt(Wave* wave) {
+  for (size_t i = 0; i < item_count(); ++i) {
+    if (GetItemAt(i) == wave) {
+      return i;
+    }
+  }
+  NOTREACHED();
+  return 0;
+}
+
+bool YTWaveContainer::HasWave(Wave* wave) {
+  for (size_t i = 0; i < item_count(); ++i) {
+    if (GetItemAt(i) == wave) {
+      return true;
+    }
+  }
+  return false;
+}
+
+Wave* YTWaveContainer::GetWaveAt(size_t index) {
+  return GetItemAt(index);
+}
+
+void YTWaveContainer::AddWave(Wave* wave) {
+  Add(wave); 
+}
+
+void YTWaveContainer::RemoveWave(Wave* wave) {
+  size_t i = WaveAt(wave);
+  RemoveAt(i);
+}
+
+size_t YTWaveContainer::WaveCount() const {
+  return item_count();
+}
+
+void YTWaveContainer::AddWaveObserver(ui::ListModelObserver* observer) {
+  AddObserver(observer);
+}
+
+void YTWaveContainer::RemoveWaveObserver(ui::ListModelObserver* observer) {
+  RemoveObserver(observer);
+}

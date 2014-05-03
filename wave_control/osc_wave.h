@@ -13,6 +13,9 @@
 // TODO whether compare() can replace trigger and Osc Range.
 class OscWave : public Wave {
 public:
+  OscWave() {}
+  virtual ~OscWave() {}
+
   // implement Wave
   virtual Type type_id() const { return kOsc; }
   virtual OscWave* AsOscWave() OVERRIDE { return this; }
@@ -82,4 +85,6 @@ protected:
 
 private:
   ObserverList<OscWaveObserver> observer_list_;
+
+  DISALLOW_COPY_AND_ASSIGN(OscWave);
 };

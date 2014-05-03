@@ -11,19 +11,19 @@ WaveControlView::WaveControlView(WaveControl* wave_control)
     : wave_control_(wave_control) {
   set_background(Background::CreateSolidBackground(kWaveControlBackgroundColor));
   SetLayoutManager(new FillBoxLayout(FillBoxLayout::kVertical, 0, 0, 0));
-  wave_control->AddObserver(this);
+  wave_control->AddWaveContainerObserver(this);
 
   // fetch WaveContainer
-  ListItemsAdded(0, wave_control->item_count());
+  ListItemsAdded(0, wave_control->WaveContainerCount());
 }
 
 WaveControlView::~WaveControlView() {
-  wave_control()->RemoveObserver(this);
+  wave_control()->RemoveWaveContainerObserver(this);
 }
 
 void WaveControlView::ListItemsAdded(size_t start, size_t count) {
   for (size_t i = 0; i < count; ++i) {
-    WaveContainer* container = wave_control_->GetItemAt(start + i);
+    WaveContainer* container = wave_control_->GetWaveContainerAt(start + i);
     View* view = WaveControlViewFactory::GetInstance()->Create(container, this);
     this->AddChildViewAt(view, start + i);
   }

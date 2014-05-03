@@ -1,31 +1,14 @@
 #include "wave_control/wave_container.h"
 
-int WaveContainer::WaveAt(Wave* wave) {
-  for (size_t i = 0; i < item_count(); ++i) {
-    if (GetItemAt(i) == wave) {
-      return i;
-    }
-  }
-  NOTREACHED();
-  return 0;
+WaveControl* WaveContainer::wave_control() {
+  return wave_control_;
 }
 
-bool WaveContainer::HasWave(Wave* wave) {
-  for (size_t i = 0; i < item_count(); ++i) {
-    if (GetItemAt(i) == wave) {
-      return true;
-    }
-  }
-  return false;
+void WaveContainer::SetWave(Wave* wave, WaveContainer* container) {
+  wave->wave_container_ = container;
 }
 
-void WaveContainer::AddWave(Wave* wave) {
-  Add(wave);
+WaveContainer::WaveContainer()
+    : wave_control_(NULL) { 
 
 }
-
-void WaveContainer::RemoveWave(Wave* wave) {
-  size_t i = WaveAt(wave);
-  RemoveAt(i);
-}
-

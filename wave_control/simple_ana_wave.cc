@@ -19,5 +19,6 @@ void SimpleAnaWave::HasObserver(SimpleAnaWaveObserver* observer) {
 }
 
 void SimpleAnaWave::NotifyChanged(int change_set) {
-  FOR_EACH_OBSERVER(SimpleAnaWaveObserver, observer_list_, OnSimpleAnaWaveChanged(this, change_set));
+  FOR_EACH_OBSERVER(SimpleAnaWaveObserver, observer_list_, 
+      OnSimpleAnaWaveChanged(this, change_set));
 }

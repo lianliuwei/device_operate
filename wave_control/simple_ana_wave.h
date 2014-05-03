@@ -47,4 +47,6 @@ protected:
 
 private:
   ObserverList<SimpleAnaWaveObserver> observer_list_;
+
+  DISALLOW_COPY_AND_ASSIGN(SimpleAnaWave);
 };

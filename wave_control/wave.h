@@ -14,6 +14,9 @@ class SimpleDigitWave;
 
 class Wave : public base::SupportsUserData {
 public:
+  Wave();
+  virtual ~Wave() {}
+
   // parent
   WaveControl* wave_control();
   WaveContainer* wave_container();
@@ -38,6 +41,10 @@ public:
   virtual const gfx::Image& icon() = 0;
 
 private:
-  WaveControl* wave_control_;
+  friend class WaveContainer;
+
   WaveContainer* wave_container_;
+
+  DISALLOW_COPY_AND_ASSIGN(Wave);
 };
+

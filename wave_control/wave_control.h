@@ -7,12 +7,21 @@
 class WaveControlVisitor;
 
 // no sub class now
-class WaveControl : public ui::ListModel<WaveContainer> {
+class WaveControl : protected ui::ListModel<WaveContainer> {
 public:
-  int WaveContainerAt(WaveContainer* container);
+  WaveControl() {}
+  virtual ~WaveControl() {}
+
+  size_t WaveContainerAt(WaveContainer* container);
   bool HasWaveContainer(WaveContainer* container);
-  void AddContainer(WaveContainer* container);
-  void RemoveContainer(WaveContainer* container);
+  WaveContainer* GetWaveContainerAt(size_t index);
+  // can sort WaveContainer in subclass
+  virtual void AddWaveContainer(WaveContainer* container);
+  // no delete container
+  virtual void RemoveWaveContainer(WaveContainer* container);
+  size_t WaveContainerCount() const;
+  void AddWaveContainerObserver(ui::ListModelObserver* observer);
+  void RemoveWaveContainerObserver(ui::ListModelObserver* observer);
 
   // auto layout wave
   virtual void AddWave(Wave* wave) = 0;
@@ -20,10 +29,9 @@ public:
 
   virtual void Accept(WaveControlVisitor* visitor);
 
-  virtual void ShowInfo() = 0;
-  virtual void ToggleInfo() = 0;
-  virtual void IsShowInfo() const = 0;
+protected:
+  void SetWaveControl(WaveContainer* container, WaveControl* control);
 
 private:
-
+  DISALLOW_COPY_AND_ASSIGN(WaveControl);
 };

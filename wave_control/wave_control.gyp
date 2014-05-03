@@ -21,6 +21,7 @@
         'yl_wave_container.h',
         'xy_wave_container.h',
         'wave.h',
+        'wave.cc',
         'osc_wave.h',
         'osc_wave.cc',
         'osc_wave_observer.h',

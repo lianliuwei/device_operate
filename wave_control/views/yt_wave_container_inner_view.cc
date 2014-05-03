@@ -627,15 +627,15 @@ YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
   measure_line_view_ = new MeasureLineContainerView(this);
   AddChildViewAt(measure_line_view_, kMeasureLineViewID);
 
-  container->AddObserver(this);
+  container->AddWaveObserver(this);
   // fetch Wave
-  ListItemsAdded(0, container->item_count());
+  ListItemsAdded(0, container->WaveCount());
 
   SetGrid(kDefaultVDiv, kDefaultHDiv);
 }
 
 YTWaveContainerInnerView::~YTWaveContainerInnerView() {
-  container_->RemoveObserver(this);
+  container_->RemoveWaveObserver(this);
 
   trigger_bar_.reset();
   horiz_offset_bar_.reset();
@@ -659,9 +659,9 @@ void YTWaveContainerInnerView::MoveToY(SimpleAnaWave* wave, int offset) {
 void YTWaveContainerInnerView::ListItemsAdded(size_t start, size_t count) {
   YTWaveVisitor visitor(this);
 
-  wave_record_.reserve(container_->item_count());
+  wave_record_.reserve(container_->WaveCount());
   for (size_t i = 0; i < count; ++i) {
-    Wave* wave = container_->GetItemAt(start + i);
+    Wave* wave = container_->GetWaveAt(start + i);
     View* view = WaveControlViewFactory::GetInstance()->Create(wave, 
         static_cast<YTWaveContainerView*>(this->parent()));
     this->AddChildViewAt(view, WaveIDToViewID(start + i));
@@ -811,10 +811,7 @@ bool YTWaveContainerInnerView::HasWave(Wave* wave) {
 }
 
 Wave* YTWaveContainerInnerView::GetMeasureWave() {
-  if (container_->item_count() == 0) {
-    return NULL;
-  }
-  return container_->GetItemAt(0);
+  return container_->GetSelectWave();
 }
 
 const gfx::Transform YTWaveContainerInnerView::GetMeasureWaveTransform() {
