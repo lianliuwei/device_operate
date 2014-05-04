@@ -53,5 +53,6 @@ void WaveControl::RemoveWaveContainerObserver(ui::ListModelObserver* observer) {
 }
 
 void WaveControl::SetWaveControl(WaveContainer* container, WaveControl* control) {
+  CHECK(container->wave_control_ == NULL);
   container->wave_control_ = control;
 }
