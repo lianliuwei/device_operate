@@ -45,7 +45,8 @@
         # model impl
         'default_simple_ana_wave.h',
         'default_simple_ana_wave.cc',
-        
+        'classify_wave_control.h',
+        'classify_wave_control.cc',
         
         # osc wave grup
         'osc_wave_group/osc_wave_group.h',
