@@ -25,6 +25,7 @@ void ChnlCalcManager::RawDataCollected(OscRawDataHandle raw_data) {
 void ChnlCalcManager::Cancel() {
   if (!current_task_.get())
     return;
+  current_task_->RemoveObserver(this);
   current_task_->Cancel();
 }
 

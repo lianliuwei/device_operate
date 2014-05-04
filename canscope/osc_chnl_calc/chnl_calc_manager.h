@@ -14,6 +14,7 @@
 
 namespace canscope {
 
+// no thread safe.
 class ChnlCalcManager : public AsyncTaskObserver {
 public:
   ChnlCalcManager();
