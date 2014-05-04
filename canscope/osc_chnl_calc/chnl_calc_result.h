@@ -1,6 +1,5 @@
 #pragma once
 
-#include "base/memory/ref_counted.h"
 
 #include "depend_calc/calc_data.h"
 #include "depend_calc/calc_delegate.h"
@@ -10,15 +9,15 @@
 namespace canscope {
 
 class ChnlCalcResult : public CalcData
-                     , public base::RefCountedThreadSafe<ChnlCalcResult>
                      , public CalcDelegate {
 public:
   ChnlCalcResult(OscRawDataHandle handle);
-  virtual ~ChnlCalcResult() {}
 
   OscRawData* raw_data();
 
 private:
+  virtual ~ChnlCalcResult() {}
+ 
   // CalcDelegate implement
   virtual void ItemFinish(CalcKey key, CalcItem* item, bool ret) {}
 
