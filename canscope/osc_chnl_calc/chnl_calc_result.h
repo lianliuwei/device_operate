@@ -20,6 +20,8 @@ private:
  
   // CalcDelegate implement
   virtual void ItemFinish(CalcKey key, CalcItem* item, bool ret) {}
+  virtual void AddCalcDelegateRef();
+  virtual void ReleaseCalcDelegateRef();
 
   OscRawDataHandle handle_;
 };

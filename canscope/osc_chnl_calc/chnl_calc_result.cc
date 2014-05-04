@@ -11,4 +11,14 @@ OscRawData* ChnlCalcResult::raw_data() {
   return handle_.get();
 }
 
+void ChnlCalcResult::AddCalcDelegateRef() {
+  AddRef();
+}
+
+void ChnlCalcResult::ReleaseCalcDelegateRef() {
+  Release();
+}
+
+
+
 } // namespace canscope

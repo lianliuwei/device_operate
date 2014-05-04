@@ -13,7 +13,6 @@ class CalcExecuter : public base::RefCountedThreadSafe<CalcExecuter> {
 public:
   // take ownership of group
   CalcExecuter(CalcGroup* group);
-  ~CalcExecuter() {}
 
   void set_delegate(CalcDelegate* delegate);
 
@@ -22,6 +21,9 @@ public:
   void StartRun(AsyncTaskHandle task);
 
 private:
+  friend class base::RefCountedThreadSafe<CalcExecuter>;
+  ~CalcExecuter() {}
+
   // call after Run() reset group calc state
   void Reset();
 
