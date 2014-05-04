@@ -1,12 +1,8 @@
-#include "base/json/json_string_value_serializer.h"
-#include "base/json/json_reader.h"
-
 #include "testing/gtest/include/gtest/gtest.h"
 #include "testing/gmock/include/gmock/gmock.h"
 
-#include "common/common_thread.h"
-
 #include "canscope/scoped_trace_event.h"
+#include "canscope/device/config_util.h"
 #include "canscope/test/test_process.h"
 #include "canscope/osc_chnl_calc/chnl_calc_manager.h"
 #include "canscope/osc_chnl_calc/chnl_calc_item.h"
@@ -116,16 +112,6 @@ static const char kOscConfig [] =  {" \
 } \
 "};
 
-DictionaryValue* GetDefaultConfig() {
-  std::string content(kOscConfig);
-  JSONStringValueSerializer serializer(content);
-  Value* value = serializer.Deserialize(NULL, NULL);
-  EXPECT_TRUE(NULL != value);
-  EXPECT_TRUE(value->IsType(Value::TYPE_DICTIONARY));
-  DictionaryValue* dict_value;
-  value->GetAsDictionary(&dict_value);
-  return dict_value;
-}
 
 static ChnlCalcManagerTest* gCurrentTest = NULL;
 }
@@ -170,7 +156,7 @@ TEST_F(ChnlCalcManagerTest, ProcessOne) {
 
   EXPECT_CALL(mock, CalcFinish()).Times(1).WillOnce(Invoke(&ActionQuitUI));
   EXPECT_CALL(mock, NotifyUI()).Times(1);
-  ConfigManager::Config config = { 1,  GetDefaultConfig() };
+  ConfigManager::Config config = { 1,  GetConfig(kOscConfig) };
   OscRawDataHandle osc_raw_data = new OscRawData(DT_CS1202, 
       new OscRawDataDeviceConfig(config));
   chnl_calc_manager.RawDataCollected(osc_raw_data);
@@ -182,7 +168,7 @@ TEST_F(ChnlCalcManagerTest, ProcessOne) {
 void ChnlCalcManagerTest::StartProduce() {
   manager_.reset(new ChnlCalcManager);
   SetUpManager(manager_.get());
-  default_config_.reset(GetDefaultConfig());
+  default_config_.reset(GetConfig(kOscConfig));
   ProduceOne();
 }
 
