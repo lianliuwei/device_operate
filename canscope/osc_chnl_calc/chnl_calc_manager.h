@@ -17,7 +17,17 @@ namespace canscope {
 // no thread safe.
 class ChnlCalcManager : public AsyncTaskObserver {
 public:
-  ChnlCalcManager();
+  class Delegate {
+  public:
+    Delegate() {}
+    virtual ~Delegate() {}
+
+    virtual bool CalcForUI() = 0;
+    virtual void MayNotifyUI(scoped_refptr<ChnlCalcResult> result) = 0;
+    virtual void RecordResult(scoped_refptr<ChnlCalcResult> result) = 0;
+  };
+
+  ChnlCalcManager(Delegate* delegate);
   ~ChnlCalcManager();
 
   void RawDataCollected(OscRawDataHandle raw_data);
@@ -39,10 +49,7 @@ private:
 
   void StartRun(bool force_ui);
 
-  void MayNotifyUI(scoped_refptr<ChnlCalcResult> result);
-
-  void RecordResult(scoped_refptr<ChnlCalcResult> result);
-
+ 
   // ui calc less then 60Hz, more is waste CPU.
   scoped_refptr<CalcExecuter> chnl_calc_;
   scoped_refptr<CalcExecuter> ui_calc_;
@@ -51,11 +58,10 @@ private:
   AsyncTaskHandle current_task_;
   bool is_ui_calc_;
 
-  typedef std::deque<OscRawDataHandle> OscRawDataQueue;
-  OscRawDataQueue raw_data_queue_;
+  std::deque<OscRawDataHandle> raw_data_queue_;
   OscRawDataHandle current_raw_data_;
 
-  FreqTime ui_freq_;
+  Delegate* delegate_;
 };
 
 } // namespace canscope

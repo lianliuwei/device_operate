@@ -14,6 +14,8 @@ using namespace common;
 using testing::Invoke;
 using testing::AnyNumber;
 
+namespace {
+
 void ActionQuitUI() {
   CommonThread::UnsafeGetMessageLoopForThread(CommonThread::UI)->
       PostTask(FROM_HERE, MessageLoop::QuitClosure());
@@ -49,6 +51,22 @@ private:
   DISALLOW_COPY_AND_ASSIGN(ChnlCalcObserverMock);
 };
 
+class ChnlCalcManagerDelegate : public ChnlCalcManager::Delegate {
+public:
+  ChnlCalcManagerDelegate() 
+      : time_(60) {}
+  virtual ~ChnlCalcManagerDelegate() {}
+
+  // implment ChnlCalcManager::Observer
+  virtual bool CalcForUI() { return time_.Hit(); }
+  virtual void MayNotifyUI(scoped_refptr<ChnlCalcResult> result);
+  virtual void RecordResult(scoped_refptr<ChnlCalcResult> result);
+private:
+  FreqTime time_;
+
+  DISALLOW_COPY_AND_ASSIGN(ChnlCalcManagerDelegate);
+};
+
 class ChnlCalcManagerTest : public testing::Test {
 public:
   ChnlCalcManagerTest() 
@@ -76,13 +94,13 @@ protected:
   virtual void TearDown();
 
 
+  scoped_ptr<ChnlCalcManagerDelegate> delegate_;
   scoped_ptr<ChnlCalcManager> manager_;
   scoped_ptr<base::Value> default_config_;
   int count_;
   ScopedTraceEvent trace_event_;
 };
 
-namespace {
 
 static void* kCANHKey = (void*)(0x01);
 static void* kCANLKey = (void*)(0x02);
@@ -114,8 +132,14 @@ static const char kOscConfig [] =  {" \
 
 
 static ChnlCalcManagerTest* gCurrentTest = NULL;
+
+void ChnlCalcManagerDelegate::MayNotifyUI(scoped_refptr<ChnlCalcResult> result) {
+  gCurrentTest->mock.NotifyUI();
 }
 
+void ChnlCalcManagerDelegate::RecordResult(scoped_refptr<ChnlCalcResult> result) {
+  gCurrentTest->mock.CalcFinish();
+}
 
 void ChnlCalcManagerTest::SetUp() {
   gCurrentTest = this;
@@ -126,13 +150,8 @@ void ChnlCalcManagerTest::TearDown() {
   gCurrentTest = NULL;
 }
 
-void ChnlCalcManager::MayNotifyUI(scoped_refptr<ChnlCalcResult> result) {
-  gCurrentTest->mock.NotifyUI();
 }
 
-void ChnlCalcManager::RecordResult(scoped_refptr<ChnlCalcResult> result) {
-  gCurrentTest->mock.CalcFinish();
-}
 
 void SetUpManager(ChnlCalcManager* manager) {
   CalcGroup* chnl_group = new CalcGroup("chnl");
@@ -151,14 +170,15 @@ void SetUpManager(ChnlCalcManager* manager) {
 }
 
 TEST_F(ChnlCalcManagerTest, ProcessOne) {
-  ChnlCalcManager chnl_calc_manager;
+  ChnlCalcManagerDelegate observer;
+  ChnlCalcManager chnl_calc_manager(&observer);
   SetUpManager(&chnl_calc_manager);
 
   EXPECT_CALL(mock, CalcFinish()).Times(1).WillOnce(Invoke(&ActionQuitUI));
   EXPECT_CALL(mock, NotifyUI()).Times(1);
   ConfigManager::Config config = { 1,  GetConfig(kOscConfig) };
   OscRawDataHandle osc_raw_data = new OscRawData(DT_CS1202, 
-      new OscRawDataDeviceConfig(config));
+      new OscRawDataDeviceConfig(config, false));
   chnl_calc_manager.RawDataCollected(osc_raw_data);
 
   GetTestProcess()->MainMessageLoopRun();
@@ -166,7 +186,8 @@ TEST_F(ChnlCalcManagerTest, ProcessOne) {
 
 
 void ChnlCalcManagerTest::StartProduce() {
-  manager_.reset(new ChnlCalcManager);
+  delegate_.reset(new ChnlCalcManagerDelegate);
+  manager_.reset(new ChnlCalcManager(delegate_.get()));
   SetUpManager(manager_.get());
   default_config_.reset(GetConfig(kOscConfig));
   ProduceOne();
@@ -175,7 +196,7 @@ void ChnlCalcManagerTest::StartProduce() {
 void ChnlCalcManagerTest::ProduceOne() {
   ConfigManager::Config config = { count_,  default_config_.get() };
   OscRawDataHandle osc_raw_data = new OscRawData(DT_CS1202, 
-    new OscRawDataDeviceConfig(config));
+    new OscRawDataDeviceConfig(config, false));
   manager_->RawDataCollected(osc_raw_data);
 
   ++count_;
