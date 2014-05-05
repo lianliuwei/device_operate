@@ -169,9 +169,10 @@ bool OscDataCollecter::IsCollected() {
 OscRawDataDeviceConfigHandle OscDataCollecter::LastConfig() {
   ConfigManager::Config config = osc_device_->config_manager()->GetLast();
   if (last_config_.get() == NULL) {
-    last_config_ = new OscRawDataDeviceConfig(config);
+    // TODO need get hardware diff from PortDevice
+    last_config_ = new OscRawDataDeviceConfig(config, false);
   } else if (!last_config_->SameConfig(config)) {
-    last_config_ = new OscRawDataDeviceConfig(config);
+    last_config_ = new OscRawDataDeviceConfig(config, false);
   }
   return last_config_;
 }

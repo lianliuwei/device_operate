@@ -14,6 +14,8 @@ public:
   ChnlCalcResult(OscRawDataHandle handle);
 
   OscRawData* raw_data();
+  OscDeviceProperty* property() { return handle_->property(); }
+  bool hardware_diff() const { return handle_->hardware_diff(); }
 
 private:
   virtual ~ChnlCalcResult() {}
@@ -24,6 +26,8 @@ private:
   virtual void ReleaseCalcDelegateRef();
 
   OscRawDataHandle handle_;
+
+  DISALLOW_COPY_AND_ASSIGN(ChnlCalcResult);
 };
 
 } // namespace canscope

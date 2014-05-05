@@ -20,5 +20,4 @@ void ChnlCalcResult::ReleaseCalcDelegateRef() {
 }
 
 
-
 } // namespace canscope

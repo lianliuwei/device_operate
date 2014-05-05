@@ -3,9 +3,10 @@
 namespace canscope {
 
 OscRawDataDeviceConfig::OscRawDataDeviceConfig(
-    const ConfigManager::Config& config)
+    const ConfigManager::Config& config, bool hardware_diff)
     : OscDeviceProperty()
-    , id_(config.id) {
+    , id_(config.id)
+    , hardware_diff_(hardware_diff) {
   // config ownership still will ConfigManager
   Init(config.pref->DeepCopy());
 }
@@ -13,10 +14,6 @@ OscRawDataDeviceConfig::OscRawDataDeviceConfig(
 bool OscRawDataDeviceConfig::SameConfig(
     const ConfigManager::Config& config) const {
   return config.id == id_;
-}
-
-int OscRawDataDeviceConfig::id() const {
-  return id_;
 }
 
 OscRawData::OscRawData(DeviceType type, OscRawDataDeviceConfigHandle property)
@@ -65,9 +62,6 @@ OscDeviceProperty* OscRawData::property() {
   return property_.get();
 }
 
-int OscRawData::id() const {
-  return property_->id();
-}
 
 void OscRawData::set_data(uint8* data, int size) {
   raw_data_ = data;
