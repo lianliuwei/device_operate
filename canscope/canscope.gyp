@@ -32,6 +32,28 @@
       ], 
     },
     {
+      'target_name': 'chnl',
+      'type': 'static_library',
+      'dependencies': [
+        '../third_party/chromium/base/base_bin.gyp:base_bin',
+        'canscope_device.gyp:canscope_device',
+      ],
+      'include_dirs': [
+        '..',
+      ], 
+      'sources': [
+        'chnl/chnl.h',
+        'chnl/chnl.cc',
+        'chnl/chnl_container.h',
+        'chnl/chnl_container.cc',
+        'chnl/canscope_chnl.h',
+        'chnl/canscope_chnl.cc',
+        'chnl/canscope_chnl_container.h',
+        'chnl/canscope_chnl_container.cc',
+        'chnl/canscope_chnl_constants.h',
+      ], 
+    },
+    {
       'target_name': 'test_support',
       'type': 'static_library',
       'sources' : [
@@ -54,6 +76,40 @@
         '../third_party/chromium/base/base_bin.gyp:base_bin',
         '../third_party/chromium/testing/gtest.gyp:gtest',
        ],
+    },
+    {
+      'target_name': 'canscope_unittests',
+      'type': '<(gtest_target_type)',
+      'sources': [
+        'osc_chnl_calc/chnl_calc_manager_unittest.cc',
+        'chnl/canscope_chnl_container_unittest.cc',
+        
+        'device/test/scoped_open_device.h',
+        'device/test/scoped_open_device.cc',
+        'test/test_process.h',
+        'test/test_process.cc',
+      ],
+      
+      'include_dirs': [
+        '..',
+      ], 
+      'dependencies': [
+        '../third_party/chromium/base/base_bin.gyp:base_bin',
+        '../third_party/chromium/base/base_bin.gyp:base_prefs_bin',
+        '../third_party/chromium/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
+        '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
+        '../third_party/chromium/testing/gmock.gyp:gmock',
+        '../third_party/chromium/testing/gtest.gyp:gtest',
+        '../common/common.gyp:common',
+        '../device/device.gyp:device',
+        'canscope_device.gyp:canscope_usb_port',
+        'canscope_device.gyp:canscope_device',
+        'device_simulate/device_simulate.gyp:simulate_device',
+        '../depend_calc/depend_calc.gyp:depend_calc',
+        'osc_chnl_calc',
+        'test_support',
+        'chnl',
+      ],
     },
   ],
 }
