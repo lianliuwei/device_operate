@@ -53,7 +53,7 @@ enum TimeBase {
   k1s,
   kTimeBaseSize,
 };
-// unit ms
+// unit ns
 uint32 TimeBaseValue(TimeBase time_base);
 
 enum Coupling {
@@ -78,6 +78,7 @@ enum TriggerSource {
 
 bool IsTriggerSourceChnl(TriggerSource trigger_source);
 Chnl TriggerSource2Chnl(TriggerSource trigger_source);
+TriggerSource Chnl2TriggerSource(Chnl chnl);
 
 enum TriggerType {
   kRisingEdge, 
@@ -103,7 +104,6 @@ enum CompareType {
   kEqual,
 };
 
-DECLARE_ENUM_STORE_MEMBER(Chnl);
 DECLARE_ENUM_STORE_MEMBER(VoltRange);
 DECLARE_ENUM_STORE_MEMBER(TimeBase);
 DECLARE_ENUM_STORE_MEMBER(Coupling);
