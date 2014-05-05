@@ -7,7 +7,7 @@
 #include "canscope/device/osc_device/osc_device.h"
 #include "canscope/device/usb_port_device_delegate.h"
 #include "canscope/device/test/scoped_open_device.h"
-#include "canscope/device/test/test_util.h"
+#include "canscope/device/config_util.h"
 #include "canscope/device/config_manager.h"
 #include "canscope/device/osc_device/osc_device.h"
 #include "canscope/device/osc_device/osc_device_handle.h"
