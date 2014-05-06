@@ -51,6 +51,7 @@
         'chnl/canscope_chnl_container.h',
         'chnl/canscope_chnl_container.cc',
         'chnl/canscope_chnl_constants.h',
+        'chnl/canscope_chnl_constants.cc',
       ], 
     },
     {
