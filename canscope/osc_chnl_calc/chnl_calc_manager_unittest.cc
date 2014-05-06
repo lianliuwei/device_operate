@@ -7,6 +7,7 @@
 #include "canscope/osc_chnl_calc/chnl_calc_manager.h"
 #include "canscope/osc_chnl_calc/chnl_calc_item.h"
 #include "canscope/osc_chnl_calc/can_diff_calc_item.h"
+#include "canscope/app/freq_time.h"
 
 using namespace canscope;
 using namespace base;
