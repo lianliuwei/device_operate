@@ -23,7 +23,7 @@ public:
   virtual device::Error GetDeviceInfo(DeviceInfo* device_info);
   virtual device::Error ReadOscData(uint8* buffer, int size);
   virtual device::Error ReadFrameData(uint8* buffer, int size);
-  virtual void DetachFromThread() { thread_check_.DetachFromThread(); }
+  virtual void DetachFromThread();
 
 protected:
   CANScopeDeviceRegisterGroup group_;
