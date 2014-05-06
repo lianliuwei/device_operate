@@ -37,4 +37,6 @@ private:
   bool notify_end_;
   AsyncTaskHandle task_;
   scoped_ptr<CalcGroupWalker> walker_;
+
+  DISALLOW_COPY_AND_ASSIGN(CalcExecuter);
 };
