@@ -29,6 +29,7 @@ OscRawData::OscRawData(int size, OscRawDataDeviceConfigHandle property)
     : property_(property)
     , own_(true) {
   // type are invalid
+  property_->DetachFromThread();
   size_ = size;
   raw_data_ = new uint8[size];
 }
@@ -40,6 +41,7 @@ OscRawData::OscRawData(uint8* raw_data, int size, bool own,
     , size_(size)
     , own_(own_)
     , type_(type) {
+  property_->DetachFromThread();
 }
 
 OscRawData::~OscRawData() {
@@ -94,7 +96,5 @@ PooledOscRawData::~PooledOscRawData() {
     set_data(NULL, 0);
   }
 }
-
-
 
 } // namespace canscope
