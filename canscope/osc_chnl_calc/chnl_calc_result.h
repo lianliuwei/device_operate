@@ -16,7 +16,7 @@ public:
   OscRawData* raw_data();
   OscDeviceProperty* property() { return handle_->property(); }
   bool hardware_diff() const { return handle_->hardware_diff(); }
-
+  DeviceType type() const { return handle_->type(); }
 private:
   virtual ~ChnlCalcResult() {}
  
