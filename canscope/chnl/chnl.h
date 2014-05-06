@@ -40,6 +40,8 @@ public:
   virtual bool IsTrigger() const = 0;
   virtual void BeTrigger() = 0;
 
+  double VRangeValue();
+
 protected:
   friend class ChnlContainer;
 

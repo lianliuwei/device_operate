@@ -57,3 +57,7 @@ ChnlContainer::~ChnlContainer() {
   }
   chnls_.clear();
 }
+
+double ChnlContainer::HRangeValue() {
+  return HRangeOption()[HRange()];
+}

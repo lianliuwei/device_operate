@@ -12,6 +12,8 @@ public:
   virtual const std::vector<double>& HRangeOption() const = 0;
   virtual void SetHRange(int i) = 0;
 
+  double HRangeValue();
+
   Chnl* GetChnlByType(ChnlTypeEnum type);
   int ChnlCount() const;
   Chnl* GetChnlAt(int index);
