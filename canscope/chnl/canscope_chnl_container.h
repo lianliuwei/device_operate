@@ -20,9 +20,10 @@ public:
   virtual int HRange() const;
   virtual const std::vector<double>& HRangeOption() const;
   virtual void SetHRange(int i);
-
+  
 private:
   void UpdateContainer(bool hardware_diff, bool init);
+  void UpdateHRange(DeviceType type, bool init);
 
   OscDeviceProperty* device_property() const;
 
@@ -31,7 +32,8 @@ private:
   scoped_ptr<CANScopeChnl> can_diff_;
 
   bool hardware_diff_;
-  
+  DeviceType type_;
+
   scoped_refptr<ChnlCalcResult> result_;
   OscDeviceHandle* handle_;
 
