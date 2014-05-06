@@ -25,8 +25,6 @@
         'osc_chnl_calc/chnl_calc_item.cc',
         'osc_chnl_calc/can_diff_calc_item.h',
         'osc_chnl_calc/can_diff_calc_item.cc',
-        'osc_chnl_calc/freq_time.h',
-        'osc_chnl_calc/freq_time.cc',
         'osc_chnl_calc/osc_chnl_data.h',
         'osc_chnl_calc/osc_chnl_data.cc',
       ], 
@@ -53,6 +51,35 @@
         'chnl/canscope_chnl_constants.h',
         'chnl/canscope_chnl_constants.cc',
       ], 
+    },
+    {
+      'target_name': 'canscope_osc_app',
+      'type': 'static_library',
+      'include_dirs': [
+        '..',
+      ], 
+       'dependencies': [
+        '../third_party/chromium/base/base_bin.gyp:base_bin',
+        '../third_party/chromium/base/base_bin.gyp:base_prefs_bin',
+        '../third_party/chromium/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
+        '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
+        '../common/common.gyp:common',
+        '../device/device.gyp:device',
+        'canscope_device.gyp:canscope_usb_port',
+        'device_simulate/device_simulate.gyp:simulate_device',
+        'canscope_device.gyp:canscope_device',
+        '../depend_calc/depend_calc.gyp:depend_calc',
+        'osc_chnl_calc',
+        'chnl',
+       ],
+      'sources' : [
+        'app/canscope_process.h',
+        'app/canscope_process.cc',
+        'app/canscope_chnl_calc.h',
+        'app/canscope_chnl_calc.cc',
+        'app/freq_time.h',
+        'app/freq_time.cc',
+      ],
     },
     {
       'target_name': 'test_support',
@@ -84,11 +111,16 @@
       'sources': [
         'osc_chnl_calc/chnl_calc_manager_unittest.cc',
         'chnl/canscope_chnl_container_unittest.cc',
+        'app/canscope_chnl_calc_unittest.cc',
         
         'device/test/scoped_open_device.h',
         'device/test/scoped_open_device.cc',
         'test/test_process.h',
         'test/test_process.cc',
+        'app/canscope_chnl_calc.h',
+        'app/canscope_chnl_calc.cc',
+        'app/freq_time.h',
+        'app/freq_time.cc',
       ],
       
       'include_dirs': [
