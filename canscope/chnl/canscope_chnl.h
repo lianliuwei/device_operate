@@ -25,6 +25,7 @@ public:
   virtual int VRange() const;
   virtual const std::vector<double>& VRangeOption() const;
   virtual void SetVRange(int i);
+
   virtual bool IsTrigger() const;
   virtual void BeTrigger();
 
@@ -33,7 +34,7 @@ private:
   Property<VoltRange>* SetVoltRange();
   ::device::DoubleStoreMember* GetVoltOffset() const;
   Property<double>* SetVoltOffset();
-  void* Key() const;
+  const void* Key() const;
 
   OscDeviceProperty* device_property() const;
 

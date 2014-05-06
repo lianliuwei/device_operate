@@ -7,7 +7,7 @@
 class CalcDelegate;
 class CalcExecuter;
 
-typedef void* CalcKey;
+typedef const void* CalcKey;
 
 class CalcItem {
 public:
