@@ -136,6 +136,8 @@ protected:
   bool GetReaderMinMax(int64* min_value, int64* max_value);
 
 
+  // NOTE only call when you sure the buffer have data, data may be recycle
+  // this only check count.
   void FireCallbackNoLock(int64 reach_count);
 
   mutable base::Lock lock_;
