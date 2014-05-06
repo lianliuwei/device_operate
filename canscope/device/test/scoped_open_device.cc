@@ -25,19 +25,19 @@ using namespace base;
 
 namespace canscope {
 
-ScopeOpenDevice::ScopeOpenDevice(DeviceDelegate* device_delegate) 
+ScopedOpenDevice::ScopedOpenDevice(DeviceDelegate* device_delegate) 
     : device_delegate_(device_delegate)
     , open_(false) {
   DCHECK(device_delegate);
   open_ = InitDevice(device_delegate, &type_);
 }
 
-ScopeOpenDevice::~ScopeOpenDevice() {
+ScopedOpenDevice::~ScopedOpenDevice() {
   if (open_)
     CloseDevice(device_delegate_);
 }
 
-bool ScopeOpenDevice::InitDevice(DeviceDelegate* device_delegate, DeviceType* type) {
+bool ScopedOpenDevice::InitDevice(DeviceDelegate* device_delegate, DeviceType* type) {
 
   std::vector<string16> devices;
   device::Error err = device_delegate->EnumDevices(&devices);

@@ -123,7 +123,7 @@ protected:
 protected:
   ConfigManager osc_device_config_;
   scoped_ptr<DeviceDelegate> device_delegate_;
-  ScopeOpenDevice open_device_;
+  ScopedOpenDevice open_device_;
   scoped_ptr<OscDevice> osc_device_;
   scoped_ptr<OscDeviceHandle> osc_device_handle_;
   scoped_refptr<OscDataCollecter> osc_data_collecter_;
