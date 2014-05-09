@@ -18,7 +18,7 @@ bool AxisBackground::NormalSize( gfx::Size& size ) {
     return axis_painter_->NormalSize(size);
 }
 
-gfx::Size AxisBackground::GetMinimumSize() {
+gfx::Size AxisBackground::GetMinimumSize() const {
     return axis_painter_->GetMinimumSize();
 }
 

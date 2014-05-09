@@ -20,7 +20,7 @@ public:
   // if false the size no change the cx(y) is too small.
   bool NormalSize(gfx::Size& size);
 
-  gfx::Size GetMinimumSize();
+  gfx::Size GetMinimumSize() const;
 
 private:
   // paint the dash 2*grid-1 grid lines

@@ -105,7 +105,7 @@ bool AxisPainter::NormalSize(gfx::Size& size) {
   return true;
 }
 
-gfx::Size AxisPainter::GetMinimumSize() {
+gfx::Size AxisPainter::GetMinimumSize() const {
   int hdiv = h_grid_*2*h_grid_div_;
   int vdiv =v_grid_*2*v_grid_div_;
   return gfx::Size(2*hdiv + 1, 2*vdiv + 1); //at least 2 pixel

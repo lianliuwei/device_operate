@@ -22,7 +22,8 @@ public:
   bool NormalSize(gfx::Size& size);
 
   // see commit in axis_painter.h
-  gfx::Size GetMinimumSize();
+  gfx::Size GetMinimumSize() const;
+
 private:
   // the painter of axis
   scoped_ptr<AxisPainter> axis_painter_;
