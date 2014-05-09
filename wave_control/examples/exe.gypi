@@ -1,16 +1,20 @@
 {
   'type': 'executable',
+  
+  'variables': {
+    'BASE_PATH': '../../third_party/chromium/',
+  },
+  
   'dependencies': [
-    '<(DEPTH)/base/base.gyp:base',
-    '<(DEPTH)/base/base.gyp:base_i18n',
-    '<(DEPTH)/skia/skia.gyp:skia',
-    '<(DEPTH)/ui/ui.gyp:ui',
-    '<(DEPTH)/ui/ui.gyp:ui_resources',
-    '<(DEPTH)/chrome/chrome_resources.gyp:packed_resources',
-    '<(DEPTH)/ui/views/views.gyp:views',
-    '<(DEPTH)/ui/compositor/compositor.gyp:compositor',
-    '<(DEPTH)/third_party/icu/icu.gyp:icui18n',
-    '<(DEPTH)/third_party/icu/icu.gyp:icuuc', '<(DEPTH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
+    '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+    '<(BASE_PATH)/base/base_bin.gyp:base_i18n_bin',
+    '<(BASE_PATH)/skia/skia_bin.gyp:skia_bin',
+    '<(BASE_PATH)/ui/ui_bin.gyp:ui_bin',
+    '<(BASE_PATH)/ui/ui_bin.gyp:ui_resources_bin',
+    '<(BASE_PATH)/chrome/chrome_resources_bin.gyp:packed_resources_bin',
+    '<(BASE_PATH)/ui/views/views_bin.gyp:views_bin',
+    '<(BASE_PATH)/third_party/icu_bin.gyp:icui18n_bin',
+    '<(BASE_PATH)/third_party/icu_bin.gyp:icuuc_bin', '<(BASE_PATH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
   ],
   'include_dirs': [
    '../..',

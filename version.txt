@@ -1,6 +1,6 @@
 third_party/chromium/
-chromium_base_bin@d0eefee948605f53e854fd0f31e528d3bf887ec4
-branch pure
+chromium_base2@f598a615640a2324ad19af44db2240b48667f05f
+branch ui_modify_bin
 
 build/
 chromium_base_bin@d0eefee948605f53e854fd0f31e528d3bf887ec4

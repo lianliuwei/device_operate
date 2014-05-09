@@ -8,7 +8,7 @@ vars = {
 deps = {
   'third_party/chromium/':
       Var('self_url') + 
-      '/chromium_base2.git@f598a615640a2324ad19af44db2240b48667f05f',
+      '/chromium_base2.git@6882be0cdc4bbeb92cf6b07db390f79663dee735',
       
   'third_party/chromium/testing/gmock':
       Var('git_url') + '/external/googlemock.git@6b1759c3816d574bddde3e1725c51a811c8870e7',

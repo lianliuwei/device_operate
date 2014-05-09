@@ -1,14 +1,20 @@
 {
+  'variables': {
+    'BASE_PATH': '../third_party/chromium/',
+  },
   'targets' : [
     {
       'target_name': 'wave_control',
       'type': 'static_library',
       'dependencies': [
-        '<(DEPTH)/base/base.gyp:base',
-        '<(DEPTH)/ui/ui.gyp:ui',
-        '<(DEPTH)/ui/ui.gyp:ui_resources',
-        '<(DEPTH)/ui/views/views.gyp:views',
-        '<(DEPTH)/skia/skia.gyp:skia',
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/ui/ui_bin.gyp:ui_bin',
+        '<(BASE_PATH)/ui/ui_bin.gyp:ui_resources_bin',
+        '<(BASE_PATH)/ui/views/views_bin.gyp:views_bin',
+        '<(BASE_PATH)/skia/skia_bin.gyp:skia_bin',
+      ],
+      'include_dirs': [
+        '..',
       ],
       'sources': [
         # view model
