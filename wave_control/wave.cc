@@ -3,6 +3,9 @@
 #include "wave_control/wave_container.h"
 
 WaveControl* Wave::wave_control() {
+  if (wave_container() == NULL) {
+    return NULL;
+  }
   return wave_container()->wave_control();
 }
 
