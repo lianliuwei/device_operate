@@ -11,9 +11,9 @@
 using namespace views;
 
 FillBoxLayout::FillBoxLayout(FillBoxLayout::Orientation orientation,
-                     int inside_border_horizontal_spacing,
-                     int inside_border_vertical_spacing,
-                     int between_child_spacing)
+                             int inside_border_horizontal_spacing,
+                             int inside_border_vertical_spacing,
+                             int between_child_spacing)
     : orientation_(orientation),
       inside_border_horizontal_spacing_(inside_border_horizontal_spacing),
       inside_border_vertical_spacing_(inside_border_vertical_spacing),
