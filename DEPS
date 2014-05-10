@@ -9,6 +9,9 @@ deps = {
   'third_party/chromium/':
       Var('self_url') + 
       '/chromium_base2.git@6882be0cdc4bbeb92cf6b07db390f79663dee735',
+  # ui need those head    
+  'third_party/chromium/third_party/skia/include':
+      Var('git_url') + '/external/skia/include.git@44dd501fd86752e61a0291fec7ca7d3b51d64563',
       
   'third_party/chromium/testing/gmock':
       Var('git_url') + '/external/googlemock.git@6b1759c3816d574bddde3e1725c51a811c8870e7',
