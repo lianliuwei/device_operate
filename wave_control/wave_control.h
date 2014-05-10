@@ -29,6 +29,12 @@ public:
 
   virtual void Accept(WaveControlVisitor* visitor);
 
+  // drag move wave
+  virtual bool CANMoveWaveTo(Wave* wave, WaveContainer* container) = 0;
+  virtual bool CANCreateWaveContainerAt(Wave* wave, size_t index) = 0;
+  virtual void MoveWaveTo(Wave* wave, WaveContainer* container) = 0;
+  virtual void CreateWaveContainerAt(Wave* wave, size_t index) = 0;
+
 protected:
   void SetWaveControl(WaveContainer* container, WaveControl* control);
 

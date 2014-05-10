@@ -11,6 +11,7 @@
 #include "wave_control/views/all_fill_layout.h"
 #include "wave_control/views/handle_point_view.h"
 #include "wave_control/views/yt_wave_container_view.h"
+#include "wave_control/views/wave_drag_controller.h"
 
 using namespace ui;
 using namespace std;
@@ -827,6 +828,14 @@ const gfx::Transform YTWaveContainerInnerView::GetMeasureWaveTransform() {
 void YTWaveContainerInnerView::OnSelectWaveChanged() {
   UpdateAxis();
   measure_line_view_->MeasureWaveChanged();
+  // may be call no add to container
+  if (parent() == NULL) {
+    return;
+  }
+  // only cancel be drag view.
+  if (container_view() == GetDragController()->start_view()) {
+    GetDragController()->Cancel();
+  }
 }
 
 void YTWaveContainerInnerView::OnBoundsChanged(const gfx::Rect& previous_bounds) {
@@ -870,9 +879,27 @@ void YTWaveContainerInnerView::PaintChildren(gfx::Canvas* canvas) {
 }
 
 bool YTWaveContainerInnerView::OnMousePressed(const ui::MouseEvent& event) {
+  if (GetDragController()->DragEvent(event)) {
+    Wave* select_wave = container_->GetSelectWave();
+    if (select_wave) {
+      View* view = child_at(WaveIDToViewID(0));
+      vector<View*> renderers;
+      renderers.push_back(view);
+      vector<gfx::Rect> r_bounds;
+      r_bounds.push_back(view->GetLocalBounds());
+      gfx::Rect paint_bounds = view->GetLocalBounds();
+      paint_bounds.Offset(gfx::Vector2d(10, 10));
+      GetDragController()->Init(container_view(), select_wave, 
+          renderers, r_bounds, paint_bounds);
+
+      return GetDragController()->OnMousePressed(this, event);
+    }
+  }
+
   if (!event.IsOnlyRightMouseButton()) {
     return false;
   }
+
   if (menu_runner_.get() && menu_runner_->IsRunning()) {
     return true;
   }
@@ -952,4 +979,24 @@ void YTWaveContainerInnerView::CancelMenu() {
 
 YTWaveContainerView* YTWaveContainerInnerView::container_view() const {
   return static_cast<YTWaveContainerView*>(const_cast<View*>(parent()));
+}
+
+WaveDragController* YTWaveContainerInnerView::GetDragController() {
+  return static_cast<WaveControlView*>(parent()->parent())->drag_controller();
+}
+
+bool YTWaveContainerInnerView::OnMouseDragged(const ui::MouseEvent& event) {
+  return GetDragController()->OnMouseDragged(this, event);
+}
+
+void YTWaveContainerInnerView::OnMouseReleased(const ui::MouseEvent& event) {
+  GetDragController()->OnMouseReleased(this, event);
+}
+
+void YTWaveContainerInnerView::OnMouseCaptureLost() {
+  GetDragController()->OnMouseCaptureLost(this);
+}
+
+bool YTWaveContainerInnerView::ContainerEvent(const ui::MouseEvent& event) {
+  return GetDragController()->DragEvent(event);
 }

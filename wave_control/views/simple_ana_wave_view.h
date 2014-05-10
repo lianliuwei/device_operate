@@ -32,6 +32,8 @@ private:
   void UpdateTransform();
   void UpdateData();
 
+  bool ContainerEvent(const ui::MouseEvent& event);
+
   gfx::Transform CalcTransform();
 
   double handle_offset_;

@@ -14,7 +14,6 @@
 #include "wave_control/views/handle_bar_model_observer.h"
 #include "wave_control/views/measure_line/measure_line_container_view.h"
 
-
 class HandleBarDelegate : public HandleBarModel
                         , public HandleBarObserver {
 public:
@@ -47,6 +46,7 @@ class YTWaveVisitor;
 
 class SimpleAnaWaveView;
 class YTWaveContainerView;
+class WaveDragController;
 
 // real YTWaveContainer show view, the YTWaveContainerView
 // just frame
@@ -97,6 +97,11 @@ public:
   virtual void Layout() OVERRIDE;
   virtual void PaintChildren(gfx::Canvas* canvas) OVERRIDE;
   virtual bool OnMousePressed(const ui::MouseEvent& event) OVERRIDE;
+  virtual bool OnMouseDragged(const ui::MouseEvent& event) OVERRIDE;
+  virtual void OnMouseReleased(const ui::MouseEvent& event) OVERRIDE;
+  virtual void OnMouseCaptureLost() OVERRIDE;
+
+  bool ContainerEvent(const ui::MouseEvent& event);
 
 private:
   // implement MeasureLineContainerView::Delegate
@@ -116,6 +121,8 @@ private:
   virtual void ListItemsChanged(size_t start, size_t count);
 
   void OnSelectWaveChanged();
+
+  WaveDragController* GetDragController();
 
   AxisBackground* get_axis_background();
   void SetGrid(int v_grid, int h_grid);

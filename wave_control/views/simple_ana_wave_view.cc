@@ -1,6 +1,8 @@
 #include "wave_control/views/simple_ana_wave_view.h"
 #include "wave_control/views/transform_util.h"
 
+#include "wave_control/views/yt_wave_container_inner_view.h"
+
 namespace {
 bool IsSet(int set, int test) {
   return (set & test) != 0;
@@ -94,6 +96,10 @@ void SimpleAnaWaveView::MoveToY(int y_pos) {
 }
 
 bool SimpleAnaWaveView::OnMousePressed(const ui::MouseEvent& event) {
+  if (ContainerEvent(event)) {
+    return false;
+  }
+
   if (!event.IsOnlyLeftMouseButton()) {
     return false;
   }
@@ -127,4 +133,8 @@ bool SimpleAnaWaveView::OnMouseDragged(const ui::MouseEvent& event) {
 
 void SimpleAnaWaveView::OnMouseReleased(const ui::MouseEvent& event) {
 
+}
+
+bool SimpleAnaWaveView::ContainerEvent(const ui::MouseEvent& event) {
+  return static_cast<YTWaveContainerInnerView*>(parent())->ContainerEvent(event);
 }

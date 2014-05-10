@@ -1,4 +1,5 @@
 #include "wave_control/classify_wave_control.h"
+#include "wave_control/yt_wave_container.h"
 
 namespace {
 static const int kWaveContainerOrder[] = {
@@ -24,4 +25,52 @@ void ClassifyWaveControl::AddWaveContainer(WaveContainer* container) {
   }
   SetWaveControl(container, this);
   AddAt(insert_index, container);
+}
+
+bool ClassifyWaveControl::CANMoveWaveTo(Wave* wave, WaveContainer* container) {
+  if (wave->wave_control() != this) {
+    return false;
+  }
+  // already in WaveContainer
+  if (wave->wave_container() == container) {
+    return false;
+  }
+  // only support YTWaveContainer wave move
+  return container->AsYTWaveContainer() != NULL 
+      && wave->wave_container()->AsYTWaveContainer() != NULL;
+}
+
+bool ClassifyWaveControl::CANCreateWaveContainerAt(Wave* wave, size_t index) {
+  if (wave->wave_control() != this) {
+    return false;
+  }
+  // no YT wave can no move
+  if (wave->wave_container()->AsYTWaveContainer() == NULL) {
+    return false;
+  }
+  DCHECK(index >= 0 && index <= WaveContainerCount());
+  // if check after last one, check last one
+  if (index == WaveContainerCount()) {
+    --index;
+  }
+  WaveContainer* container = GetWaveContainerAt(index);
+
+  return container->AsYTWaveContainer() != NULL;
+}
+
+void ClassifyWaveControl::MoveWaveTo(Wave* wave, WaveContainer* container) {
+  DCHECK(CANMoveWaveTo(wave, container));
+  YTWaveContainer* old_container = wave->wave_container()->AsYTWaveContainer();
+  old_container->RemoveWave(wave);
+  container->AsYTWaveContainer()->AddMovedWave(wave);
+}
+
+void ClassifyWaveControl::CreateWaveContainerAt(Wave* wave, size_t index) {
+  DCHECK(CANCreateWaveContainerAt(wave, index));
+  YTWaveContainer* old_container = wave->wave_container()->AsYTWaveContainer();
+  old_container->RemoveWave(wave);
+  YTWaveContainer* new_container = CreateYTWaveContainer();
+  new_container->AddMovedWave(wave);
+  SetWaveControl(new_container, this);
+  AddAt(index, new_container);
 }
