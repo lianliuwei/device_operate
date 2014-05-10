@@ -24,6 +24,7 @@ public:
   Wave* GetWaveAt(size_t index);
   // may layout the wave in subclass
   virtual void AddWave(Wave* wave); 
+  virtual void AddMovedWave(Wave* wave);
   // no delete wave
   virtual void RemoveWave(Wave* wave);
   size_t WaveCount() const;

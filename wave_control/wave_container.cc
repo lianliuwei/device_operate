@@ -5,7 +5,6 @@ WaveControl* WaveContainer::wave_control() {
 }
 
 void WaveContainer::SetWave(Wave* wave, WaveContainer* container) {
-  CHECK(wave->wave_container_ == NULL);
   wave->wave_container_ = container;
 }
 

@@ -26,11 +26,13 @@ bool WaveControl::HasWaveContainer(WaveContainer* container) {
 }
 
 void WaveControl::AddWaveContainer(WaveContainer* container) {
+  DCHECK(container->wave_control() == NULL);
   SetWaveControl(container, this);
   Add(container);
 }
 
 void WaveControl::RemoveWaveContainer(WaveContainer* container) {
+  DCHECK(container->wave_control() == this);
   SetWaveControl(container, NULL);
   size_t i = WaveContainerAt(container);
   RemoveAt(i);
@@ -53,6 +55,5 @@ void WaveControl::RemoveWaveContainerObserver(ui::ListModelObserver* observer) {
 }
 
 void WaveControl::SetWaveControl(WaveContainer* container, WaveControl* control) {
-  CHECK(container->wave_control_ == NULL);
   container->wave_control_ = control;
 }

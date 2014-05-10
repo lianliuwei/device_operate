@@ -46,12 +46,23 @@ Wave* YTWaveContainer::GetWaveAt(size_t index) {
 }
 
 void YTWaveContainer::AddWave(Wave* wave) {
+  DCHECK(wave->wave_container() == NULL);
+  SetWave(wave, this);
   Add(wave); 
+}
+
+
+void YTWaveContainer::AddMovedWave(Wave* wave) {
+  DCHECK(wave->wave_container() == NULL);
+  SetWave(wave, this);
+  AddAt(0, wave);
 }
 
 void YTWaveContainer::RemoveWave(Wave* wave) {
   size_t i = WaveAt(wave);
   RemoveAt(i);
+  DCHECK(wave->wave_container() == this);
+  SetWave(wave, NULL);
 }
 
 size_t YTWaveContainer::WaveCount() const {
