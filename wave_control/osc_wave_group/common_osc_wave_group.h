@@ -4,7 +4,6 @@
 
 class CommonOscWaveGroup;
 
-
 class RefTriggerPart : public base::RefCounted<RefTriggerPart>
                      , public TriggerPart {
 public:
@@ -25,6 +24,9 @@ public:
 private:
   friend class base::RefCounted<RefTriggerPart>;
   ~RefTriggerPart();
+  
+  friend class CommonOscWaveGroup;
+  void set_osc_wave(OscWave* osc_wave) { osc_wave_ = osc_wave; }
 
   OscWave* osc_wave_;
 
@@ -53,6 +55,9 @@ private:
   friend class base::RefCounted<RefHorizontalPart>;
   ~RefHorizontalPart();
 
+  friend class CommonOscWaveGroup;
+  void set_osc_wave(OscWave* osc_wave) { osc_wave_ = osc_wave; }
+
   OscWave* osc_wave_;
 
   // notify delete
@@ -79,6 +84,9 @@ public:
 private:
   friend class base::RefCounted<RefVerticalPart>;
   ~RefVerticalPart();
+
+  friend class CommonOscWaveGroup;
+  void set_osc_wave(OscWave* osc_wave) { osc_wave_ = osc_wave; }
 
   OscWave* osc_wave_;
   gfx::Image icon_;
@@ -123,6 +131,10 @@ private:
   int HorizontalIndex(HorizontalPart* part);
   int VerticalIndex(VerticalPart* part);
   
+  OscWave* SameTriggerWave(OscWave* osc_wave);
+  OscWave* SameHorizontalWave(OscWave* osc_wave);
+  OscWave* SameVerticalWave(OscWave* osc_wave);
+
   bool NeedUpdateTriggerOffset(TriggerPart* trigger, OscWave* osc_wave);
   
   std::vector<OscWaveRecord> osc_waves_;

@@ -88,6 +88,53 @@ void CommonOscWaveGroup::RemoveOscWave(OscWave* osc_wave) {
       NOTREACHED();
     }
   }
+  std::vector<int> trigger_index;
+  // update the ref to the remove wave to other wave.
+  if (!trigger_changed_) {
+    OscWave* new_wave = SameTriggerWave(osc_wave);
+    DCHECK(new_wave);
+    for (int i = 0; i < trigger_count(); ++i) {
+      RefTriggerPart* part = static_cast<RefTriggerPart*>(trigger_at(i));
+      if (part->osc_wave() == osc_wave) {
+        part->set_osc_wave(new_wave);    
+        trigger_index.push_back(i);
+      }
+    }
+  }
+  std::vector<int> horizontal_index;
+  if (!horizontal_changed_) {
+    OscWave* new_wave = SameHorizontalWave(osc_wave);
+    DCHECK(new_wave);
+    for (int i = 0; i < horizontal_count(); ++i) {
+      RefHorizontalPart* part = static_cast<RefHorizontalPart*>(horizontal_at(i));
+      if (part->osc_wave() == osc_wave) {
+        part->set_osc_wave(new_wave);
+        horizontal_index.push_back(i);
+      }
+    }
+  }
+  std::vector<int> vertical_index;
+  if (!vertical_changed_) {
+    OscWave* new_wave = SameVerticalWave(osc_wave);
+    DCHECK(new_wave);
+    for (int i = 0; i < vertical_count(); ++i) {
+      RefVerticalPart* part = static_cast<RefVerticalPart*>(vertical_at(i));
+      if (part->osc_wave() == osc_wave) {
+        part->set_osc_wave(new_wave);
+        vertical_index.push_back(i);
+      }
+    }
+  }
+  for (size_t i = 0; i < trigger_index.size(); ++i) {
+    NotifyTriggerChanged(trigger_index[i]);
+  }
+
+  for (size_t i = 0; i < horizontal_index.size(); ++i) {
+    NotifyHorizontalChanged(horizontal_index[i]);
+  }
+  for (size_t i = 0; i < vertical_index.size(); ++i) {
+    NotifyHorizontalChanged(vertical_index[i]);
+  }
   if (trigger_changed_) {
     NotifyTriggerGroupChanged();
   }
@@ -97,6 +144,45 @@ void CommonOscWaveGroup::RemoveOscWave(OscWave* osc_wave) {
   if (vertical_changed_) {
     NotifyVerticalGroupChanged();
   }
+}
+
+OscWave* CommonOscWaveGroup::SameTriggerWave(OscWave* osc_wave) {
+  for (size_t i = 0; i < osc_waves_.size(); ++i) {
+    OscWaveRecord& record = osc_waves_[i];
+    if (record.wave == osc_wave) {
+      continue;
+    }
+    if (record.wave->IsSameTrigger(osc_wave)) {
+      return record.wave;
+    }
+  }
+  return NULL;
+}
+
+OscWave* CommonOscWaveGroup::SameHorizontalWave(OscWave* osc_wave) {
+  for (size_t i = 0; i < osc_waves_.size(); ++i) {
+    OscWaveRecord& record = osc_waves_[i];
+    if (record.wave == osc_wave) {
+      continue;
+    }
+    if (record.wave->IsSameHorizontal(osc_wave)) {
+      return record.wave;
+    }
+  }
+  return NULL;
+}
+
+OscWave* CommonOscWaveGroup::SameVerticalWave(OscWave* osc_wave) {
+  for (size_t i = 0; i < osc_waves_.size(); ++i) {
+    OscWaveRecord& record = osc_waves_[i];
+    if (record.wave == osc_wave) {
+      continue;
+    }
+    if (record.wave->IsSameVertical(osc_wave)) {
+      return record.wave;
+    }
+  }
+  return NULL;
 }
 
 bool CommonOscWaveGroup::HasOscWave(OscWave* osc_wave) {
