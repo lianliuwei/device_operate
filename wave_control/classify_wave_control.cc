@@ -63,6 +63,11 @@ void ClassifyWaveControl::MoveWaveTo(Wave* wave, WaveContainer* container) {
   YTWaveContainer* old_container = wave->wave_container()->AsYTWaveContainer();
   old_container->RemoveWave(wave);
   container->AsYTWaveContainer()->AddMovedWave(wave);
+
+  if (old_container->WaveCount() == 0) {
+    RemoveWaveContainer(old_container);
+    delete old_container;
+  }
 }
 
 void ClassifyWaveControl::CreateWaveContainerAt(Wave* wave, size_t index) {
@@ -73,4 +78,9 @@ void ClassifyWaveControl::CreateWaveContainerAt(Wave* wave, size_t index) {
   new_container->AddMovedWave(wave);
   SetWaveControl(new_container, this);
   AddAt(index, new_container);
+
+  if (old_container->WaveCount() == 0) {
+    RemoveWaveContainer(old_container);
+    delete old_container;
+  }
 }
