@@ -2,11 +2,18 @@
 
 #include "ui/gfx/transform.h"
 
-int TransformX(const gfx::Transform transform, int x);
-int TransformX(const gfx::Transform transform, double x);
+// two type of coordinate, 
+// [double, double] -> [int, int]  data to view
+// [int, ] -> [int, ] wave data index to view x pos
 
-int TransformReverseX(const gfx::Transform transform, int x);
+int XInt(const gfx::Transform& transform, double x);
+int YInt(const gfx::Transform& transform, double y);
 
-int TransformY(const gfx::Transform transform, double y);
+double ReverseXDouble(const gfx::Transform& transform, int x);
+double ReverseYDouble(const gfx::Transform& transform, int y);
 
-int TransformReverseY(const gfx::Transform transform, int y);
+
+int VectorToX(const gfx::Transform& transform, int index);
+int XToVerctor(const gfx::Transform& transform, int x);
+
+

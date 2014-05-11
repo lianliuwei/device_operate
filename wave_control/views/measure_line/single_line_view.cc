@@ -23,7 +23,7 @@ void SingleLineView::Layout() {
     point = horiz_ ? v_size.width()*3/8 : v_size.height()*3/8; 
 
   } else if (state_ == kHadWave) {
-    point = horiz_ ? TransformX(transform_, pos_) : TransformY(transform_, pos_);
+    point = horiz_ ? XInt(transform_, pos_) : YInt(transform_, pos_);
 
   } else if (state_ == kNoWave) {
     point = line_->line_point();
@@ -58,7 +58,7 @@ void SingleLineView::OnPaint(gfx::Canvas* canvas) {
     SkPaint paint;
     paint.setStrokeWidth(3);
     paint.setColor(kMeasureLineColor);
-    int y_pos = TransformY(transform_, y_value_);
+    int y_pos = YInt(transform_, y_value_);
     canvas->DrawPoint(Point(line_->line_point(), y_pos), paint);
 
   } else if (state_ == kNoWave) {
@@ -74,8 +74,8 @@ void SingleLineView::OnPosChanged(MeasureLinePartView* part_view, int pos) {
     
   } else if (state_ == kHadWave) {
     pos_ = horiz_ 
-        ? TransformReverseX(transform_, pos) 
-        : TransformReverseY(transform_, pos);
+        ? ReverseXDouble(transform_, pos) 
+        : ReverseYDouble(transform_, pos);
   }
 
   UpdateLabel();
@@ -91,7 +91,7 @@ void SingleLineView::LayoutLabel(int pos) {
   }
 
   if (value_label_ && has_value_) {
-    int y_pos = TransformY(transform_, y_value_);
+    int y_pos = YInt(transform_, y_value_);
     gfx::Size v_size = value_label_->GetPreferredSize();
     gfx::Point v_point(pos + 2, y_pos);
     value_label_->SetBoundsRect(Rect(v_point, v_size));
@@ -102,8 +102,8 @@ void SingleLineView::LayoutLabel(int pos) {
 void SingleLineView::UpdateLabel() {
   if (pos_label_) {
     double pos_value = horiz_ 
-        ? TransformReverseX(transform_, line_->line_point()) 
-        : TransformReverseY(transform_, line_->line_point());
+        ? ReverseXDouble(transform_, line_->line_point()) 
+        : ReverseYDouble(transform_, line_->line_point());
     pos_label_->SetText(StringPrintf(L"%.4f", pos_value));
   }
 
@@ -111,7 +111,7 @@ void SingleLineView::UpdateLabel() {
     double value;
     int x_point = line_->line_point();
     bool ret = container_view()->ValueForPoint(wave_, 
-        TransformReverseX(transform_, x_point), &value);
+        ReverseXDouble(transform_, x_point), &value);
     if (!ret) {
       value_label_->SetVisible(false);
       has_value_ = false;
@@ -140,8 +140,8 @@ void SingleLineView::WaveChanged(Wave* wave, const gfx::Transform& transform) {
     wave_ = wave;
     transform_ = transform;
     // use current line_pos update pos_ so measure line keep pos in view
-    pos_ = horiz_ ? TransformReverseX(transform, line_->line_point()) 
-        : TransformReverseY(transform, line_->line_point());
+    pos_ = horiz_ ? ReverseXDouble(transform, line_->line_point()) 
+        : ReverseYDouble(transform, line_->line_point());
     pos_label_ = new Label();
     // label will auto calculate color need set background color
     pos_label_->SetBackgroundColor(kWaveViewBackgroundColor);
@@ -171,8 +171,8 @@ void SingleLineView::WaveChanged(Wave* wave, const gfx::Transform& transform) {
       transform_ = transform;
       // use current line_pos update pos_ so measure line keep pos in view
       pos_ = horiz_ 
-          ? TransformReverseX(transform, line_->line_point()) 
-          : TransformReverseY(transform, line_->line_point());
+          ? ReverseXDouble(transform, line_->line_point()) 
+          : ReverseYDouble(transform, line_->line_point());
     }
 
   } else {

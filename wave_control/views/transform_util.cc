@@ -4,6 +4,7 @@
 
 #include "base/logging.h"
 #include "ui/gfx/point.h"
+#include "ui/gfx/point3_f.h"
 
 namespace {
 int SymmetricRound(double x) {
@@ -14,13 +15,7 @@ int SymmetricRound(double x) {
 }
 }
 
-int TransformX(const gfx::Transform transform, int x) {
-  gfx::Point point(x, 0);
-  transform.TransformPoint(point);
-  return point.x();
-}
-
-int TransformX(const gfx::Transform transform, double x) {
+int XInt(const gfx::Transform& transform, double x) {
   SkScalar p[4] = {
     SkDoubleToScalar(x),
     0,
@@ -30,14 +25,7 @@ int TransformX(const gfx::Transform transform, double x) {
     return SymmetricRound(p[0]);
 }
 
-int TransformReverseX(const gfx::Transform transform, int x) {
-  gfx::Point point(x, 0);
-  bool ret = transform.TransformPointReverse(point);
-  CHECK(ret) << "Invalid transform matrix";
-  return point.x();
-}
-
-int TransformY(const gfx::Transform transform, double y) {
+int YInt(const gfx::Transform& transform, double y) {
   SkScalar p[4] = {
     0,
     SkDoubleToScalar(y),
@@ -47,10 +35,30 @@ int TransformY(const gfx::Transform transform, double y) {
     return SymmetricRound(p[1]);
 }
 
-int TransformReverseY(const gfx::Transform transform, int y) {
-  gfx::Point point(0, y);
+double ReverseXDouble(const gfx::Transform& transform, int x) {
+  gfx::Point3F point(x, 0, 0);
+  bool ret = transform.TransformPointReverse(point);
+  CHECK(ret) << "Invalid transform matrix";
+  return point.x();
+}
+
+
+double ReverseYDouble(const gfx::Transform& transform, int y) {
+  gfx::Point3F point(0, y, 0);
   bool ret = transform.TransformPointReverse(point);
   CHECK(ret) << "Invalid transform matrix";
   return point.y();
 }
 
+int VectorToX(const gfx::Transform& transform, int index) {
+  gfx::Point point(index, 0);
+  transform.TransformPoint(point);
+  return point.x();
+}
+
+int XToVerctor(const gfx::Transform& transform, int x) {
+  gfx::Point point(x, 0);
+  bool ret = transform.TransformPointReverse(point);
+  CHECK(ret) << "Invalid transform matrix";
+  return point.x();
+}

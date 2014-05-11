@@ -99,7 +99,7 @@ const gfx::Image& HorizOffsetBar::GetIcon(int ID) {
 int HorizOffsetBar::GetOffset(int ID) {
   OscWave* wave = wave_group_->horizontal_at(ID)->osc_wave();
   gfx::Transform transform = view_->OscWaveTransform(wave);
-  return TransformX(transform, 0);
+  return XInt(transform, 0);
 }
 
 bool HorizOffsetBar::IsVisible(int ID) {
@@ -109,7 +109,7 @@ bool HorizOffsetBar::IsVisible(int ID) {
 void HorizOffsetBar::OnHandleMove(int ID, int offset) {
   OscWave* wave = wave_group_->horizontal_at(ID)->osc_wave();
   gfx::Transform transform = view_->OscWaveTransform(wave);
-  int logic_offset = TransformReverseX(transform, offset);
+  int logic_offset = ReverseXDouble(transform, offset);
   double old_offset = wave->horizontal_offset();
   wave->MoveToX(YTWaveContainerInnerView::ToOscOffset(old_offset, logic_offset));
 }
@@ -214,7 +214,7 @@ int TriggerBar::GetOffset(int ID) {
     offset = trigger_wave->vertical_offset() + offset;
   }
   gfx::Transform transform = view_->OscWaveTransform(trigger_wave);
-  return TransformY(transform, offset);
+  return YInt(transform, offset);
 }
 
 void TriggerBar::OnHandleMove(int ID, int offset) {
@@ -226,7 +226,7 @@ void TriggerBar::OnHandleMove(int ID, int offset) {
     base_y = -trigger_wave->vertical_offset();
   }
   gfx::Transform transform = view_->OscWaveTransform(trigger_wave);
-  double new_offset = TransformReverseY(transform, offset);
+  double new_offset = ReverseYDouble(transform, offset);
   trigger_wave->MoveTrigger(new_offset - base_y);
 }
 
@@ -416,7 +416,7 @@ int WaveBar::GetOffset(int ID) {
   if (ID < wave_group_->vertical_count()) {
     OscWave* wave = wave_group_->vertical_at(ID)->osc_wave();
     gfx::Transform transform = view_->OscWaveTransform(wave);
-    return TransformY(transform, 0);
+    return YInt(transform, 0);
   } else {
     int index = ID - wave_group_->vertical_count();
     OtherWaveVisitor visitor(other_wave_[index], view_);
@@ -428,7 +428,7 @@ void WaveBar::OnHandleMove(int ID, int offset) {
   if (ID < wave_group_->vertical_count()) {
     OscWave* wave = wave_group_->vertical_at(ID)->osc_wave();
     gfx::Transform transform = view_->OscWaveTransform(wave);
-    int logic_offset = TransformReverseY(transform, offset);
+    double logic_offset = ReverseYDouble(transform, offset);
     double old_offset = wave->vertical_offset();
     wave->MoveToY(YTWaveContainerInnerView::ToOscOffset(old_offset, logic_offset));
   } else {

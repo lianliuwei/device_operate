@@ -37,8 +37,8 @@ bool AnaWaveDataView::PaintWaveParam(int* vector_start_out, int* vector_end_out,
                                      bool* need_sample_out) {
 
   WaveRange wave_range = line_data_->data_range();
-  int real_begin = TransformX(data_transform_, wave_range.begin);
-  int real_end = TransformX(data_transform_, wave_range.end);
+  int real_begin = XInt(data_transform_, wave_range.begin);
+  int real_end = XInt(data_transform_, wave_range.end);
   int real_length = real_end - real_begin;
   CHECK(real_begin <= real_end);
   int view_begin = GetLocalBounds().x();
@@ -58,8 +58,8 @@ bool AnaWaveDataView::PaintWaveParam(int* vector_start_out, int* vector_end_out,
   vector_to_real_x.Translate(real_begin, 0);
   vector_to_real_x.Scale(static_cast<float>(real_length) / (vector_size - 1), 1);
   // get How many point to show
-  int vector_start = TransformReverseX(vector_to_real_x, plot_begin);
-  int vector_end = TransformReverseX(vector_to_real_x, plot_end);
+  int vector_start = XToVerctor(vector_to_real_x, plot_begin);
+  int vector_end = XToVerctor(vector_to_real_x, plot_end);
   // add two point separate add begin and end for show the wave like cut when
   // the wave range is cut off by the view.
   if (vector_start != 0)
@@ -125,16 +125,16 @@ void AnaWaveDataView::PaintWave(gfx::Canvas* canvas) {
   if (need_sample) {
     // pixel by pixel
     double begin_value = data[vector_start];
-    int begin_y = TransformY(data_transform_, begin_value);
+    int begin_y = YInt(data_transform_, begin_value);
 
     for (int i = plot_begin; i < plot_end; i ++) {
-      int begin_index = TransformReverseX(vector_to_real_x, i);
-      int end_index = TransformReverseX(vector_to_real_x, i + 1);
+      int begin_index = XToVerctor(vector_to_real_x, i);
+      int end_index = XToVerctor(vector_to_real_x, i + 1);
       PeakValue peak = buffer->GetRangePeak(begin_index, end_index - begin_index);
-      int begin = TransformY(data_transform_, peak.begin);
-      int end = TransformY(data_transform_, peak.end);
-      int max = TransformY(data_transform_, peak.max);
-      int min = TransformY(data_transform_, peak.min);
+      int begin = YInt(data_transform_, peak.begin);
+      int end = YInt(data_transform_, peak.end);
+      int max = YInt(data_transform_, peak.max);
+      int min = YInt(data_transform_, peak.min);
       
       if (draw_line) {
         canvas->DrawLine(Point(i, begin_y), Point(i + 1, begin), line_paint);
@@ -154,10 +154,10 @@ void AnaWaveDataView::PaintWave(gfx::Canvas* canvas) {
     // TODO test if drawPoints can save plot time
     // draw a line segment and the back dot
     for (int i = vector_start; i < vector_end; ++i) {
-      int begin_x = TransformX(vector_to_real_x, i);
-      int begin_y = TransformY(data_transform_, data[i]);
-      int end_x = TransformX(vector_to_real_x, i+1);
-      int end_y = TransformY(data_transform_, data[i+1]);
+      int begin_x = VectorToX(vector_to_real_x, i);
+      int begin_y = YInt(data_transform_, data[i]);
+      int end_x = VectorToX(vector_to_real_x, i+1);
+      int end_y = YInt(data_transform_, data[i+1]);
       if (draw_line) {
         canvas->DrawLine(Point(begin_x, begin_y), Point(end_x, end_y), line_paint);
       }
@@ -169,8 +169,8 @@ void AnaWaveDataView::PaintWave(gfx::Canvas* canvas) {
   // draw the last dot;
   if (draw_dot) {
     double logic_y = data[vector_end];
-    Point point(TransformX(vector_to_real_x, vector_end), 
-                TransformY(data_transform_, logic_y));
+    Point point(VectorToX(vector_to_real_x, vector_end), 
+                YInt(data_transform_, logic_y));
     canvas->DrawPoint(point, dot_paint);
   }
 }

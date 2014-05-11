@@ -83,12 +83,12 @@ void SimpleAnaWaveView::OnBoundsChanged(const gfx::Rect& previous_bounds) {
 }
 
 int SimpleAnaWaveView::GetYOffset() {
-  return TransformY(data_transform(), handle_offset_);
+  return YInt(data_transform(), handle_offset_);
 }
 
 void SimpleAnaWaveView::MoveToY(int y_pos) {
-  int logic_offset = TransformReverseY(data_transform(), y_pos);
-  int move = handle_offset_ - logic_offset;
+  double logic_offset = ReverseYDouble(data_transform(), y_pos);
+  double move = handle_offset_ - logic_offset;
   WaveRange range = ana_wave_->vertical_range();
   range.begin += move;
   range.end += move;
