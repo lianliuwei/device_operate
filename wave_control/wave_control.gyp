@@ -118,5 +118,48 @@
         'views/measure_line/measure_line_part_view.cc',
       ],
     }, 
+    {
+      'target_name': 'wave_control_test_support',
+      'type': 'static_library',
+      'sources' : [
+        'test/run_all_unittests.cc',
+        'test/test_suite.h',
+        'test/test_suite.cc',
+        'test/perftimer.h',
+        'test/perftimer.cc',
+      ],
+      'include_dirs': [
+        '..',
+      ], 
+       'dependencies': [
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/testing/gtest.gyp:gtest',
+       ],
+    },
+    {
+      'target_name': 'wave_control_unittests',
+      'type': '<(gtest_target_type)',
+      'sources': [
+        'osc_wave_group/common_osc_wave_group_unittest.cc',
+        'examples/test_osc_wave.h',
+        'examples/test_osc_wave.cc',
+      ],
+      
+      'include_dirs': [
+        '..',
+      ], 
+      'dependencies': [
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/base/base_bin.gyp:base_prefs_bin',
+        '<(BASE_PATH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
+        '<(BASE_PATH)/base_ex/base_ex.gyp:base_ex',
+        '<(BASE_PATH)/ui/ui_bin.gyp:ui_bin',
+        '<(BASE_PATH)/skia/skia_bin.gyp:skia_bin',
+        '<(BASE_PATH)/testing/gmock.gyp:gmock',
+        '<(BASE_PATH)/testing/gtest.gyp:gtest',
+        'wave_control_test_support',
+        'wave_control',
+      ],
+    },
  ],
 }
