@@ -2,18 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "wave_control/test/dragged_thumb_view.h"
+#include "wave_control/drag_test/dragged_thumb_view.h"
 
 #include "base/stl_util.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "ui/gfx/canvas.h"
 #include "ui/views/widget/widget.h"
 
-#if defined(USE_AURA)
-#include "ui/views/widget/native_widget_aura.h"
-#elif defined(OS_WIN)
-#include "ui/views/widget/native_widget_win.h"
-#endif
 
 namespace {
  // Saves the drawing state, and restores the state when going out of scope.
@@ -65,16 +60,6 @@ DraggedThumbView::DraggedThumbView(const std::vector<views::View*>& renderers,
   params.bounds = gfx::Rect(PreferredContainerSize());
   container_->Init(params);
   container_->SetContentsView(this);
-#if defined(OS_WIN) && !defined(USE_AURA)
-  static_cast<views::NativeWidgetWin*>(container_->native_widget())->
-      SetCanUpdateLayeredWindow(false);
-
-  BOOL drag;
-  if ((::SystemParametersInfo(SPI_GETDRAGFULLWINDOWS, 0, &drag, 0) != 0) &&
-      (drag == FALSE)) {
-    show_contents_on_drag_ = false;
-  }
-#endif
   container_->SetOpacity(kTransparentAlpha);
   container_->SetBounds(gfx::Rect(params.bounds.size()));
 }
