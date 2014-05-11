@@ -74,17 +74,20 @@ void WaveDragController::OnMouseReleased(views::View* view, const ui::MouseEvent
   CHECK(view == pressed_view_);
   pressed_ = false;
   if (canceling_) {
+    active_ = false;
     return;
   }
 
   if (active_) {
     Drop();
+    active_ = false;
   }
 }
 
 void WaveDragController::OnMouseCaptureLost(views::View* view) {
   CHECK(view == pressed_view_);
   pressed_ = false;
+  active_ = false;
   Cancel();
 }
 
