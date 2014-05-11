@@ -236,6 +236,10 @@ void MeasureLineContainerView::TransformChanged() {
   if (!inited_) {
     return;
   }
+  // if no measure wave, no notify.
+  if (!delegate_->GetMeasureWave()) {
+    return;
+  }
   vector<MeasureLine*> lines = measure_lines();
   for (size_t i = 0; i < lines.size(); ++i) {
     (lines[i])->TransformChanged(delegate_->GetMeasureWaveTransform());

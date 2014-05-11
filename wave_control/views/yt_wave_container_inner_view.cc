@@ -675,6 +675,9 @@ void YTWaveContainerInnerView::ListItemsAdded(size_t start, size_t count) {
     OnSelectWaveChanged();
   }
   CancelMenu();
+
+  if (parent())
+    parent()->Layout();
 }
 
 void YTWaveContainerInnerView::ListItemsRemoved(size_t start, size_t count) {
@@ -697,6 +700,8 @@ void YTWaveContainerInnerView::ListItemsRemoved(size_t start, size_t count) {
     OnSelectWaveChanged();
   }
   CancelMenu();
+
+  parent()->Layout();
 }
 
 void YTWaveContainerInnerView::ListItemMoved(size_t index, size_t target_index) {
@@ -709,6 +714,8 @@ void YTWaveContainerInnerView::ListItemMoved(size_t index, size_t target_index) 
     OnSelectWaveChanged();
   }
   CancelMenu();
+
+  parent()->Layout();
 }
 
 void YTWaveContainerInnerView::ListItemsChanged(size_t start, size_t count) {
@@ -785,6 +792,10 @@ void YTWaveContainerInnerView::SetGrid(int v_grid, int h_grid) {
 
 void YTWaveContainerInnerView::UpdateAxis() {
   Wave* wave = container_->GetSelectWave();
+  // if no wave no update
+  if (wave == NULL) {
+    return;
+  }
   YTWaveVisitor visitor(this);
   visitor.SetAxis(wave);
 }
@@ -888,7 +899,8 @@ bool YTWaveContainerInnerView::OnMousePressed(const ui::MouseEvent& event) {
       vector<gfx::Rect> r_bounds;
       r_bounds.push_back(view->GetLocalBounds());
       gfx::Rect paint_bounds = view->GetLocalBounds();
-      paint_bounds.Offset(gfx::Vector2d(10, 10));
+      gfx::Point press_point = event.location();
+      paint_bounds.Offset(gfx::Vector2d(-press_point.x(), -press_point.y()));
       GetDragController()->Init(container_view(), select_wave, 
           renderers, r_bounds, paint_bounds);
 

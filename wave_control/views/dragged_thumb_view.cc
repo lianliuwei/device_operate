@@ -36,7 +36,7 @@ class ScopedCanvas {
 };
 
 }
-static const int kTransparentAlpha = 200;
+static const int kTransparentAlpha = 255;
 static const int kOpaqueAlpha = 255;
 static const float kScalingFactor = 0.5;
 
