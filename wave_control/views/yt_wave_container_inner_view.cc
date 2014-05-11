@@ -119,6 +119,7 @@ void HorizOffsetBar::OnHandleActive(int ID) {
   view_->SelectWave(wave);  
 }
 
+
 class TriggerBar : public HandleBarDelegate
                  , public OscWaveGroupObserver {
 public:
@@ -847,11 +848,6 @@ void YTWaveContainerInnerView::OnSelectWaveChanged() {
   if (container_view() == GetDragController()->start_view()) {
     GetDragController()->Cancel();
   }
-}
-
-void YTWaveContainerInnerView::OnBoundsChanged(const gfx::Rect& previous_bounds) {
-  if (previous_bounds.size() != gfx::Size(0, 0))
-    measure_line_view_->ShowHorizSingle(true);
 }
 
 // check top first

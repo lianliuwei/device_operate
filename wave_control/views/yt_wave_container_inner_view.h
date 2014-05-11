@@ -92,7 +92,6 @@ public:
 
   // override views::View
   gfx::Size GetMinimumSize() OVERRIDE;
-  virtual void OnBoundsChanged(const gfx::Rect& previous_bounds) OVERRIDE;
   virtual View* GetEventHandlerForPoint(const gfx::Point& point) OVERRIDE;
   virtual void Layout() OVERRIDE;
   virtual void PaintChildren(gfx::Canvas* canvas) OVERRIDE;
