@@ -120,8 +120,8 @@ void WaveDragController::Drop() {
   views::View::ConvertPointFromScreen(control_view_, &s_point);
   bool is_view;
   size_t view_index;
-  size_t insert_index;
-  control_view_->GetIndicate(s_point, &is_view, &view_index, &insert_index);
+  size_t gap_index;
+  control_view_->GetIndicate(s_point, &is_view, &view_index, &gap_index);
   WaveControl* wave_control = control_view_->wave_control();
   if (is_view) {
     WaveContainer* container = wave_control->GetWaveContainerAt(view_index);
@@ -130,9 +130,9 @@ void WaveDragController::Drop() {
       wave_control->MoveWaveTo(select_wave_, container);
     } 
   } else {
-    bool ret = wave_control->CANCreateWaveContainerAt(select_wave_, insert_index);
+    bool ret = wave_control->CANCreateWaveContainerAt(select_wave_, gap_index);
     if (ret) {
-      wave_control->CreateWaveContainerAt(select_wave_, insert_index);
+      wave_control->CreateWaveContainerAt(select_wave_, gap_index);
     }
   }
 }

@@ -22,7 +22,8 @@ public:
   void IndicateView(size_t i);
   void IndicateGap(size_t i);
 
-  void GetIndicate(const gfx::Point& point, bool* is_view, size_t* i, size_t* index);
+  void GetIndicate(const gfx::Point& point, 
+      bool* is_view, size_t* view_index, size_t* gap_index);
 
   // override views::View
   virtual void Layout() OVERRIDE;
@@ -48,7 +49,7 @@ private:
   bool show_indicate_;
   bool indicate_is_view_;
   size_t view_index_;
-  size_t insert_index_;
+  size_t gap_index_;
   views::View* view_indiciate_;
   views::View* gap_indicate_;
 

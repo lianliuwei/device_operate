@@ -107,12 +107,12 @@ void WaveControlView::ListItemsChanged(size_t start, size_t count) {
 
 // if layout more complex this need to move to LayoutManager
 void WaveControlView::GetIndicate(const gfx::Point& point, 
-                                  bool* is_view, size_t* i, size_t* index) {
+                                  bool* is_view, size_t* view_index, size_t* gap_index) {
   int y = point.y();
   int child_num = ContainerViewCount();
   if (child_num == 0) {
     *is_view = false;
-    *index = 0;
+    *gap_index = 0;
     return;
   }
   if (y < 0) {
@@ -126,13 +126,13 @@ void WaveControlView::GetIndicate(const gfx::Point& point,
   int offset = y % c_height;
   if (offset < 8) {
     *is_view = false;
-    *index = child_index;
+    *gap_index = child_index;
   } else if (offset > c_height - 8) {
     *is_view = false;
-    *index = child_index + 1;
+    *gap_index = child_index + 1;
   } else {
     *is_view = true;
-    *i = child_index;
+    *view_index = child_index;
     DCHECK(child_index < ContainerViewCount());
   }
 
@@ -163,7 +163,7 @@ void WaveControlView::IndicateGap(size_t i) {
     LayoutGapIndicate(i);
   }
   indicate_is_view_ = false;
-  insert_index_ = i;
+  gap_index_ = i;
 }
 
 
@@ -187,7 +187,7 @@ void WaveControlView::Layout() {
     if (indicate_is_view_) {
       LayoutViewIndicate(view_index_);
     } else {
-      LayoutGapIndicate(insert_index_);
+      LayoutGapIndicate(gap_index_);
     }
   }
 }
