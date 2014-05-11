@@ -109,9 +109,8 @@ void SingleLineView::UpdateLabel() {
 
   if (value_label_) {
     double value;
-    int x_point = line_->line_point();
     bool ret = container_view()->ValueForPoint(wave_, 
-        ReverseXDouble(transform_, x_point), &value);
+        pos_, &value);
     if (!ret) {
       value_label_->SetVisible(false);
       has_value_ = false;
