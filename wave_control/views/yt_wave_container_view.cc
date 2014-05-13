@@ -17,7 +17,7 @@ gfx::Rect Center(const gfx::Rect rect, const gfx::Size& size) {
 static const ResourceBundle::FontStyle kBarFont = ResourceBundle::MediumFont;
 
 // the width or height between the handlebar and the YTView.
-static const int kGapSize = 4;
+static const int kGapSize = 0;
 }
 
 void YTWaveContainerView::Layout() {
@@ -81,7 +81,8 @@ void YTWaveContainerView::Layout() {
 
   }else {
     gfx::Rect ytview_rect = GetLocalBounds();
-    ytview_rect.Inset(left_need, top_need, right_need, bottom_need);
+    //ytview_rect.Inset(left_need, top_need, right_need, bottom_need);
+    ytview_rect.Inset(left_need, 0, 0, 0);
     gfx::Size ytview_size = ytview_rect.size();
     bool ret = yt_view_->NormalSize(ytview_size);
     CHECK(ret) << "the ytview_size can no be normal";
