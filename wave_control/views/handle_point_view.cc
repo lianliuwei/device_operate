@@ -17,6 +17,7 @@ void HandlePointView::OnHandlePressed(int id, int offset, bool horiz) {
 }
 
 void HandlePointView::OnHandleMove(int ID, int offset) {
+  DCHECK(in_drag_ == true);
   offset_ = offset;
   animation_.Stop();
   SchedulePaint();
