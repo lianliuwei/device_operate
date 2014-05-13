@@ -1,15 +1,17 @@
 {
   'variables': {
     'chromium_code': 1,
+    'BASE_PATH': '../third_party/chromium/',
   },
+    
   'targets': [
     {
       'target_name': 'osc_chnl_calc',
       'type': 'static_library',
       'dependencies': [
-        '../third_party/chromium/base/base_bin.gyp:base_bin',
-        '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
-        '../third_party/chromium/base/base_bin.gyp:base_prefs_bin',
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/base_ex/base_ex.gyp:base_ex',
+        '<(BASE_PATH)/base/base_bin.gyp:base_prefs_bin',
       ],
       'include_dirs': [
         '..',
@@ -33,7 +35,7 @@
       'target_name': 'chnl',
       'type': 'static_library',
       'dependencies': [
-        '../third_party/chromium/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
         'canscope_device.gyp:canscope_device',
       ],
       'include_dirs': [
@@ -53,22 +55,45 @@
       ], 
     },
     {
-      'target_name': 'canscope_osc_app',
+      'target_name': 'canscope_ui',
       'type': 'static_library',
+      'dependencies': [
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/skia/skia_bin.gyp:skia_bin',
+        '<(BASE_PATH)/ui/ui_bin.gyp:ui_bin',
+        '../wave_control/wave_control.gyp:wave_control',
+        'canscope_device.gyp:canscope_device',
+      ],
+      'include_dirs': [
+        '..',
+      ], 
+      'sources': [
+        'ui/canscope_view.h',
+        'ui/canscope_view.cc',
+        'ui/oscilloscope.h',
+        'ui/oscilloscope.cc',
+        'ui/chnl_wave.h',
+        'ui/chnl_wave.cc',
+      ], 
+    },
+    {
+       'includes': [ 'exe.gypi' ],
+      'target_name': 'canscope_osc_app',
       'include_dirs': [
         '..',
       ], 
        'dependencies': [
-        '../third_party/chromium/base/base_bin.gyp:base_bin',
-        '../third_party/chromium/base/base_bin.gyp:base_prefs_bin',
-        '../third_party/chromium/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
-        '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/base/base_bin.gyp:base_prefs_bin',
+        '<(BASE_PATH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
+        '<(BASE_PATH)/base_ex/base_ex.gyp:base_ex',
         '../common/common.gyp:common',
         '../device/device.gyp:device',
+        '../depend_calc/depend_calc.gyp:depend_calc',
+        '../wave_control/wave_control.gyp:wave_control',
         'canscope_device.gyp:canscope_usb_port',
         'device_simulate/device_simulate.gyp:simulate_device',
         'canscope_device.gyp:canscope_device',
-        '../depend_calc/depend_calc.gyp:depend_calc',
         'osc_chnl_calc',
         'chnl',
        ],
@@ -79,6 +104,7 @@
         'app/canscope_chnl_calc.cc',
         'app/freq_time.h',
         'app/freq_time.cc',
+        'app/canscope_app.cc',
       ],
     },
     {
@@ -101,8 +127,8 @@
         '..',
       ], 
        'dependencies': [
-        '../third_party/chromium/base/base_bin.gyp:base_bin',
-        '../third_party/chromium/testing/gtest.gyp:gtest',
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/testing/gtest.gyp:gtest',
        ],
     },
     {
@@ -127,18 +153,18 @@
         '..',
       ], 
       'dependencies': [
-        '../third_party/chromium/base/base_bin.gyp:base_bin',
-        '../third_party/chromium/base/base_bin.gyp:base_prefs_bin',
-        '../third_party/chromium/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
-        '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
-        '../third_party/chromium/testing/gmock.gyp:gmock',
-        '../third_party/chromium/testing/gtest.gyp:gtest',
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/base/base_bin.gyp:base_prefs_bin',
+        '<(BASE_PATH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
+        '<(BASE_PATH)/base_ex/base_ex.gyp:base_ex',
+        '<(BASE_PATH)/testing/gmock.gyp:gmock',
+        '<(BASE_PATH)/testing/gtest.gyp:gtest',
         '../common/common.gyp:common',
         '../device/device.gyp:device',
+        '../depend_calc/depend_calc.gyp:depend_calc',
         'canscope_device.gyp:canscope_usb_port',
         'canscope_device.gyp:canscope_device',
         'device_simulate/device_simulate.gyp:simulate_device',
-        '../depend_calc/depend_calc.gyp:depend_calc',
         'osc_chnl_calc',
         'test_support',
         'chnl',
