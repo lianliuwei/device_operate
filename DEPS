@@ -8,7 +8,7 @@ vars = {
 deps = {
   'third_party/chromium/':
       Var('self_url') + 
-      '/chromium_base2.git@edf74ccbca08cae98a452cf61a340678c2c62f46',
+      '/chromium_base2.git@d5b865a99bfac89a3d880c942dd3a534c8f3d754',
   # ui need those head    
   'third_party/chromium/third_party/skia/include':
       Var('git_url') + '/external/skia/include.git@44dd501fd86752e61a0291fec7ca7d3b51d64563',
