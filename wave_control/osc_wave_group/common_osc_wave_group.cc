@@ -1,9 +1,56 @@
 #include "wave_control/osc_wave_group/common_osc_wave_group.h"
 
+#include "ui/gfx/path.h"
+#include "ui/gfx/size.h"
+#include "ui/gfx/canvas.h"
+
 namespace {
 
 bool IsSet(int set, int test) {
   return (set & test) != 0;
+}
+
+
+SkBitmap CreateIndicateIcon(int x, int y, bool horiz, SkColor color) {
+  gfx::Size ps(x, y);  
+  gfx::Canvas scale_canvas(ps, ui::SCALE_FACTOR_100P, false);
+
+  SkPaint paint;
+  paint.setColor(color);
+  int paint_width = horiz ? x / 3 : y / 3;
+  paint.setAntiAlias(true);
+  if (horiz) {
+    paint.setStrokeWidth(paint_width + 1);
+    scale_canvas.DrawLine(gfx::Point(x - paint_width/2, 1), 
+                          gfx::Point(x - paint_width/2, y), 
+                          paint);
+    paint.setStrokeWidth(paint_width);
+    scale_canvas.DrawLine(gfx::Point(x/3,  y/2 + 1), gfx::Point(x, y/2 + 1), paint);
+    gfx::Path::Point arrow[3] =  { {x/3, y/2 + 1 - x/6}, 
+                                   {0, y/2 + 1}, 
+                                   {x/3, y/2 + 1 + x/6} };
+    paint.setStrokeWidth(1);
+    paint.setStyle(SkPaint::kFill_Style);
+    scale_canvas.DrawPath(gfx::Path(arrow, arraysize(arrow)), paint);
+
+  } else {
+    paint.setStrokeWidth(paint_width + 1);
+    scale_canvas.DrawLine(gfx::Point(1, paint_width/2), 
+                          gfx::Point(x, paint_width/2), 
+                          paint);
+    paint.setStrokeWidth(paint_width);
+    scale_canvas.DrawLine(gfx::Point(x/2 + 1,  0), 
+                          gfx::Point(x/2 + 1, y - y/3), 
+                          paint);
+    gfx::Path::Point arrow[3] =  { {x/2 + 1 - y/6, y - y/3}, 
+                                   {x/2 + 1, y }, 
+                                   {x/2 + 1 +y/6,  y - y/3} };
+    paint.setStrokeWidth(1);
+    paint.setStyle(SkPaint::kFill_Style);
+    scale_canvas.DrawPath(gfx::Path(arrow, arraysize(arrow)), paint);
+  }
+
+  return scale_canvas.ExtractImageRep().sk_bitmap();
 }
 
 }
@@ -227,6 +274,7 @@ void CommonOscWaveGroup::OnOscWaveChanged(OscWave* osc_wave, int change_set) {
   OscWaveRecord& record = GetOscWaveRecord(osc_wave);
 
   if (IsSet(change_set, OscWave::kTrigger)) {
+    record.trigger->UpdateIcon();
     NotifyTriggerChanged(TriggerIndex(record.trigger.get()));
   }
   if (IsSet(change_set, OscWave::kTriggerOffset)) {
@@ -307,6 +355,14 @@ CommonOscWaveGroup::~CommonOscWaveGroup() {
   osc_waves_.clear();
 }
 
+gfx::Image& CommonOscWaveGroup::HorizontalIcon() {
+  if (horizontal_icon_.IsEmpty()) {
+    horizontal_icon_ = gfx::Image::CreateFrom1xBitmap(
+        CreateIndicateIcon(19, 15, false, SkColorSetARGB(255, 0, 255, 255)));
+  }
+  return horizontal_icon_;
+}
+
 // RefTriggerPart
 
 SkColor RefTriggerPart::color() {
@@ -321,13 +377,8 @@ string16 RefTriggerPart::text() {
   return L"";
 }
 
-// TODO draw a trigger
-#include "ui/base/resource/resource_bundle.h"
-#include "grit/ui_resources.h"
-
 const gfx::Image& RefTriggerPart::icon() {
-  ResourceBundle& rb = ResourceBundle::GetSharedInstance();
-  return rb.GetImageNamed(IDR_CLOSE_SA_H);
+  return icon_;
 }
 
 WaveRange RefTriggerPart::offset_range() {
@@ -350,11 +401,23 @@ OscWave* RefTriggerPart::trigger_wave() {
   return osc_wave_->trigger_wave();
 }
 
+
+void RefTriggerPart::UpdateIcon() {
+  OscWave* trigger = trigger_wave();
+  if (trigger == NULL) {
+    icon_ = gfx::Image();
+  } else {
+    icon_ = gfx::Image::CreateFrom1xBitmap(
+        CreateIndicateIcon(15, 19, true, trigger->color()));
+  }
+}
+
 RefTriggerPart::RefTriggerPart(OscWave* osc_wave, CommonOscWaveGroup* wave_group)
     : osc_wave_(osc_wave)
     , wave_group_(wave_group) {
   DCHECK(osc_wave);
   DCHECK(wave_group);
+  UpdateIcon();
 }
 
 RefTriggerPart::~RefTriggerPart() {
@@ -375,8 +438,7 @@ string16 RefHorizontalPart::text() {
 }
 
 const gfx::Image& RefHorizontalPart::icon() {
-  ResourceBundle& rb = ResourceBundle::GetSharedInstance();
-  return rb.GetImageNamed(IDR_CLOSE_SA_H);
+  return wave_group_->HorizontalIcon();
 }
 
 WaveRange RefHorizontalPart::range() {

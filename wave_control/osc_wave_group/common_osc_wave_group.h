@@ -21,6 +21,8 @@ public:
   virtual OscWave* trigger_wave();
   virtual OscWave* osc_wave() { return osc_wave_; }
 
+  void UpdateIcon();
+
 private:
   friend class base::RefCounted<RefTriggerPart>;
   ~RefTriggerPart();
@@ -29,6 +31,8 @@ private:
   void set_osc_wave(OscWave* osc_wave) { osc_wave_ = osc_wave; }
 
   OscWave* osc_wave_;
+
+  gfx::Image icon_;
 
   // notify delete
   CommonOscWaveGroup* wave_group_;
@@ -113,6 +117,8 @@ public:
   virtual void RemoveOscWave(OscWave* osc_wave);
   virtual bool HasOscWave(OscWave* osc_wave);
 
+  gfx::Image& HorizontalIcon();
+
 private:
   friend class RefTriggerPart;
   friend class RefHorizontalPart;
@@ -142,4 +148,9 @@ private:
   bool trigger_changed_;
   bool horizontal_changed_;
   bool vertical_changed_;
+
+  gfx::Image trigger_icon_;
+  gfx::Image horizontal_icon_;
+
+  DISALLOW_COPY_AND_ASSIGN(CommonOscWaveGroup);
 };
