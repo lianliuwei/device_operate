@@ -1,14 +1,11 @@
 #include "canscope/osc_chnl_calc/chnl_calc_manager.h"
 
 
-namespace {
-static const double kUIFreq = 60;
-}
-
 namespace canscope {
 
-ChnlCalcManager::ChnlCalcManager()
-    : ui_freq_(kUIFreq) {
+ChnlCalcManager::ChnlCalcManager(Delegate* delegate)
+    : delegate_(delegate) {
+  DCHECK(delegate);
 }
 
 ChnlCalcManager::~ChnlCalcManager() {
@@ -25,6 +22,7 @@ void ChnlCalcManager::RawDataCollected(OscRawDataHandle raw_data) {
 void ChnlCalcManager::Cancel() {
   if (!current_task_.get())
     return;
+  current_task_->RemoveObserver(this);
   current_task_->Cancel();
 }
 
@@ -69,7 +67,7 @@ void ChnlCalcManager::StartRun(bool force_ui) {
   current_task_->AddObserver(this);
   CalcExecuter* calc_exec = NULL;
   if (!force_ui) {
-    is_ui_calc_ = ui_freq_.Hit();
+    is_ui_calc_ = delegate_->CalcForUI();
     calc_exec = is_ui_calc_ ? ui_calc_.get() : chnl_calc_.get();
   } else {
     calc_exec = ui_calc_.get();
@@ -89,17 +87,9 @@ void ChnlCalcManager::OnAsyncTaskFinish(AsyncTask* task,
   bool is_ui_calc = is_ui_calc_;
   // cache calc_result and ProcessRaw immediately, for better concurrent
   ProcessRaw();
-  RecordResult(calc_result_);
+  delegate_->RecordResult(calc_result_);
   if (is_ui_calc)
-    MayNotifyUI(calc_result_);
+    delegate_->MayNotifyUI(calc_result_);
 }
-
-// void ChnlCalcManager::MayNotifyUI(scoped_refptr<ChnlCalcResult> result) {
-// 
-// }
-
-// void ChnlCalcManager::RecordResult(scoped_refptr<ChnlCalcResult> result) {
-// 
-// }
 
 } // namespace canscope

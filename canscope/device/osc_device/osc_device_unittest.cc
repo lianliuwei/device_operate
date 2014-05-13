@@ -7,7 +7,7 @@
 #include "canscope/device/osc_device/osc_device.h"
 #include "canscope/device/usb_port_device_delegate.h"
 #include "canscope/device/test/scoped_open_device.h"
-#include "canscope/device/test/test_util.h"
+#include "canscope/device/config_util.h"
 #include "canscope/device/config_manager.h"
 #include "canscope/device/osc_device/osc_device.h"
 #include "canscope/device/osc_device/osc_device_handle.h"
@@ -123,7 +123,7 @@ protected:
 protected:
   ConfigManager osc_device_config_;
   scoped_ptr<DeviceDelegate> device_delegate_;
-  ScopeOpenDevice open_device_;
+  ScopedOpenDevice open_device_;
   scoped_ptr<OscDevice> osc_device_;
   scoped_ptr<OscDeviceHandle> osc_device_handle_;
   scoped_refptr<OscDataCollecter> osc_data_collecter_;

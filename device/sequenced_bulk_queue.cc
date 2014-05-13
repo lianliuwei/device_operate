@@ -264,8 +264,6 @@ void SequencedBulkQueueBase::SetReadyCallback(void* id,
   DCHECK(it == callback_map_.end()) << "one reader one callback";
   ReadyCallbackRecord record = { ready_callback, count, };
   callback_map_.insert(std::make_pair(static_cast<uint8*>(id), record));
-
-  FireCallbackNoLock(CountNoLock());
   }
   }
 

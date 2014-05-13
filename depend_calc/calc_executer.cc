@@ -40,6 +40,7 @@ void CalcExecuter::StartRun(AsyncTaskHandle task) {
     task_->NotifyFinish(NULL);
     return;
   }
+  delegate_->AddCalcDelegateRef();
   }
   StartAllRunnable();
 }
@@ -60,6 +61,7 @@ void CalcExecuter::StartAllRunnable() {
     // notify canceled only once.
     if (!notify_end_) {
       notify_end_ = true;
+      delegate_->ReleaseCalcDelegateRef();
       task_->NotifyCancel(NULL);
     }
     return;
@@ -81,6 +83,7 @@ void CalcExecuter::RunItem(CalcItem* item) {
     // notify canceled only once.
     if (!notify_end_) {
       notify_end_ = true;
+      delegate_->ReleaseCalcDelegateRef();
       task_->NotifyCancel(NULL);
     }
     return;
@@ -96,6 +99,7 @@ void CalcExecuter::RunItem(CalcItem* item) {
   if (walker_->Finish()) {
     if (!notify_end_) {
       notify_end_ = true;
+      delegate_->ReleaseCalcDelegateRef();
       task_->NotifyFinish(NULL);
     }
     return;

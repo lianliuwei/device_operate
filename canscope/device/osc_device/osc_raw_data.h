@@ -16,17 +16,19 @@ class OscRawDataDeviceConfig : public OscDeviceProperty
                              , public base::RefCountedThreadSafe<
                                   OscRawDataDeviceConfig> {
 public:
-  OscRawDataDeviceConfig(const ConfigManager::Config& config);
+  OscRawDataDeviceConfig(const ConfigManager::Config& config, bool hardware_diff);
 
   bool SameConfig(const ConfigManager::Config& config) const;
+  bool hardware_diff() const { return hardware_diff_; }
 
-  int id() const;
+  int id() const { return id_; }
 
 private:
   friend class base::RefCountedThreadSafe<OscRawDataDeviceConfig>;
   ~OscRawDataDeviceConfig() {}
 
   int id_;
+  bool hardware_diff_;
 
   DISALLOW_COPY_AND_ASSIGN(OscRawDataDeviceConfig);
 };
@@ -46,8 +48,9 @@ public:
 
   OscDeviceProperty* property();
   const OscDeviceProperty* property() const;
+  bool hardware_diff() const { return property_->hardware_diff(); }
 
-  int id() const;
+  int id() const { return property_->id(); }
 
 protected:
   OscRawData(uint8* raw_data, int size, bool own, DeviceType type, OscRawDataDeviceConfigHandle property);

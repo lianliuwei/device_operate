@@ -29,7 +29,6 @@ static const uint32 kTimeBaseValue[] = {
 }
 namespace canscope {
 
-IMPLEMENT_ENUM_STORE_MEMBER_INT(Chnl);
 IMPLEMENT_ENUM_STORE_MEMBER_INT(VoltRange);
 IMPLEMENT_ENUM_STORE_MEMBER_INT(TimeBase);
 IMPLEMENT_ENUM_STORE_MEMBER_INT(Coupling);
@@ -68,6 +67,15 @@ Chnl TriggerSource2Chnl(TriggerSource trigger_source) {
   case kTriggerSourceCANL: return CAN_L;
   case kTriggerSourceCANDIFF: return CAN_DIFF;
   default: NOTREACHED(); return CAN_H;
+  }
+}
+
+TriggerSource Chnl2TriggerSource(Chnl chnl) {
+  switch (chnl) {
+  case CAN_H: return kTriggerSourceCANH;
+  case CAN_L: return kTriggerSourceCANL;
+  case CAN_DIFF: return kTriggerSourceCANDIFF;
+  default: NOTREACHED(); return kTriggerSourceCANH;
   }
 }
 

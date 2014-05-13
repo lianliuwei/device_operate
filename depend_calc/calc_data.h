@@ -2,12 +2,17 @@
 
 #include <map>
 
+#include "base/memory/ref_counted.h"
+#include "base/memory/linked_ptr.h"
+#include "base/synchronization/lock.h"
+
 #include "depend_calc/calc_item.h"
 
-class CalcData {
+// take ownership of the Data set to CalcData.
+// thread safe Get()  and Set().
+class CalcData : public base::RefCountedThreadSafe<CalcData> {
 public:
   CalcData() {}
-  virtual ~CalcData() {}
 
   // Derive from this class and add your own data members to associate extra
   // information with this object. Alternatively, add this as a public base
@@ -20,14 +25,22 @@ public:
   // use const void* support more point then CalcKey
   // take ownership of data, delete it when destroy
   Data* GetData(const void* key) const;
+
+  // check key no set before
   void SetData(const void* key, Data* data);
   void RemoveData(const void* key);
 
+protected:
+  friend class base::RefCountedThreadSafe<CalcData>;
+  virtual ~CalcData() {}
+
 private:
-  typedef std::map<const void*, Data*> DataMap;
+  typedef std::map<const void*, linked_ptr<Data> > DataMap;
 
   // Externally-defined data accessible by key.
   DataMap user_data_;
+  
+  mutable base::Lock lock_;
 };
 
 template <typename T>
@@ -55,6 +68,4 @@ public:
 private:
   CalcKey key_;
   CalcData* data_;
-
-  DISALLOW_COPY_AND_ASSIGN(CalcDataItem);
 };

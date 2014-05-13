@@ -44,7 +44,7 @@ bool ChnlDiffCalcItem::Run(CalcDelegate* delegate) {
 
   CalcDataItem<OscChnlData> can_h(can_h_key_, result);
   CalcDataItem<OscChnlData> can_l(can_l_key_, result);
-  CalcDataItem<OscChnlData> can_diff(can_l_key_, result);
+  CalcDataItem<OscChnlData> can_diff(can_diff_key_, result);
 
   DCHECK(can_h.Get() != NULL);
   DCHECK(can_l.Get() != NULL);

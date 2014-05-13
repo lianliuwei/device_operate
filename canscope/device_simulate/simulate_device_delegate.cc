@@ -106,4 +106,9 @@ void SimulateDeviceDelegate::CheckThread() {
   }
 }
 
+void SimulateDeviceDelegate::DetachFromThread() {
+  thread_check_.DetachFromThread();
+  osc_device_.DetachFromThread();
+}
+
 } // namespace canscope

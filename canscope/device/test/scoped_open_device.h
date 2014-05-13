@@ -6,10 +6,10 @@
 namespace canscope {
 
 // open the first Device of DeviceList. if fault call gtest EXPECT_
-class ScopeOpenDevice {
+class ScopedOpenDevice {
 public:
-  ScopeOpenDevice(DeviceDelegate* device_delegate);
-  ~ScopeOpenDevice();
+  ScopedOpenDevice(DeviceDelegate* device_delegate);
+  ~ScopedOpenDevice();
 
   bool IsOpen() const { return open_; }
   DeviceType type() const  { return type_; }
@@ -25,7 +25,7 @@ private:
   bool open_;
   DeviceType type_;
 
-  DISALLOW_COPY_AND_ASSIGN(ScopeOpenDevice);
+  DISALLOW_COPY_AND_ASSIGN(ScopedOpenDevice);
 };
 
 } // namespace canscope

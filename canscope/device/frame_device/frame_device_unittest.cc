@@ -87,7 +87,7 @@ protected:
 
   ConfigManager frame_device_config_;
   scoped_ptr<DeviceDelegate> device_delegate_;
-  ScopeOpenDevice open_device_;
+  ScopedOpenDevice open_device_;
   scoped_ptr<FrameDevice> frame_device_;
   scoped_ptr<FrameDeviceHandle> frame_device_handle_;
   SoftDiffRegister soft_diff_;
@@ -184,7 +184,7 @@ TEST_F(FrameDeviceTest, SendAndReceive) {
 
 TEST(FrameDeviceTest2, TestRegister) {
   scoped_ptr<DeviceDelegate> device_delegate(CreateDeviceDelegate());
-  ScopeOpenDevice open_device(device_delegate.get());
+  ScopedOpenDevice open_device(device_delegate.get());
   Error err;
 
   EXPECT_TRUE_OR_RET(open_device.IsOpen());

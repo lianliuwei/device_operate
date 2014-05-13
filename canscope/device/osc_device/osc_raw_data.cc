@@ -3,9 +3,10 @@
 namespace canscope {
 
 OscRawDataDeviceConfig::OscRawDataDeviceConfig(
-    const ConfigManager::Config& config)
+    const ConfigManager::Config& config, bool hardware_diff)
     : OscDeviceProperty()
-    , id_(config.id) {
+    , id_(config.id)
+    , hardware_diff_(hardware_diff) {
   // config ownership still will ConfigManager
   Init(config.pref->DeepCopy());
 }
@@ -13,10 +14,6 @@ OscRawDataDeviceConfig::OscRawDataDeviceConfig(
 bool OscRawDataDeviceConfig::SameConfig(
     const ConfigManager::Config& config) const {
   return config.id == id_;
-}
-
-int OscRawDataDeviceConfig::id() const {
-  return id_;
 }
 
 OscRawData::OscRawData(DeviceType type, OscRawDataDeviceConfigHandle property)
@@ -32,6 +29,7 @@ OscRawData::OscRawData(int size, OscRawDataDeviceConfigHandle property)
     : property_(property)
     , own_(true) {
   // type are invalid
+  property_->DetachFromThread();
   size_ = size;
   raw_data_ = new uint8[size];
 }
@@ -43,6 +41,7 @@ OscRawData::OscRawData(uint8* raw_data, int size, bool own,
     , size_(size)
     , own_(own_)
     , type_(type) {
+  property_->DetachFromThread();
 }
 
 OscRawData::~OscRawData() {
@@ -65,9 +64,6 @@ OscDeviceProperty* OscRawData::property() {
   return property_.get();
 }
 
-int OscRawData::id() const {
-  return property_->id();
-}
 
 void OscRawData::set_data(uint8* data, int size) {
   raw_data_ = data;
@@ -100,7 +96,5 @@ PooledOscRawData::~PooledOscRawData() {
     set_data(NULL, 0);
   }
 }
-
-
 
 } // namespace canscope

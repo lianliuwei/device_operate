@@ -1,4 +1,4 @@
-#include "canscope/osc_chnl_calc/freq_time.h"
+#include "canscope/app/freq_time.h"
 
 #include "base/logging.h"
 
