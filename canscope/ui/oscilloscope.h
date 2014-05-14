@@ -7,7 +7,7 @@ namespace canscope {
 class Oscilloscope : public ClassifyWaveControl {
 public:
   Oscilloscope(OscDeviceHandle* handle, 
-              scoped_refptr<ChnlCalcResultQueue> chnl_queue);
+               scoped_refptr<ChnlCalcResultQueue> chnl_queue);
   virtual ~Oscilloscope();
 
   // implement WaveControl

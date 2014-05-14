@@ -74,6 +74,8 @@
         'ui/oscilloscope.cc',
         'ui/chnl_wave.h',
         'ui/chnl_wave.cc',
+        'ui/chnl_ana_data.h',
+        'ui/chnl_ana_data.cc',
       ], 
     },
     {

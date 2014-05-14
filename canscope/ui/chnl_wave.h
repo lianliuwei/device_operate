@@ -2,18 +2,22 @@
 
 #include "wave_control/osc_wave.h"
 
+#include "canscope/ui/chnl_ana_data.h"
+
 namespace canscope {
 
 class ChnlWave : public OscWave {
 public:
- 
+  ChnlWave(::Chnl* chnl, ChnlContainer* container);
+  virtual ~ChnlWave();
+
   // implement wave
-  virtual string16 name();
-  virtual SkColor color();
-  virtual const gfx::Image& icon();
+  virtual string16 name() { return name_; }
+  virtual SkColor color() { return color_; }
+  virtual const gfx::Image& icon() { return icon_; }
 
   // implement OscWave
-  virtual AnaWaveData& Data();
+  virtual AnaWaveData& Data() { return &(wave_data_.get()); }
   virtual void MoveToX(double pos);
   virtual void MoveToY(double pos);
   virtual void MoveTrigger(double pos);
@@ -49,16 +53,16 @@ public:
   virtual void DoRangeCommand(int command_id, WaveRange range);
 
 
-public:
+private:
+  ::Chnl* chnl_;
+  ChnlContainer* container_;
+
   string16 name_;
   SkColor color_;
   gfx::Image icon_;
-  scoped_ptr<TestAnaData> wave_data_;
+  scoped_ptr<ChnlAnaData> wave_data_;
 
-private:
-  scoped_refptr<Horiz> horiz_;
-  scoped_refptr<Vertical> vertical_;
-  scoped_refptr<Trigger> trigger_;
+  DISALLOW_COPY_AND_ASSIGN(ChnlWave);
 };
 
 } // namespace canscope

@@ -25,7 +25,7 @@ private:
 
   struct CANRecordThread {
     scoped_ptr<common::NotificationService> notifier;
-    scoped_ptr<canscope::device::ScopedDeviceError> device_error;  
+    scoped_ptr<canscope::device::ScopedDeviceError> device_error;
   };
 
   CANRecordThread threads_[common::CommonThread::ID_COUNT];

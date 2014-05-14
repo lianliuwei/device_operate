@@ -1,6 +1,6 @@
 vars = {
   'git_url':
-    'https://chromium.googlesource.com',
+    'http://chromium.googlesource.com',
   'self_url':
     'http://github.com/lianliuwei',
 }
