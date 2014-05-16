@@ -1,15 +1,21 @@
 #pragma once
 
+#include "base/memory/scoped_ptr.h"
+#include "base/callback.h"
+
 #include "wave_control/osc_wave.h"
 
 #include "canscope/ui/chnl_ana_data.h"
 
 namespace canscope {
 
+class Oscilloscope;
+typedef base::Callback<ChnlWave*(::Chnl*)> ChnlMapViewCallbackType;
+
 class ChnlWave : public OscWave {
 public:
-  ChnlWave(::Chnl* chnl, ChnlContainer* container);
-  virtual ~ChnlWave();
+  ChnlWave(::Chnl* chnl, ChnlContainer* container, ChnlMapViewCallbackType chnl_map_view);
+  virtual ~ChnlWave() {}
 
   // implement wave
   virtual string16 name() { return name_; }
@@ -17,7 +23,7 @@ public:
   virtual const gfx::Image& icon() { return icon_; }
 
   // implement OscWave
-  virtual AnaWaveData& Data() { return &(wave_data_.get()); }
+  virtual AnaWaveData& Data() { return *(wave_data_.get()); }
   virtual void MoveToX(double pos);
   virtual void MoveToY(double pos);
   virtual void MoveTrigger(double pos);
@@ -54,8 +60,12 @@ public:
 
 
 private:
+  friend class Oscilloscope;
+
   ::Chnl* chnl_;
+
   ChnlContainer* container_;
+  ChnlMapViewCallbackType chnl_map_view_;
 
   string16 name_;
   SkColor color_;
