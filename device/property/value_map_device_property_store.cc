@@ -4,6 +4,7 @@
 #include "base/stringprintf.h"
 #include "base/json/json_string_value_serializer.h"
 
+using namespace std;
 using namespace base;
 
 namespace {
@@ -166,7 +167,8 @@ void ValueMapDevicePropertyStore::SetValueInner(const std::string& key,
   
   scoped_ptr<Value> new_value(value);
   Value* old_value = NULL;
-  prefs_.GetValue(key, &old_value);
+  bool ret = prefs_.GetValue(key, &old_value);
+  DCHECK(ret);
   if (!old_value || !value->Equals(old_value)) {
     prefs_.SetValue(key, new_value.release());
     ReportValueChanged(key);
@@ -237,5 +239,19 @@ void ValueMapDevicePropertyStore::DetachFromThread() {
   DevicePropertyStore::DetachFromThread();
   notifier_.DetachFromThread();
 }
+
+vector<string> ValueMapDevicePropertyStore::ChangedSet(ValueMapDevicePropertyStore* store) {
+  vector<string> change_set;
+  for (PrefValueMap::iterator it = prefs_.begin(); it != prefs_.end(); ++it) {
+    string name = it->first;
+    const Value* map_value = NULL;
+    bool ret = store->GetValue(name, &map_value);
+    if (!ret || !Value::Equals(map_value, it->second)) {
+      change_set.push_back(name);
+    }
+  }
+  return change_set;
+}
+
 
 } // namespace device

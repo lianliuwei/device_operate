@@ -68,25 +68,40 @@ TEST(ValueMapDevicePropertyStoreTest, Observer) {
 namespace {
 static const char kTestConfig [] = { " \
 { \
+  \"NoMapItem\" : 1, \
   \"test.1.2.3\" : 10, \
   \"test.NoNotify\" : true \
 } \
 "};
 
-}
+static const char kNewTestConfig [] = { " \
+{ \
+  \"new item\" : 4, \
+  \"test.1.2.3\" : 2, \
+  \"test.NoNotify\" : true \
+} \
+"};
 
-TEST(ValueMapDevicePropertyStoreTest, ReadWriteConfigFile) {
-  string config(kTestConfig);
-  JSONStringValueSerializer serializer(config);
+DictionaryValue* GetConfig(const char* config) {
+  std::string content(config);
+  JSONStringValueSerializer serializer(content);
   int error;
-  string error_msg;
+  std::string error_msg;
   Value* value = serializer.Deserialize(&error, &error_msg);
-  EXPECT_TRUE(NULL != value);
-  EXPECT_TRUE(value->IsType(Value::TYPE_DICTIONARY));
-  ValueMapDevicePropertyStore prefs;
+  CHECK(NULL != value);
+  CHECK(value->IsType(Value::TYPE_DICTIONARY));
   DictionaryValue* dict_value;
   value->GetAsDictionary(&dict_value);
-  prefs.Reset(dict_value);
+
+  return dict_value;
+}
+
+}
+
+TEST(ValueMapDevicePropertyStoreTest, ReadConfigFile) {
+  ValueMapDevicePropertyStore prefs;
+  prefs.Reset(GetConfig(kTestConfig));
+
   string pref_name = "test.1.2.3";
   const Value* value_out;
   prefs.GetValue(pref_name, &value_out);
@@ -103,4 +118,17 @@ TEST(ValueMapDevicePropertyStoreTest, ReadWriteConfigFile) {
   ret = value_out->GetAsBoolean(&bool_out);
   EXPECT_TRUE(ret);
   EXPECT_EQ(true, bool_out);
+}
+
+TEST(ValueMapDevicePropertyStoreTest, ChangedSet) {
+  ValueMapDevicePropertyStore prefs;
+  prefs.Reset(GetConfig(kTestConfig));
+
+  ValueMapDevicePropertyStore new_prefs;
+  new_prefs.Reset(GetConfig(kNewTestConfig));
+
+  vector<string> change_set = prefs.ChangedSet(&new_prefs);
+  EXPECT_EQ(2, change_set.size());
+  EXPECT_NE(change_set.end(), find(change_set.begin(), change_set.end(), "NoMapItem"));
+  EXPECT_NE(change_set.end(), find(change_set.begin(), change_set.end(), "test.1.2.3"));
 }

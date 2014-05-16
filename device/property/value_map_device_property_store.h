@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <set>
 
 #include "base/debug/trace_event.h"
@@ -39,6 +40,8 @@ public:
 
   // can only be access on the thread call AttachThread()
   void DetachFromThread();
+
+  std::vector<std::string> ChangedSet(ValueMapDevicePropertyStore* store);
 
 private:
   void SetValueInner(const std::string& key, base::Value* value);
