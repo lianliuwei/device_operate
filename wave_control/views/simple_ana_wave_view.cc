@@ -111,20 +111,19 @@ bool SimpleAnaWaveView::OnMousePressed(const ui::MouseEvent& event) {
 }
 
 bool SimpleAnaWaveView::OnMouseDragged(const ui::MouseEvent& event) {
-  gfx::Point logic_start = start_point_;
-  gfx::Point logic_now = event.location();
-  bool ret = drag_transform_.TransformPointReverse(logic_start);
-  DCHECK(ret);
-  ret = drag_transform_.TransformPointReverse(logic_now);
-  DCHECK(ret);
-  gfx::Vector2d logic_offset = logic_now - logic_start;
+  gfx::Point start = start_point_;
+  gfx::Point now = event.location();
+  double offset_x = ReverseXDouble(drag_transform_, now.x()) 
+      - (ReverseXDouble(drag_transform_, start.x()));
+  double offset_y = ReverseYDouble(drag_transform_, now.y()) 
+      - ReverseYDouble(drag_transform_, start.y());
 
   WaveRange v_range = drag_v_range_;
-  v_range.begin += -logic_offset.y();
-  v_range.end += -logic_offset.y();
+  v_range.begin += -offset_y;
+  v_range.end += -offset_y;
   WaveRange h_range = drag_h_range_;
-  h_range.begin += -logic_offset.x();
-  h_range.end += -logic_offset.x();
+  h_range.begin += -offset_x;
+  h_range.end += -offset_x;
 
   ana_wave_->set_vertical_range(v_range);
   ana_wave_->set_horizontal_range(h_range);
