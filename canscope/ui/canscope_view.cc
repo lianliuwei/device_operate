@@ -32,7 +32,7 @@ public:
     last_ = Time::Now();
     int64 last_count = last_count_;
     last_count_ = count;
-    count_speed_ = (last_count - count) / pass_time.InSecondsF();
+    count_speed_ = (count - last_count) / pass_time.InSecondsF();
   }
   double Speed() { return count_speed_; }
 
@@ -58,16 +58,20 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
     , speed_(new FPSSpeed) {
   DCHECK(device);
 
-  set_background(Background::CreateSolidBackground(kWaveControlBackgroundColor));
+  set_background(Background::CreateSolidBackground(SkColorSetRGB(0, 0, 0)));
 
-  View* button_group_ = new View;
+  button_group_ = new View;
   button_group_->SetLayoutManager(
       new FillBoxLayout(FillBoxLayout::kHorizontal, 1, 2, 4));
   AddChildView(button_group_);
   start_ = new TextButton(this, L"Start");
+  start_->SetEnabledColor(SkColorSetRGB(255, 255, 255));
+  start_->SetDisabledColor(SkColorSetRGB(125, 125, 125));
   button_group_->AddChildView(start_);
   stop_ = new TextButton(this, L"Stop");
   button_group_->AddChildView(stop_);
+  stop_->SetEnabledColor(SkColorSetRGB(255, 255, 255));
+  stop_->SetDisabledColor(SkColorSetRGB(125, 125, 125));
 
   fps_ = new Label(FPSText(0.0));
   fps_->SetBackgroundColor(SkColorSetRGB(0, 0, 0));
@@ -85,12 +89,15 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
 
   UpdateButton();
 
+  device_handle->GetOscDataCollecter()->AddObserver(this);
+
   timer_.Start(FROM_HERE, TimeDelta::FromMilliseconds(1000), 
       Bind(&CANScopeView::UpdateFPS, Unretained(this)));
 }
 
 CANScopeView::~CANScopeView() {
-
+  CANScopeDeviceHandle* device_handle = CANScopeDeviceHandle::GetInstance(device_);
+  device_handle->GetOscDataCollecter()->RemoveObserver(this);
 }
 
 void CANScopeView::Layout() {
@@ -99,11 +106,11 @@ void CANScopeView::Layout() {
   button_group_->SetBoundsRect(gfx::Rect(v_rect.origin(), b_size));
   
   gfx::Size l_size = fps_->GetPreferredSize();
-  gfx::Point l_origin = v_rect.top_right() - gfx::Vector2d(-l_size.width(), 0);
+  gfx::Point l_origin = v_rect.top_right() + gfx::Vector2d(-l_size.width(), 0);
   fps_->SetBoundsRect(gfx::Rect(l_origin, l_size));
 
-  v_rect.Offset(gfx::Vector2d(0, -b_size.height()));
-  v_rect.AdjustToFit(GetLocalBounds());
+  v_rect.Offset(gfx::Vector2d(0, b_size.height()));
+  v_rect.Intersect(GetLocalBounds());
   osc_view_->SetBoundsRect(v_rect);
 }
 
