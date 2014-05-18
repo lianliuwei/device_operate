@@ -22,6 +22,8 @@ public:
   static CANScopeDevice* Create(
       scoped_refptr<base::SingleThreadTaskRunner> runner);
 
+  void NotifyCreated();
+
   OscDevice* osc_device() { return &osc_device_; }
   FrameDevice* frame_device() { return &frame_device_; }
 
@@ -33,6 +35,8 @@ public:
 
   // take ownership of value
   void LoadConfig(base::Value* value);
+
+  void SetAll();
 
   // pass out ownership value
   base::DictionaryValue* SaveConfig();
@@ -61,6 +65,8 @@ private:
   FrameDevice frame_device_;
 
   CANScopeDeviceRunner runner_;
+
+  bool notify_created_;
 
   DISALLOW_COPY_AND_ASSIGN(CANScopeDevice);
 };

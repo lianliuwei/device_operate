@@ -21,13 +21,14 @@ CANScopeDevice* CANScopeDevice::Create(
     scoped_refptr<base::SingleThreadTaskRunner> runner) {
   DCHECK(runner->BelongsToCurrentThread());
   CANScopeDevice* device = new CANScopeDevice(runner);
-  NotifyAll(NOTIFICATION_DEVICE_MANAGER_CREATED, 
-      Source<CANScopeDevice>(device), 
-      NotificationService::NoDetails());
+
   return device;
 }
 
 void CANScopeDevice::DestroyImpl() {
+  if (!notify_created_) {
+    return;
+  }
   NotifyAll(NOTIFICATION_DEVICE_MANAGER_START_DESTROY, 
       Source<CANScopeDevice>(this), 
       NotificationService::NoDetails());
@@ -35,11 +36,20 @@ void CANScopeDevice::DestroyImpl() {
 
 void CANScopeDevice::DeleteDeviceImpl() {
   DCHECK(run_thread()->BelongsToCurrentThread());
-  NotifyAll(NOTIFICATION_DEVICE_MANAGER_DESTROYED, 
+  if (notify_created_) {
+    NotifyAll(NOTIFICATION_DEVICE_MANAGER_DESTROYED, 
+        Source<CANScopeDevice>(this), 
+        NotificationService::NoDetails());
+  }
+  delete this;
+}
+
+void CANScopeDevice::NotifyCreated() {
+  DCHECK(!notify_created_);
+  notify_created_ = true;
+  NotifyAll(NOTIFICATION_DEVICE_MANAGER_CREATED, 
       Source<CANScopeDevice>(this), 
       NotificationService::NoDetails());
-
-  delete this;
 }
 
 CANScopeDevice::CANScopeDevice(
@@ -50,7 +60,8 @@ CANScopeDevice::CANScopeDevice(
     , osc_device_(device_delegate_.get(), &osc_device_config_)
     , frame_device_config_()
     , frame_device_(device_delegate_.get(), &frame_device_config_, osc_device_.soft_diff())
-    , runner_(this) {
+    , runner_(this)
+    , notify_created_(false) {
   osc_device_.set_run_thread(run_thread());
   frame_device_.set_run_thread(run_thread());
 }
@@ -102,6 +113,12 @@ base::DictionaryValue* CANScopeDevice::SaveConfig() {
 void CANScopeDevice::DeviceTypeDetected(DeviceType type) {
   osc_device_.set_device_type(type);
   frame_device_.set_device_type(type);
+}
+
+// TODO need check error
+void CANScopeDevice::SetAll() {
+  osc_device_.SetAll();
+  frame_device_.SetAll();
 }
 
 
