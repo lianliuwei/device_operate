@@ -116,7 +116,7 @@ OscWave* ChnlWave::trigger_wave() {
   if (chnl_map_view_.is_null()) {
     return NULL;
   }
-  for (int i = 0; container_->ChnlCount(); ++i) {
+  for (int i = 0; i < container_->ChnlCount(); ++i) {
     ::Chnl* chnl = container_->GetChnlAt(i);
     if (chnl_->IsTrigger()) {
       return chnl_map_view_.Run(chnl);
@@ -127,7 +127,9 @@ OscWave* ChnlWave::trigger_wave() {
 
 SkColor ChnlWave::trigger_color() {
   OscWave* osc_wave = trigger_wave();
-  DCHECK(osc_wave);
+  if (osc_wave == NULL) {
+    return SkColorSetRGB('b', 'a', 'd');
+  }
   return osc_wave->color();
 }
 
