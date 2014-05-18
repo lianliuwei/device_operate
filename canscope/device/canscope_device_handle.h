@@ -23,6 +23,8 @@ public:
   OscDeviceHandle osc_device_handle;
   FrameDeviceHandle frame_device_handle;
 
+  scoped_refptr<OscDataCollecter> GetOscDataCollecter();
+  
 private:
   virtual void Observe(int type, 
                        const common::NotificationSource& source, 

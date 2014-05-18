@@ -10,7 +10,7 @@ class ChnlWave;
 class ChnlAnaData : public AnaWaveData {
 public:
   ChnlAnaData(ChnlWave* wave, ::Chnl* chnl);
-  virtual ~ChnlAnaData();
+  virtual ~ChnlAnaData() {}
 
   // implement AnaWaveData
   virtual WaveRange data_range();
@@ -18,7 +18,7 @@ public:
   virtual int size();
 
 private:
-  OscWave* wave_;
+  ChnlWave* wave_;
   ::Chnl* chnl_;
 
   DISALLOW_COPY_AND_ASSIGN(ChnlAnaData);

@@ -87,5 +87,8 @@ CANScopeDeviceHandle::~CANScopeDeviceHandle() {
   device_manager_ = NULL;
 }
 
+scoped_refptr<OscDataCollecter> CANScopeDeviceHandle::GetOscDataCollecter() {
+  return device_manager_->runner()->osc_data;
+}
 
 }

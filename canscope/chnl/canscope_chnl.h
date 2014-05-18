@@ -28,6 +28,8 @@ public:
 
   virtual bool IsTrigger() const;
   virtual void BeTrigger();
+  virtual double TriggerOffset() const;
+  virtual void SetTriggerOffset(double offset);
 
 private:
   VoltRangeStoreMember* GetVoltRange() const;

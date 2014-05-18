@@ -65,6 +65,14 @@ void CANScopeChnl::BeTrigger() {
   handle_->trigger_source.set_value(Chnl2TriggerSource(chnl_));
 }
 
+double CANScopeChnl::TriggerOffset() const {
+  return device_property()->trigger_volt.value();
+}
+
+void CANScopeChnl::SetTriggerOffset(double offset) {
+  handle_->trigger_volt.set_value(offset);
+}
+
 CANScopeChnl::CANScopeChnl(canscope::Chnl chnl, 
                            scoped_refptr<ChnlCalcResult> result, 
                            OscDeviceHandle* handle)

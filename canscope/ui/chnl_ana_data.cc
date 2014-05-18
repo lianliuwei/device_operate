@@ -1,5 +1,7 @@
 #include "canscope/ui/chnl_ana_data.h"
 
+#include "canscope/ui/chnl_wave.h"
+
 namespace canscope {
 
 
@@ -11,7 +13,7 @@ double* ChnlAnaData::data() {
   if (!chnl_->HasChnlData()) {
     return NULL;
   }
-  return chnl_->ChnlData().data();
+  return const_cast<double*>(chnl_->ChnlData().data());
 }
 
 int ChnlAnaData::size() {
@@ -19,6 +21,12 @@ int ChnlAnaData::size() {
     return NULL;
   }
   return chnl_->ChnlData().size();
+}
+
+ChnlAnaData::ChnlAnaData(ChnlWave* wave, ::Chnl* chnl)
+    : wave_(wave)
+    , chnl_(chnl) {
+
 }
 
 

@@ -70,6 +70,8 @@
       'sources': [
         'ui/canscope_view.h',
         'ui/canscope_view.cc',
+        'ui/canscope_window.h',
+        'ui/canscope_window.cc',
         'ui/oscilloscope.h',
         'ui/oscilloscope.cc',
         'ui/chnl_wave.h',
@@ -98,6 +100,7 @@
         'canscope_device.gyp:canscope_device',
         'osc_chnl_calc',
         'chnl',
+        'canscope_ui',
        ],
       'sources' : [
         'app/canscope_process.h',
