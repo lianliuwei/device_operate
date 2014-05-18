@@ -40,6 +40,10 @@ CANScopeChnlCalc::CANScopeChnlCalc(scoped_refptr<base::SingleThreadTaskRunner> r
   ui_queue_ = new ChnlCalcResultQueue(true, false);
 }
 
+CANScopeChnlCalc::~CANScopeChnlCalc() {
+
+}
+
 void CANScopeChnlCalc::Start() {
   run_thread_->PostTask(FROM_HERE, Bind(&CANScopeChnlCalc::StartImpl, this));
 }

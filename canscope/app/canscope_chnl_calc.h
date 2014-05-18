@@ -29,6 +29,9 @@ public:
 
   // TODO add FFT calc to depend Calc
 private:
+  friend class base::RefCountedThreadSafe<CANScopeChnlCalc>;
+  ~CANScopeChnlCalc();
+  
   void StartImpl();
   void StopImpl();
 
