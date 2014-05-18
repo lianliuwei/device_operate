@@ -91,11 +91,13 @@ std::string SpeedSense::FormatSpeedAndTotal() {
 }
 
 SpeedSense::SpeedSense(base::TimeDelta delta)
-    : delta_(delta) {
+    : delta_(delta)
+    , last_(Time::Now()) {
   Start();      
 }
 
 SpeedSense::SpeedSense(int64 ms)
-    : delta_(TimeDelta::FromMilliseconds(ms)){
+    : delta_(TimeDelta::FromMilliseconds(ms))
+    , last_(Time::Now()) {
   Start();
 }

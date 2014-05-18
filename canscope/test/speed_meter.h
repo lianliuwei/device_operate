@@ -37,6 +37,8 @@ private:
   int64 last_count_;
   int64 total_size_;
   int64 total_count_;
+
+  DISALLOW_COPY_AND_ASSIGN(SpeedMeter);
 };
   
 std::string FormatByte(int64 byte_size);
