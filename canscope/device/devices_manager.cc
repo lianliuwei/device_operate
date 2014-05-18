@@ -4,6 +4,7 @@
 
 #include "canscope/device/usb/usb_port.h"
 #include "canscope/device/canscope_device_constants.h"
+#include "canscope/device/config_util.h"
 
 using namespace std;
 
@@ -174,6 +175,8 @@ bool DevicesManager::OpenDeviceImpl(string16 device_path, bool notify) {
   if (error != device::OK) {
     LOG(WARNING) << "Device Open Error: " << ErrorToString(error) << 
       " Device: " << device_path;
+
+    device->StartDestroying();
     return false;
   }
   AddObserver(runner);
@@ -191,6 +194,9 @@ bool DevicesManager::OpenDeviceImpl(string16 device_path, bool notify) {
   if (notify) {
     NotifyDeviceStateChanged();
   }
+  device->Init(GetDefaultConfig());
+  device->SetAll();
+  device->NotifyCreated();
   return true;
 
 }
