@@ -3,7 +3,7 @@
 #include "canscope/canscope_notification_types.h"
 #include "canscope/device/devices_manager.h"
 #include "canscope/device/canscope_device_handle.h"
-
+#include "canscope/device/canscope_device_finder.h"
 using namespace common;
 using namespace canscope::device;
 
@@ -13,7 +13,8 @@ canscope::CANScopeProcess* g_Process = NULL;
 
 namespace canscope {
 
-CANScopeProcess::CANScopeProcess() {
+CANScopeProcess::CANScopeProcess()
+    : device_(NULL) {
   if (g_Process) {
     NOTREACHED();
   }
@@ -47,6 +48,10 @@ void CANScopeProcess::Init() {
 
   DevicesManager::Create(
       CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE), true, false, false);
+
+  device_finder_ = 
+      new CANScopeDeviceFinder(CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE), false);
+  device_finder_->Start();
   
 }
 
@@ -84,8 +89,9 @@ void CANScopeProcess::Observe(int type,
     Source<CANScopeDevice> device_source(source);
     DCHECK(device_ == device_source.ptr());
     device_ = NULL;
+  } else {
+    NOTREACHED();
   }
-  NOTREACHED();
 }
 
 void CANScopeProcess::CreateUI() {
@@ -99,6 +105,7 @@ void CANScopeProcess::CreateCalc() {
   scoped_refptr<OscRawDataQueue> raw_queue = device_->runner()->osc_data->RawDataQueue();
   chnl_calc_ = new CANScopeChnlCalc(
       CommonThread::GetMessageLoopProxyForThread(CommonThread::FILE), raw_queue);
+  chnl_calc_->Start();
 }
 
 void CANScopeProcess::CreateHandle() {
@@ -109,7 +116,10 @@ void CANScopeProcess::CreateHandle() {
 
 void CANScopeProcess::Close() {
   view_.reset(NULL);
+  chnl_calc_->Stop();
   chnl_calc_ = NULL;
+  device_finder_->Stop();
+  device_finder_ = NULL;
   DevicesManager::Destroy();
   MessageLoop::current()->Quit();
 }

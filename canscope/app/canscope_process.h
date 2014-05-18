@@ -51,6 +51,7 @@ private:
 
   scoped_ptr<CANScopeWindow> view_;
   scoped_refptr<CANScopeChnlCalc> chnl_calc_;
+  scoped_refptr<CANScopeDeviceFinder> device_finder_;
 
   // now only take care one device;
   CANScopeDevice* device_;
