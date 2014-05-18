@@ -53,7 +53,12 @@ public:
 // just Vertical Layout the ContainerView
 WaveControlView::WaveControlView(WaveControl* wave_control)
     : wave_control_(wave_control)
-    , drag_controller_(this) {
+    , drag_controller_(this)
+    , show_indicate_(false)
+    , view_index_(-1)
+    , gap_index_(-1)
+    , view_indiciate_(NULL)
+    , gap_indicate_(NULL) {
   set_background(Background::CreateSolidBackground(kWaveControlBackgroundColor));
   wave_control->AddWaveContainerObserver(this);
   
