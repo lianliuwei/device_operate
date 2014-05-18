@@ -87,4 +87,8 @@ base::DictionaryValue* GetDefaultFrameDeviceConfig() {
   return GetSubDict(GetConfig(kDefaultCANScopeConfig), kFrameDevice);
 }
 
+base::DictionaryValue* GetDefaultConfig() {
+  return GetConfig(kDefaultCANScopeConfig);
+}
+
 } // namespace canscope
