@@ -29,6 +29,7 @@ private:
 
   // implement ThreadLoopRun
   virtual bool LoopRunImp() OVERRIDE;
+  virtual void OnStop() OVERRIDE;
 
   void NotifyStateChanged();
   void NotifyDeviceStateChanged();

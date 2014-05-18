@@ -10,6 +10,9 @@ namespace canscope {
 bool CANScopeDeviceFinder::LoopRunImp() {
   // EnumDevice
   std::vector<string16> devices;
+  if (device_delegate_.get() == NULL) {
+    device_delegate_.reset(CreateDeviceDelegate());
+  }
   device::Error err = device_delegate_->EnumDevices(&devices);
   DCHECK(err == device::OK);
   int find_device_size = static_cast<int>(devices.size());
@@ -27,11 +30,15 @@ bool CANScopeDeviceFinder::LoopRunImp() {
   return !IsSingle();
 }
 
+void CANScopeDeviceFinder::OnStop() {
+  device_delegate_.reset(NULL);
+}
+
 CANScopeDeviceFinder::CANScopeDeviceFinder(
     scoped_refptr<base::SingleThreadTaskRunner> run_thread, 
     bool stop_on_found)
     : stop_on_found_(stop_on_found)
-    , device_delegate_(CreateDeviceDelegate()) {
+    , device_delegate_(NULL) {
   set_run_thread(run_thread);
   next_loop_delay_ = base::TimeDelta::FromSeconds(1);
 }
