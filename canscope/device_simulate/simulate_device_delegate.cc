@@ -47,7 +47,7 @@ Error SimulateDeviceDelegate::CloseDevice() {
   CheckThread();
   DCHECK(opened_) << "close device no open";
   opened_ = false;
-  return ERR_DEVICE_CLOSE;
+  return OK;
 }
 
 Error SimulateDeviceDelegate::DownloadFPGA(uint8* buffer, int size) {
