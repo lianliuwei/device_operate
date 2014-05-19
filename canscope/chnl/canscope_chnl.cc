@@ -123,7 +123,7 @@ Property<double>* CANScopeChnl::SetVoltOffset() {
 const void* CANScopeChnl::Key() const {
   switch (chnl_) {
   case CAN_H: return kCANHKey;
-  case CAN_L: return kCANHKey;
+  case CAN_L: return kCANLKey;
   case CAN_DIFF: return kCANDIFFKey;
   default: NOTREACHED(); return NULL;
   }
