@@ -17,7 +17,7 @@
     '<(BASE_PATH)/third_party/icu_bin.gyp:icuuc_bin', '<(BASE_PATH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
   ],
   'include_dirs': [
-   '../..',
+   '..',
   ],
 
   'conditions': [
@@ -28,9 +28,7 @@
           '-loleacc.lib',
         ]
       },
-      'include_dirs': [
-        '<(DEPTH)/third_party/wtl/include',
-      ],
+
       'msvs_settings': {
         'VCManifestTool': {
           'AdditionalManifestFiles': '$(ProjectDir)\\exe.manifest',
