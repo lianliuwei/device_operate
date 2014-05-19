@@ -33,6 +33,7 @@ private:
 
   void UpdateButton();
   void UpdateFPS();
+  void LayoutFPS();
 
   views::TextButton* start_;
   views::TextButton* stop_;

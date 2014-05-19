@@ -105,9 +105,7 @@ void CANScopeView::Layout() {
   gfx::Rect v_rect = GetLocalBounds();
   button_group_->SetBoundsRect(gfx::Rect(v_rect.origin(), b_size));
   
-  gfx::Size l_size = fps_->GetPreferredSize();
-  gfx::Point l_origin = v_rect.top_right() + gfx::Vector2d(-l_size.width(), 0);
-  fps_->SetBoundsRect(gfx::Rect(l_origin, l_size));
+  LayoutFPS();
 
   v_rect.Offset(gfx::Vector2d(0, b_size.height()));
   v_rect.Intersect(GetLocalBounds());
@@ -137,6 +135,14 @@ void CANScopeView::UpdateButton() {
 void CANScopeView::UpdateFPS() {
   speed_->Update(osc_->read_count());
   fps_->SetText(FPSText(speed_->Speed()));
+  LayoutFPS();
+}
+
+void CANScopeView::LayoutFPS() {
+  gfx::Rect v_rect = GetLocalBounds();
+  gfx::Size l_size = fps_->GetPreferredSize();
+  gfx::Point l_origin = v_rect.top_right() + gfx::Vector2d(-l_size.width(), 0);
+  fps_->SetBoundsRect(gfx::Rect(l_origin, l_size));
 }
 
 } // namespace canscope
