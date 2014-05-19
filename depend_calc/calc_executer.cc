@@ -72,7 +72,7 @@ void CalcExecuter::StartAllRunnable() {
       it != calc_items.end(); 
       ++it) {
     pool->PostWorkerTask(FROM_HERE, Bind(&CalcExecuter::RunItem, 
-        Unretained(this), *it));
+        this, *it));
   }
 }
 
