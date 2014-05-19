@@ -24,6 +24,7 @@ public:
 private:
   void UpdateContainer(bool hardware_diff, bool init);
   void UpdateHRange(DeviceType type, bool init);
+  void UpdateAllChnl(scoped_refptr<ChnlCalcResult> result);
 
   OscDeviceProperty* device_property() const;
 

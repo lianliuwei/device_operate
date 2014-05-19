@@ -183,6 +183,8 @@ void Oscilloscope::OscConfigChanged(OscRawData* raw_data) {
   } else if (HasString(changed_set, kOscTriggerVolt)) {
     NotifyAllChnl(OscWave::kTriggerOffset);
   }
+
+  raw_data_ = raw_data;
 }
 
 ChnlWave* Oscilloscope::ChnlMapView(::Chnl* chnl) {

@@ -61,6 +61,12 @@ void CANScopeChnlContainer::UpdateHRange(DeviceType type, bool init) {
   InitHRange(h_range_, DeviceHDiv(type));
 }
 
+void CANScopeChnlContainer::UpdateAllChnl(scoped_refptr<ChnlCalcResult> result) {
+  can_h_->UpdateResult(result);
+  can_l_->UpdateResult(result);
+  can_diff_->UpdateResult(result);
+}
+
 double CANScopeChnlContainer::HOffset() const {
   return device_property()->time_offset.value() / 1e-9;
 }
@@ -103,6 +109,7 @@ void CANScopeChnlContainer::UpdateResult(scoped_refptr<ChnlCalcResult> result) {
   result_ = result;
   UpdateContainer(result_->hardware_diff(), false);
   UpdateHRange(result_->type(), false);
+  UpdateAllChnl(result);
 }
 
 OscDeviceProperty* CANScopeChnlContainer::device_property() const {
