@@ -16,8 +16,8 @@ using namespace canscope;
 namespace {
 
 static const double kVRange = 3; // unit V
-static const double kHMoveUnit = 2000; // ns  each s wave move
-static const double kHSinSize = 5000; // ns
+static const double kHMoveUnit = 1900; // ns  each s wave move
+static const double kHSinSize = 500; // ns
 static const double LLHSize = 4000;
 
 uint8 ToChnlValue(double v_range, double value) {
@@ -114,27 +114,26 @@ device::Error OscDeviceSimulate::ReadOscData(uint8* buffer, int size) {
   scoped_ptr<double[]> can_l(new double[chnl_size]);
   double wave_move = (Time::Now() - start_time_).InSeconds() * kHMoveUnit;
   double left_offset = time_offset.value();
-  for (int i = 0; i < chnl_size; ++i) {
+  double screen_range = TimeBaseValue(time_base.value());
+  int produce_size = 2000;
+  for (int i = 0; i < produce_size; ++i) {
     {
     double v_offset = offset_can_h.value();
-    double screen_range = Volt(range_can_h.value());
     double y_value = screen_range / chnl_size * i - wave_move + left_offset;
     can_h[i] = (kVRange/2) * sin(y_value / kHSinSize * M_PI / 2) + v_offset;
     }
     {
     double v_offset = offset_can_l.value();
-    double screen_range = Volt(range_can_l.value());
     double y_value = screen_range / chnl_size * i - wave_move + left_offset;
-    can_h[i] = (kVRange/2) * LowHeight(y_value / kHMoveUnit) + v_offset;
+    can_l[i] = (kVRange/2) * LowHeight(y_value / kHMoveUnit) + v_offset;
     }
   }
-  double l_v_range = Volt(range_can_l.value());;
-  double h_v_range = Volt(range_can_h.value());;
-  for (int i = 0; i < chnl_size; ++i) {
+  double l_v_range = Volt(range_can_l.value());
+  double h_v_range = Volt(range_can_h.value());
+  for (int i = 0; i < produce_size; ++i) {
     buffer[i*2] = ToChnlValue(l_v_range, can_l[i]);
     buffer[i*2+1] = ToChnlValue(h_v_range, can_h[i]);
   }
-
   return OK;
 }
 
