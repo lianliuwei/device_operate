@@ -14,6 +14,6 @@ double ReverseYDouble(const gfx::Transform& transform, int y);
 
 
 int VectorToX(const gfx::Transform& transform, int index);
-int XToVerctor(const gfx::Transform& transform, int x);
+int XToVector(const gfx::Transform& transform, int x);
 
 

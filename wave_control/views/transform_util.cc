@@ -56,7 +56,7 @@ int VectorToX(const gfx::Transform& transform, int index) {
   return point.x();
 }
 
-int XToVerctor(const gfx::Transform& transform, int x) {
+int XToVector(const gfx::Transform& transform, int x) {
   gfx::Point point(x, 0);
   bool ret = transform.TransformPointReverse(point);
   CHECK(ret) << "Invalid transform matrix";

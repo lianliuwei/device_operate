@@ -16,8 +16,8 @@ static const int kDotWidth = 4;
 static const int kLineWidth = 1;
 
 // return true for have intersect, false for no
-bool RangeIntersect(int* intersect_left, int* intersect_right, 
-                    int range_1_left, int range_1_right, 
+bool RangeIntersect(int* intersect_left, int* intersect_right,
+                    int range_1_left, int range_1_right,
                     int range_2_left, int range_2_right) {
     CHECK(range_1_left <= range_1_right) << "the coord is defalut windows coord";
     CHECK(range_2_left <= range_2_right) << "the coord is defalut windows coord";
@@ -44,8 +44,8 @@ bool AnaWaveDataView::PaintWaveParam(int* vector_start_out, int* vector_end_out,
   int view_begin = GetLocalBounds().x();
   int view_end = GetLocalBounds().right();
   int plot_begin, plot_end;
-  bool ret = RangeIntersect(&plot_begin, &plot_end, 
-                             real_begin, real_end, 
+  bool ret = RangeIntersect(&plot_begin, &plot_end,
+                             real_begin, real_end,
                              view_begin, view_end);
   // no data need to show
   if (!ret) {
@@ -58,8 +58,8 @@ bool AnaWaveDataView::PaintWaveParam(int* vector_start_out, int* vector_end_out,
   vector_to_real_x.Translate(real_begin, 0);
   vector_to_real_x.Scale(static_cast<float>(real_length) / (vector_size - 1), 1);
   // get How many point to show
-  int vector_start = XToVerctor(vector_to_real_x, plot_begin);
-  int vector_end = XToVerctor(vector_to_real_x, plot_end);
+  int vector_start = XToVector(vector_to_real_x, plot_begin);
+  int vector_end = XToVector(vector_to_real_x, plot_end);
   // add two point separate add begin and end for show the wave like cut when
   // the wave range is cut off by the view.
   if (vector_start != 0)
@@ -67,7 +67,7 @@ bool AnaWaveDataView::PaintWaveParam(int* vector_start_out, int* vector_end_out,
   if (vector_end != vector_size -1)
     vector_end += 1;
 
-  bool auto_show_dot = vector_size == 1 ? true : 
+  bool auto_show_dot = vector_size == 1 ? true :
     real_length / (vector_size - 1) >= kAutoShowDotThreshold;
   bool need_sample = 2 * real_length < vector_size;
 
@@ -92,14 +92,14 @@ bool AnaWaveDataView::PaintWaveParam(int* vector_start_out, int* vector_end_out,
 void AnaWaveDataView::PaintWave(gfx::Canvas* canvas) {
   if (!line_data_ || line_data_->data() == NULL)
     return;
- 
+
   int vector_start, vector_end, plot_begin, plot_end;
   gfx::Transform vector_to_real_x;
   bool auto_show_dot, need_sample;
 
-  bool ret = PaintWaveParam(&vector_start, &vector_end, 
-                            &plot_begin, &plot_end, 
-                            &vector_to_real_x, 
+  bool ret = PaintWaveParam(&vector_start, &vector_end,
+                            &plot_begin, &plot_end,
+                            &vector_to_real_x,
                             &auto_show_dot, &need_sample);
   if (!ret) {
     return;
@@ -128,14 +128,14 @@ void AnaWaveDataView::PaintWave(gfx::Canvas* canvas) {
     int begin_y = YInt(data_transform_, begin_value);
 
     for (int i = plot_begin; i < plot_end; i ++) {
-      int begin_index = XToVerctor(vector_to_real_x, i);
-      int end_index = XToVerctor(vector_to_real_x, i + 1);
+      int begin_index = XToVector(vector_to_real_x, i);
+      int end_index = XToVector(vector_to_real_x, i + 1);
       PeakValue peak = buffer->GetRangePeak(begin_index, end_index - begin_index);
       int begin = YInt(data_transform_, peak.begin);
       int end = YInt(data_transform_, peak.end);
       int max = YInt(data_transform_, peak.max);
       int min = YInt(data_transform_, peak.min);
-      
+
       if (draw_line) {
         canvas->DrawLine(Point(i, begin_y), Point(i + 1, begin), line_paint);
         canvas->DrawLine(Point(i, max), Point(i, min), line_paint);
@@ -146,7 +146,7 @@ void AnaWaveDataView::PaintWave(gfx::Canvas* canvas) {
         canvas->DrawPoint(Point(i, max), dot_paint);
         canvas->DrawPoint(Point(i, min), dot_paint);
       }
-      begin_y = end;
+     begin_y = end;
     }
 
   // draw all the point.
@@ -169,7 +169,7 @@ void AnaWaveDataView::PaintWave(gfx::Canvas* canvas) {
   // draw the last dot;
   if (draw_dot) {
     double logic_y = data[vector_end];
-    Point point(VectorToX(vector_to_real_x, vector_end), 
+    Point point(VectorToX(vector_to_real_x, vector_end),
                 YInt(data_transform_, logic_y));
     canvas->DrawPoint(point, dot_paint);
   }
@@ -191,21 +191,21 @@ bool AnaWaveDataView::OnMouseDragged(const ui::MouseEvent& event) {
 void AnaWaveDataView::set_wave_color(SkColor color) {
   if (color != wave_color_) {
     wave_color_ = color;
-    SchedulePaint();    
+    SchedulePaint();
   }
 }
 
 void AnaWaveDataView::set_dot_color(SkColor color) {
   if (color != dot_color_) {
     dot_color_ = color;
-    SchedulePaint();    
+    SchedulePaint();
   }
 }
 
 void AnaWaveDataView::set_show_style(ShowStyle style) {
   if (style != show_sytle_) {
     show_sytle_ = style;
-    SchedulePaint();    
+    SchedulePaint();
   }
 }
 
