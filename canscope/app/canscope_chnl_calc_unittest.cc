@@ -91,7 +91,6 @@ protected:
 
     // HACK or close will fault
     device_delegate_->DetachFromThread();
-    EXPECT_OK_OR_RET(error);
   }
 
   scoped_refptr<CANScopeChnlCalc> chnl_calc_;
