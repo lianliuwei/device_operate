@@ -81,16 +81,10 @@
       ], 
     },
     {
-       'includes': [ 'exe.gypi' ],
+      'includes': [ 'exe.gypi' ],
       'target_name': 'canscope_osc_app',
-      'include_dirs': [
-        '..',
-      ], 
-       'dependencies': [
-        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+      'dependencies': [
         '<(BASE_PATH)/base/base_bin.gyp:base_prefs_bin',
-        '<(BASE_PATH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
-        '<(BASE_PATH)/base_ex/base_ex.gyp:base_ex',
         '../common/common.gyp:common',
         '../device/device.gyp:device',
         '../depend_calc/depend_calc.gyp:depend_calc',
@@ -101,7 +95,7 @@
         'osc_chnl_calc',
         'chnl',
         'canscope_ui',
-       ],
+      ],
       'sources' : [
         'app/canscope_process.h',
         'app/canscope_process.cc',
