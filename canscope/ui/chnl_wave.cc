@@ -35,7 +35,8 @@ namespace canscope {
 ChnlWave::ChnlWave(::Chnl* chnl, ChnlContainer* container, ChnlMapViewCallbackType chnl_map_view)
     : chnl_(chnl)
     , container_(container)
-    , chnl_map_view_(chnl_map_view) {
+    , chnl_map_view_(chnl_map_view)
+    , wave_data_(new ChnlAnaData(this, chnl)) {
   DCHECK(chnl);
   name_ = ChnlName(chnl->ChnlType());
   color_ = ChnlColor(chnl->ChnlType());
