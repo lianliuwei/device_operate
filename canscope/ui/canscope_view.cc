@@ -43,6 +43,28 @@ private:
 
 DISALLOW_COPY_AND_ASSIGN(FPSSpeed);
 };
+
+void SetChildBoard(views::View* const parent, int depth) {
+  if (depth == 0) {
+    return;
+  }
+  for (int i = 0; i < parent->child_count(); ++i) {
+    parent->child_at(i)->set_border(
+      views::Border::CreateSolidBorder(1, SkColorSetRGB(255, 255, 255)));
+    SetChildBoard(parent->child_at(i), depth - 1);
+  }
+}
+
+void LayoutChild(views::View* const parent, int depth) {
+  if (depth == 0) {
+    return;
+  }
+  for (int i = 0; i < parent->child_count(); ++i) {
+    parent->child_at(i)->Layout();
+    LayoutChild(parent->child_at(i), depth - 1);
+  }
+}
+
 }
 
 namespace canscope {
@@ -72,7 +94,11 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
   button_group_->AddChildView(stop_);
   stop_->SetEnabledColor(SkColorSetRGB(255, 255, 255));
   stop_->SetDisabledColor(SkColorSetRGB(125, 125, 125));
-
+  debug_ = new TextButton(this, L"Debug");
+  button_group_->AddChildView(debug_);
+  debug_->SetEnabledColor(SkColorSetRGB(255, 255, 255));
+  debug_->SetDisabledColor(SkColorSetRGB(125, 125, 125));
+  
   fps_ = new Label(FPSText(0.0));
   fps_->SetBackgroundColor(SkColorSetRGB(0, 0, 0));
   fps_->SetEnabledColor(SkColorSetRGB(255, 0, 0));
@@ -116,8 +142,14 @@ void CANScopeView::ButtonPressed(views::Button* sender, const ui::Event& event) 
   CANScopeDeviceHandle* device_handle = CANScopeDeviceHandle::GetInstance(device_);
   if (sender == start_) {
     device_handle->GetOscDataCollecter()->Start();
-  } else {
+  } else if (sender == stop_) {
     device_handle->GetOscDataCollecter()->Stop();
+  } else if (sender == debug_) {
+//      SetChildBoard(osc_view_, 5);
+//      osc_view_->SchedulePaint();
+    LayoutChild(osc_view_, 2);
+  } else {
+    NOTREACHED();
   }
 }
 

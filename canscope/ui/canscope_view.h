@@ -37,6 +37,8 @@ private:
 
   views::TextButton* start_;
   views::TextButton* stop_;
+  views::TextButton* debug_;
+
   views::View* button_group_;
 
   views::Label* fps_;
