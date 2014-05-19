@@ -206,10 +206,20 @@ void SequencedBulkQueueBase::ReaderBase::OnWaitReady(int64 count, bool quit) {
 void SequencedBulkQueueBase::ReaderBase::CallbackOnReady() {
   CHECK(!IsQuit());
 
+  base::SequencedTaskRunner* runner = MessageLoopProxy::current();
+
+  bool ret = buffer_->CheckReady(Count(), 
+      Bind(&SequencedBulkQueueBase::ReaderBase::GetBulk, Unretained(this)));
+  // no need to wait if ready
+  if (ret) {
+    runner->PostTask(FROM_HERE, 
+                     Bind(&SequencedBulkQueueBase::ReaderBase::CallHaveData, 
+                     weak_ptr_.GetWeakPtr()));
+    return;
+  }
   // HACK init the weak in the callback MessageLoop.
   // or OnBufferReady() will init it on wrong thread.
  
-  base::SequencedTaskRunner* runner = MessageLoopProxy::current();
   DCHECK(runner) << "need runner for async OnBufferReady call";
   buffer_->SetReadyCallback(this, Count(),
       base::Bind(&SequencedBulkQueueBase::ReaderBase::OnBufferReady, 
@@ -219,9 +229,9 @@ void SequencedBulkQueueBase::ReaderBase::CallbackOnReady() {
 }
 
 void SequencedBulkQueueBase::ReaderBase::OnBufferReady(SequencedTaskRunner* runner, 
-                                                        WeakPtr<ReaderBase> weak_ptr,
-                                                        int64 count, 
-                                                        bool quit) {
+                                                       WeakPtr<ReaderBase> weak_ptr,
+                                                       int64 count, 
+                                                       bool quit) {
   quiting_ = quit;
   if (!quit) {
     GetBulk();
@@ -254,8 +264,8 @@ void SequencedBulkQueueBase::Quit() {
 }
 
 void SequencedBulkQueueBase::SetReadyCallback(void* id, 
-                                               int64 count, 
-                                               BufferReadyCallback ready_callback) {
+                                              int64 count, 
+                                              BufferReadyCallback ready_callback) {
   {
   base::AutoLock lock(lock_);
 
