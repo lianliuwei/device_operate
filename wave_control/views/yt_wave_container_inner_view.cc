@@ -612,7 +612,8 @@ void HandleBarDelegate::NotifyHandleMoved(int id) {
 YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
     : container_(container)
     , measure_line_view_(NULL)
-    , inited_measure_line_(NULL) {
+    , inited_measure_line_(NULL)
+    , inited_(false) {
   set_border(Border::CreateSolidBorder(kBorderThickness, kBorderColor));
   SetLayoutManager(new AllFillLayout());
 
@@ -628,21 +629,30 @@ YTWaveContainerInnerView::YTWaveContainerInnerView(YTWaveContainer* container)
   // add MeasureLine
   measure_line_view_ = new MeasureLineContainerView(this);
   AddChildViewAt(measure_line_view_, kMeasureLineViewID);
-
-  container->AddWaveObserver(this);
-  // fetch Wave
-  ListItemsAdded(0, container->WaveCount());
-
-  SetGrid(kDefaultVDiv, kDefaultHDiv);
 }
 
 YTWaveContainerInnerView::~YTWaveContainerInnerView() {
-  container_->RemoveWaveObserver(this);
+  if (inited_) {
+    container_->RemoveWaveObserver(this);
+  }
 
   trigger_bar_.reset();
   horiz_offset_bar_.reset();
   wave_bar_.reset();
   wave_group_.reset();
+}
+
+
+void YTWaveContainerInnerView::ViewHierarchyChanged(const ViewHierarchyChangedDetails& details) {
+  if (details.is_add && GetWidget() && !inited_) {
+    inited_ = true;
+
+    container_->AddWaveObserver(this);
+    SetGrid(kDefaultVDiv, kDefaultHDiv);
+
+    // fetch Wave
+    ListItemsAdded(0, container_->WaveCount());
+  }
 }
 
 // static
@@ -677,8 +687,7 @@ void YTWaveContainerInnerView::ListItemsAdded(size_t start, size_t count) {
   }
   CancelMenu();
 
-  if (parent())
-    parent()->Layout();
+  parent()->Layout();
 }
 
 void YTWaveContainerInnerView::ListItemsRemoved(size_t start, size_t count) {
@@ -840,10 +849,6 @@ const gfx::Transform YTWaveContainerInnerView::GetMeasureWaveTransform() {
 void YTWaveContainerInnerView::OnSelectWaveChanged() {
   UpdateAxis();
   measure_line_view_->MeasureWaveChanged();
-  // may be call no add to container
-  if (parent() == NULL) {
-    return;
-  }
   // only cancel be drag view.
   if (container_view() == GetDragController()->start_view()) {
     GetDragController()->Cancel();
@@ -1008,3 +1013,4 @@ void YTWaveContainerInnerView::OnMouseCaptureLost() {
 bool YTWaveContainerInnerView::ContainerEvent(const ui::MouseEvent& event) {
   return GetDragController()->DragEvent(event);
 }
+

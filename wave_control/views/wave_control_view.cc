@@ -58,9 +58,9 @@ WaveControlView::WaveControlView(WaveControl* wave_control)
     , view_index_(-1)
     , gap_index_(-1)
     , view_indiciate_(NULL)
-    , gap_indicate_(NULL) {
+    , gap_indicate_(NULL)
+    , inited_(false) {
   set_background(Background::CreateSolidBackground(kWaveControlBackgroundColor));
-  wave_control->AddWaveContainerObserver(this);
   
   view_indiciate_ = new ViewIndicate();
   view_indiciate_->SetVisible(false);
@@ -69,12 +69,23 @@ WaveControlView::WaveControlView(WaveControl* wave_control)
   gap_indicate_->SetVisible(false);
   AddChildViewAt(gap_indicate_, 1);
 
-  // fetch WaveContainer
-  ListItemsAdded(0, wave_control->WaveContainerCount());
 }
 
 WaveControlView::~WaveControlView() {
-  wave_control()->RemoveWaveContainerObserver(this);
+  if (inited_) {
+    wave_control()->RemoveWaveContainerObserver(this);
+  }
+}
+
+
+void WaveControlView::ViewHierarchyChanged(const ViewHierarchyChangedDetails& details) {
+  if (details.is_add && GetWidget() && !inited_) {
+    inited_ = true;
+
+    wave_control_->AddWaveContainerObserver(this);
+    // fetch WaveContainer
+    ListItemsAdded(0, wave_control_->WaveContainerCount());
+  }
 }
 
 void WaveControlView::ListItemsAdded(size_t start, size_t count) {

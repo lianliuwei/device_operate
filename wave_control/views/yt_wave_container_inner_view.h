@@ -99,6 +99,7 @@ public:
   virtual bool OnMouseDragged(const ui::MouseEvent& event) OVERRIDE;
   virtual void OnMouseReleased(const ui::MouseEvent& event) OVERRIDE;
   virtual void OnMouseCaptureLost() OVERRIDE;
+  virtual void ViewHierarchyChanged(const ViewHierarchyChangedDetails& details) OVERRIDE;
 
   bool ContainerEvent(const ui::MouseEvent& event);
 
@@ -134,6 +135,8 @@ private:
   YTWaveContainerView* container_view() const;
 
   friend class YTWaveVisitor;
+
+  bool inited_;
 
   scoped_ptr<WaveBar> wave_bar_;
   scoped_ptr<HorizOffsetBar> horiz_offset_bar_;

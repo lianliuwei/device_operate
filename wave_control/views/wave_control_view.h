@@ -28,6 +28,7 @@ public:
   // override views::View
   virtual void Layout() OVERRIDE;
   virtual void PaintChildren(gfx::Canvas* canvas) OVERRIDE;
+  virtual void ViewHierarchyChanged(const ViewHierarchyChangedDetails& details) OVERRIDE;
 
 private:
   int ViewID(int wave_container_id);
@@ -45,7 +46,8 @@ private:
   virtual void ListItemsChanged(size_t start, size_t count);
 
   WaveControl* wave_control_;
-  
+  bool inited_;
+
   bool show_indicate_;
   bool indicate_is_view_;
   size_t view_index_;
