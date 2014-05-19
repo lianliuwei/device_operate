@@ -109,7 +109,7 @@ bool HorizOffsetBar::IsVisible(int ID) {
 void HorizOffsetBar::OnHandleMove(int ID, int offset) {
   OscWave* wave = wave_group_->horizontal_at(ID)->osc_wave();
   gfx::Transform transform = view_->OscWaveTransform(wave);
-  int logic_offset = ReverseXDouble(transform, offset);
+  double logic_offset = ReverseXDouble(transform, offset);
   double old_offset = wave->horizontal_offset();
   wave->MoveToX(YTWaveContainerInnerView::ToOscOffset(old_offset, logic_offset));
 }
