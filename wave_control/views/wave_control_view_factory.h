@@ -21,9 +21,11 @@ public:
 
   views::View* Create(Wave* wave, YTWaveContainerView* wave_container_view);
 
+  // all wave_bar size, must set before create.
+  void set_wave_bar_size(int wave_bar_size);
 
 private:
-  WaveControlViewFactory() {}
+  WaveControlViewFactory();
   ~WaveControlViewFactory() {}
   friend struct DefaultSingletonTraits<WaveControlViewFactory>;
 
@@ -38,6 +40,8 @@ private:
   SimpleAnaWaveView* CreateImpl(SimpleAnaWave* wave, 
                                 YTWaveContainerView* yt_wave_container_view);
 
+  bool set_wave_bar_size_;
+  int wave_bar_size_;
 
   DISALLOW_COPY_AND_ASSIGN(WaveControlViewFactory);
 };

@@ -24,11 +24,14 @@ public:
   void ActiveWaveBarHandle(int ID);
   bool GetWaveBarActiveHandleID(int* id);
 
+  void set_wave_bar_size(int wave_bar_size);
+
 private:
   // Overridden from the views::View
   virtual void Layout() OVERRIDE;
 
-  HandleBar* CreateHandleBar(HandleBarDelegate* delegate);
+  HandleBar* CreateHandleBar(HandleBarDelegate* delegate, 
+                             views::TextButtonBase::TextAlignment align);
 
   YTWaveContainerInnerView* yt_view_;
 
@@ -41,4 +44,9 @@ private:
   bool show_wave_bar_;
   bool show_horiz_offset_bar_;
   bool show_trigger_bar_;
+
+  bool set_wave_bar_size_;
+  int wave_bar_size_;
+
+  DISALLOW_COPY_AND_ASSIGN(YTWaveContainerView);
 };

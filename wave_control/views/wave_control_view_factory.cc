@@ -48,6 +48,9 @@ YTWaveContainerView* WaveControlViewFactory::CreateImpl(YTWaveContainer* wave_co
                                                         WaveControlView* wave_control_view) {
   YTWaveContainerView*  yt_wave_container_view 
       = new YTWaveContainerView(wave_container, wave_control_view);
+  if (set_wave_bar_size_) {
+    yt_wave_container_view->set_wave_bar_size(wave_bar_size_);
+  }
   return yt_wave_container_view;
 }
 
@@ -61,4 +64,14 @@ SimpleAnaWaveView* WaveControlViewFactory::CreateImpl(SimpleAnaWave* wave,
                                                       YTWaveContainerView* yt_wave_container_view) {
   SimpleAnaWaveView* simple_ana_wave_view = new SimpleAnaWaveView(wave);
   return simple_ana_wave_view;
+}
+
+void WaveControlViewFactory::set_wave_bar_size(int wave_bar_size) {
+  set_wave_bar_size_ = true;
+  wave_bar_size_ = wave_bar_size;
+}
+
+WaveControlViewFactory::WaveControlViewFactory()
+  : set_wave_bar_size_(false)
+  , wave_bar_size_(-1) {
 }

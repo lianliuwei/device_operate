@@ -118,6 +118,7 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
       CANScopeProcess::Get()->GetChnlCalcResultQueue(device_);
   osc_.reset(new Oscilloscope(&(device_handle->osc_device_handle), queue));
 
+  WaveControlViewFactory::GetInstance()->set_wave_bar_size(60);
   osc_view_ = WaveControlViewFactory::GetInstance()->Create(osc_.get());
   AddChildView(osc_view_);
 

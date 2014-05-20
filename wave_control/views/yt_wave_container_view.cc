@@ -2,6 +2,8 @@
 
 #include "ui/base/resource/resource_bundle.h"
 
+using namespace views;
+
 namespace {
 
 // the Rect::Center change the size if is bigger than the Rect
@@ -71,6 +73,10 @@ void YTWaveContainerView::Layout() {
   gfx::Size mini = yt_view_->GetMinimumSize();
   gfx::Size real = size();
 
+  if (set_wave_bar_size_) {
+    left_need = wave_bar_size_;
+  }
+
   mini.Enlarge(left_need + right_need, top_need + bottom_need);
   // no show the YTView if the real is to small
   if(mini.width() > real.width() || mini.height() > real.height()) {
@@ -130,14 +136,16 @@ void YTWaveContainerView::Layout() {
 }
 
 YTWaveContainerView::YTWaveContainerView(YTWaveContainer* container, 
-                                         WaveControlView* wave_control_view) {
+                                         WaveControlView* wave_control_view)
+    : set_wave_bar_size_(false)
+    , wave_bar_size_(-1) {
   // create inner view
   yt_view_ = new YTWaveContainerInnerView(container);
   AddChildView(yt_view_);
   //create bars
-  wave_bar_ = CreateHandleBar(yt_view_->GetWaveBarDelegate());
-  horiz_offset_bar_ = CreateHandleBar(yt_view_->GetHorizOffsetBarDelegate());
-  trigger_bar_ = CreateHandleBar(yt_view_->GetTriggerBarDelegate());
+  wave_bar_ = CreateHandleBar(yt_view_->GetWaveBarDelegate(), TextButtonBase::ALIGN_LEFT);
+  horiz_offset_bar_ = CreateHandleBar(yt_view_->GetHorizOffsetBarDelegate(), TextButtonBase::ALIGN_CENTER);
+  trigger_bar_ = CreateHandleBar(yt_view_->GetTriggerBarDelegate(), TextButtonBase::ALIGN_RIGHT);
   // add HandlePointDelegate
   HandleBarObserver* observer = yt_view_->HandlePointDelegate();
   wave_bar_->AddObserver(observer);
@@ -146,10 +154,10 @@ YTWaveContainerView::YTWaveContainerView(YTWaveContainer* container,
 
 }
 
-HandleBar* YTWaveContainerView::CreateHandleBar(HandleBarDelegate* delegate) {
+HandleBar* YTWaveContainerView::CreateHandleBar(HandleBarDelegate* delegate, TextButtonBase::TextAlignment align) {
   ResourceBundle& rb = ResourceBundle::GetSharedInstance();
   HandleBar* bar = new HandleBar(delegate, delegate->is_horiz(), 
-      rb.GetFont(kBarFont),
+      rb.GetFont(kBarFont), align,
       0, 1);
   bar->AddObserver(delegate);
   AddChildView(bar);
@@ -179,4 +187,9 @@ void YTWaveContainerView::ActiveWaveBarHandle(int ID) {
 
 bool YTWaveContainerView::GetWaveBarActiveHandleID(int* id) {
   return wave_bar_->GetActiveHandleID(id);
+}
+
+void YTWaveContainerView::set_wave_bar_size(int wave_bar_size) {
+  set_wave_bar_size_ = true;
+  wave_bar_size_ = wave_bar_size;
 }
