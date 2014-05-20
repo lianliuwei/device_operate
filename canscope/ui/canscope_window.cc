@@ -23,12 +23,16 @@ const views::Widget* CANScopeWindow::GetWidget() const  {
 }
 
 CANScopeWindow::CANScopeWindow(CANScopeDevice* device) {
-  contents_ = new CANScopeView(device);
+  contents_.reset(new CANScopeView(device));
 
   views::Widget* window =
       views::Widget::CreateWindowWithBounds(this, gfx::Rect(0, 0, 850, 600));
 
   window->Show();
+}
+
+void CANScopeWindow::DeleteDelegate() {
+  delete this;
 }
 
 } // namespace canscope

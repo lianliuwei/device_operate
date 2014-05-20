@@ -115,7 +115,7 @@ void CANScopeProcess::CreateHandle() {
 }
 
 void CANScopeProcess::Close() {
-  view_.reset(NULL);
+  view_.release();
   chnl_calc_->Stop();
   chnl_calc_ = NULL;
   device_finder_->Stop();
