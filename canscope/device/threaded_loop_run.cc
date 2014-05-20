@@ -77,8 +77,11 @@ void ThreadedLoopRun::LoopRun() {
     {
       base::AutoLock lock(lock_);
       if (stop_) {
+        state_change = true;
         stop = true;
         Reset();
+
+      // init set running to true.
       } else if (!running_) {
         state_change = true;
         running_ = true;
@@ -103,13 +106,12 @@ void ThreadedLoopRun::LoopRun() {
       if (stop_) {
         stop = true;
         state_change = true;
-        running_ = false;
         Reset();
         return;
       }
       if (!ret ) {
+        stop = true;
         state_change = true;
-        running_ = false;
         return;
       }
     }
