@@ -254,13 +254,13 @@ void SequencedBulkQueueBase::ReaderBase::CallHaveData() {
 }
 
 void SequencedBulkQueueBase::Quit() {
- {
+  {
   base::AutoLock lock(lock_);
 
   DCHECK(quiting_ == false);
   quiting_ = true;
   }
-  FireCallbackNoLock(CountNoLock());
+  MayFireCallback();
 }
 
 void SequencedBulkQueueBase::SetReadyCallback(void* id, 
@@ -275,7 +275,8 @@ void SequencedBulkQueueBase::SetReadyCallback(void* id,
   ReadyCallbackRecord record = { ready_callback, count, };
   callback_map_.insert(std::make_pair(static_cast<uint8*>(id), record));
   }
-  }
+  MayFireCallback();
+}
 
 bool SequencedBulkQueueBase::CancelCallback(void* id) {
   {
@@ -313,6 +314,16 @@ void SequencedBulkQueueBase::FireCallbackNoLock(int64 reach_count) {
       continue;
     }
     ++it;
+  }
+}
+
+void SequencedBulkQueueBase::FireCallbacQuitkNoLock() {
+  if (quiting_) {
+    for (ReadyCallbackMap::iterator it = callback_map_.begin();
+      it != callback_map_.end();
+      ++it) {
+        it->second.callback.Run(CountNoLock(), true);
+    }
   }
 }
 

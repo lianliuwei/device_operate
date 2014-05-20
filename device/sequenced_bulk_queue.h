@@ -140,6 +140,8 @@ protected:
   // this only check count.
   void FireCallbackNoLock(int64 reach_count);
 
+  void FireCallbacQuitkNoLock();
+
   mutable base::Lock lock_;
 
 private:
@@ -165,7 +167,8 @@ private:
   // have bulk that count >= count.
   // call ready when return true
   virtual bool CheckReady(int64 count, const base::Closure& ready) = 0;
-
+  // may fire callback when add ReadyCallback
+  virtual void MayFireCallback() = 0;
 
   bool quiting_;
 
@@ -278,6 +281,7 @@ private:
 
   // implement SequencedBulkBufferBase
   virtual bool CheckReady(int64 count, const base::Closure& ready);
+  virtual void MayFireCallback();
 
   DISALLOW_COPY_AND_ASSIGN(SequencedBulkQueue);
 };
@@ -523,4 +527,15 @@ bool SequencedBulkQueue<BulkPtrType>::CheckReady(int64 count, const base::Closur
     ready.Run();
   }
   return ret;
+}
+
+template<typename BulkPtrType>
+void SequencedBulkQueue<BulkPtrType>::MayFireCallback() {
+  base::AutoLock lock(lock_);
+
+  // may be recycle
+  if (buffer_queue_.size() == 0) {
+    return;
+  }
+  FireCallbackNoLock(buffer_queue_.back().count);
 }
