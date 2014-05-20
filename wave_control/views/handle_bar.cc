@@ -196,7 +196,7 @@ void HandleBar::SetMoveRange(int start, int end) {
   }
   if (need_redraw) {
       // need repost the handles
-      InvalidateLayout();
+      Layout();
   }
   
 }
