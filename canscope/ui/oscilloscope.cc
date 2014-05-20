@@ -18,13 +18,14 @@ bool HasString(const vector<string>& strings, const char* key) {
 
 namespace canscope {
 
-Oscilloscope::Oscilloscope(OscDeviceHandle* handle, 
+Oscilloscope::Oscilloscope(OscDeviceHandle* handle,
                            scoped_refptr<ChnlCalcResultQueue> chnl_queue)
     : handle_(handle)
     , chnl_queue_(chnl_queue)
     , queue_reader_(chnl_queue.get())
     , read_id_(0)
-    , read_count_(0) {
+    , read_count_(0)
+    , show_model_(kSeparate) {
   DCHECK(handle);
   queue_reader_.set_have_data_callback(Bind(&Oscilloscope::QueueUpdate, Unretained(this)));
   queue_reader_.CallbackOnReady();
@@ -63,7 +64,7 @@ void Oscilloscope::QueueUpdate() {
 
 void Oscilloscope::HardwareDiffChanged(bool hard_diff) {
   if (last_diff_ == hard_diff) {
-    return; 
+    return;
   }
   last_diff_ = hard_diff;
   UpdateControl();
@@ -100,6 +101,7 @@ void Oscilloscope::set_show_model(ShowModel val) {
   if (val == show_model_) {
     return;
   }
+  show_model_ = val;
   // reorder Wave.
   for (size_t i = 0; i < chnl_waves_.size(); ++i) {
     RemoveWave(chnl_waves_[i]);
@@ -111,7 +113,7 @@ void Oscilloscope::set_show_model(ShowModel val) {
 
 void Oscilloscope::AddWave(Wave* wave) {
   if (show_model_ == kCombine) {
-    if (item_count() >= 0) {
+    if (item_count() > 0) {
       WaveContainer* container = GetWaveContainerAt(0);
       YTWaveContainer* yt_container = container->AsYTWaveContainer();
       yt_container->AddWave(wave);
@@ -153,7 +155,7 @@ void Oscilloscope::OscConfigChanged(OscRawData* raw_data) {
 
   vector<string> changed_set = raw_data_->property()->prefs_.ChangedSet(
       &(raw_data->property()->prefs_));
-  
+
   if (HasString(changed_set, kOscCANHVoltRange)) {
     NotifyChnlAt(0, OscWave::kVertical);
   } else if (HasString(changed_set, kOscCANHOffset)){
