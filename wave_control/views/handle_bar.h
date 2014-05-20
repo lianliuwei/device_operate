@@ -17,7 +17,7 @@ class HandleBar : public views::View
                 , public HandleBarModelObserver {
 public:
   HandleBar(HandleBarModel* model, bool is_horiz, 
-            gfx::Font font,
+            gfx::Font font, views::TextButtonBase::TextAlignment align,
             int start, int end);
   // the views delete handle auto
   virtual ~HandleBar();
@@ -121,6 +121,7 @@ private:
   HandleBarModel* model_;
 
   gfx::Font font_;
+  views::TextButtonBase::TextAlignment align_;
 
   // the start_ and end_ is set by the SetMoveRange. the start_ is less than the
   // end_ the start_ is the point of the offset zero. start_ is using to calculate

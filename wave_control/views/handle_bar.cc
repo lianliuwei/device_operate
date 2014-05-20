@@ -10,10 +10,12 @@ using namespace views;
 HandleBar::HandleBar(HandleBarModel* model, 
                      bool is_horiz, 
                      gfx::Font font,
+                     views::TextButtonBase::TextAlignment align,
                      int start, int end)
     : model_(NULL)
     , is_horiz_(is_horiz)
-    , font_(font) {
+    , font_(font)
+    , align_(align) {
   SetMoveRange(start, end);
   SetModel(model);
 
@@ -143,6 +145,7 @@ void HandleBar::SetHandle(Handle* handle, int ID) {
   handle->SetVisible(model_->IsVisible(ID));
   handle->SetEnabled(model_->IsEnable(ID));
   handle->SetFont(font_);
+  handle->set_alignment(align_);
   SkColor color = model_->GetColor(ID);
   handle->SetEnabledColor(color);
   handle->SetDisabledColor(color);
@@ -159,7 +162,6 @@ void HandleBar::SetHandle(Handle* handle, int ID) {
   
   handle->set_tag(ID);
   handle->set_icon_placement(TextButton::ICON_ON_LEFT);
-  handle->set_alignment(TextButton::ALIGN_CENTER);
 }
 
 void HandleBar::SetHandlePos(Handle* handle, int ID) {
