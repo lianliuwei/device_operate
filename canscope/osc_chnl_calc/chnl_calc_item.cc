@@ -27,15 +27,17 @@ void CalcChnlData(OscChnlData* can_h, OscChnlData* can_l,
   DCHECK(can_h->size()*2 == raw_data->size());
   double* data_can_h = can_h->data();
   double* data_can_l = can_l->data();
-  double range_can_h = VoltRange(property->range_can_h.value());
-  double range_can_l = VoltRange(property->range_can_l.value());
+  double range_can_h = Volt(property->range_can_h.value());
+  double range_can_l = Volt(property->range_can_l.value());
+  double offset_can_h = property->offset_can_h.value();
+  double offset_can_l = property->offset_can_l.value();
   int size = can_h->size();
   for (int i = 0; i < size; ++i) {
     uint8 raw_can_l = data[i * 2];
-    data_can_l[i] = DecodeRaw(raw_can_l, range_can_l);
+    data_can_l[i] = DecodeRaw(raw_can_l, range_can_l) + offset_can_l;
 
     uint8 raw_can_h = data[i * 2 + 1];
-    data_can_h[i] = DecodeRaw(raw_can_h, range_can_h);
+    data_can_h[i] = DecodeRaw(raw_can_h, range_can_h) + offset_can_h;
   }
 }
 
