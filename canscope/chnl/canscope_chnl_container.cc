@@ -11,7 +11,7 @@ void InitHRange(vector<double>& range, int div) {
   range.clear();
   for (int i = 0; i < kTimeBaseSize; ++i) {
     uint32 ns_value = TimeBaseValue(static_cast<TimeBase>(i));
-    range.push_back(ns_value / 1e-9 * div);
+    range.push_back(ns_value * 1e-9 * div);
   }
 }
 
