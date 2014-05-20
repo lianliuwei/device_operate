@@ -65,6 +65,12 @@ void LayoutChild(views::View* const parent, int depth) {
   }
 }
 
+void SetButtonColor(TextButton* button) {
+  button->SetEnabledColor(SkColorSetRGB(240, 240, 240));
+  button->SetDisabledColor(SkColorSetRGB(125, 125, 125));
+  button->SetHoverColor(SkColorSetRGB(255, 255, 255));
+}
+
 }
 
 namespace canscope {
@@ -87,17 +93,14 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
       new FillBoxLayout(FillBoxLayout::kHorizontal, 1, 2, 4));
   AddChildView(button_group_);
   start_ = new TextButton(this, L"Start");
-  start_->SetEnabledColor(SkColorSetRGB(255, 255, 255));
-  start_->SetDisabledColor(SkColorSetRGB(125, 125, 125));
+  SetButtonColor(start_);
   button_group_->AddChildView(start_);
   stop_ = new TextButton(this, L"Stop");
   button_group_->AddChildView(stop_);
-  stop_->SetEnabledColor(SkColorSetRGB(255, 255, 255));
-  stop_->SetDisabledColor(SkColorSetRGB(125, 125, 125));
+  SetButtonColor(stop_);
   debug_ = new TextButton(this, L"Debug");
+  SetButtonColor(debug_);
   button_group_->AddChildView(debug_);
-  debug_->SetEnabledColor(SkColorSetRGB(255, 255, 255));
-  debug_->SetDisabledColor(SkColorSetRGB(125, 125, 125));
   
   fps_ = new Label(FPSText(0.0));
   fps_->SetBackgroundColor(SkColorSetRGB(0, 0, 0));
