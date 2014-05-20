@@ -107,12 +107,11 @@ void ThreadedLoopRun::LoopRun() {
         stop = true;
         state_change = true;
         Reset();
-        return;
       }
-      if (!ret ) {
+      if (!ret) {
         stop = true;
         state_change = true;
-        return;
+        Reset();
       }
     }
     if (state_change) {
