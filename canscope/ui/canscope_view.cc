@@ -78,6 +78,8 @@ namespace canscope {
 CANScopeView::CANScopeView(CANScopeDevice* device)
     : start_(NULL)
     , stop_(NULL) 
+    , debug_(NULL)
+    , change_model_(NULL)
     , button_group_(NULL)
     , fps_(NULL)
     , osc_view_(NULL) 
@@ -101,6 +103,9 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
   debug_ = new TextButton(this, L"Debug");
   SetButtonColor(debug_);
   button_group_->AddChildView(debug_);
+  change_model_ = new TextButton(this, L"Model");
+  SetButtonColor(change_model_);
+  button_group_->AddChildView(change_model_);
   
   fps_ = new Label(FPSText(0.0));
   fps_->SetBackgroundColor(SkColorSetRGB(0, 0, 0));
@@ -148,9 +153,13 @@ void CANScopeView::ButtonPressed(views::Button* sender, const ui::Event& event) 
   } else if (sender == stop_) {
     device_handle->GetOscDataCollecter()->Stop();
   } else if (sender == debug_) {
-//      SetChildBoard(osc_view_, 5);
-//      osc_view_->SchedulePaint();
-    LayoutChild(osc_view_, 2);
+    SetChildBoard(osc_view_, 5);
+    osc_view_->SchedulePaint();
+  } else if (sender == change_model_) {
+    Oscilloscope::ShowModel model = osc_->show_model();
+    model = model == Oscilloscope::kSeparate ? 
+        Oscilloscope::kCombine : Oscilloscope::kSeparate;
+    osc_->set_show_model(model);
   } else {
     NOTREACHED();
   }

@@ -38,6 +38,7 @@ private:
   views::TextButton* start_;
   views::TextButton* stop_;
   views::TextButton* debug_;
+  views::TextButton* change_model_;
 
   views::View* button_group_;
 
