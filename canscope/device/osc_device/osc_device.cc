@@ -74,7 +74,7 @@ uint32 SAMET(uint32 coe) {
 }
 
 uint32 GetTrigMode(TriggerMode trigger_mode) {
-  return trigger_mode == kAuto ? 1 : 0;
+  return trigger_mode == kAuto ? 0 : 1;
 }
 
 uint8 CMP_LOW(VoltRange range, double trig_volt, double offset_volt) {
