@@ -65,7 +65,8 @@ void LayoutChild(views::View* const parent, int depth) {
   }
 }
 
-void SetButtonColor(TextButton* button) {
+void ConfigButton(TextButton* button) {
+  button->set_alignment(TextButtonBase::ALIGN_CENTER);
   button->SetEnabledColor(SkColorSetRGB(240, 240, 240));
   button->SetDisabledColor(SkColorSetRGB(125, 125, 125));
   button->SetHoverColor(SkColorSetRGB(255, 255, 255));
@@ -95,16 +96,16 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
       new FillBoxLayout(FillBoxLayout::kHorizontal, 1, 2, 4));
   AddChildView(button_group_);
   start_ = new TextButton(this, L"Start");
-  SetButtonColor(start_);
+  ConfigButton(start_);
   button_group_->AddChildView(start_);
   stop_ = new TextButton(this, L"Stop");
   button_group_->AddChildView(stop_);
-  SetButtonColor(stop_);
+  ConfigButton(stop_);
   debug_ = new TextButton(this, L"Debug");
-  SetButtonColor(debug_);
+  ConfigButton(debug_);
   button_group_->AddChildView(debug_);
   change_model_ = new TextButton(this, L"Model");
-  SetButtonColor(change_model_);
+  ConfigButton(change_model_);
   button_group_->AddChildView(change_model_);
   
   fps_ = new Label(FPSText(0.0));
@@ -138,6 +139,7 @@ CANScopeView::~CANScopeView() {
 void CANScopeView::Layout() {
   gfx::Size b_size = button_group_->GetPreferredSize();
   gfx::Rect v_rect = GetLocalBounds();
+  b_size.Enlarge(26, 0);
   button_group_->SetBoundsRect(gfx::Rect(v_rect.origin(), b_size));
   
   LayoutFPS();
