@@ -119,7 +119,7 @@ OscWave* ChnlWave::trigger_wave() {
   }
   for (int i = 0; i < container_->ChnlCount(); ++i) {
     ::Chnl* chnl = container_->GetChnlAt(i);
-    if (chnl_->IsTrigger()) {
+    if (chnl->IsTrigger()) {
       return chnl_map_view_.Run(chnl);
     }
   }
