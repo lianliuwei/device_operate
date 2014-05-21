@@ -11,7 +11,7 @@
 #include "device/property/store_member.h"
 #include "device/property/value_map_device_property_store.h"
 
-#include "canscope/scoped_trace_event.h"
+#include "canscope/test/scoped_trace_event.h"
 #include "canscope/device/property/property.h"
 #include "canscope/device/property/property_delegate.h"
 #include "canscope/async_task.h"

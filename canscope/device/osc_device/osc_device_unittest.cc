@@ -13,8 +13,10 @@
 #include "canscope/device/osc_device/osc_device_handle.h"
 #include "canscope/device/osc_device/osc_data_collecter.h"
 #include "canscope/device/sync_call.h"
+#include "canscope/device/test/device_util.h"
 #include "canscope/test/test_process.h"
 #include "canscope/test/speed_meter.h"
+#include "canscope/device/register/scope_ctrl_register.h"
 
 using namespace canscope;
 using namespace std;
@@ -152,5 +154,49 @@ TEST_F(OscDeviceTest, Collect) {
    if (meter.total_count() > 1000) {
      break;
    }
+  }
+}
+
+
+TEST(OscDeviceTest2, DeviceTest) {
+  scoped_ptr<DeviceDelegate> device_delegate(CreateDeviceDelegate());
+  ScopedOpenDevice open_device(device_delegate.get());
+  EXPECT_TRUE_OR_RET(open_device.IsOpen());
+
+  scoped_ptr<OscDevice> osc_device;
+  ConfigManager osc_device_config;
+  osc_device.reset(new OscDevice(device_delegate.get(), &osc_device_config));
+  osc_device->set_run_thread(MessageLoopProxy::current());
+  osc_device->set_device_type(open_device.type());
+  osc_device_config.Update(GetConfig(kOscConfig));
+  osc_device->InitFromConfig();
+  osc_device->Init();
+  osc_device->SetAll();
+
+  Error err;
+  // start scope
+  ScopeCtrlRegister scope_ctrl;
+  scope_ctrl.scope_ctrl.set_value(true);
+  err = WriteDevice(device_delegate.get(), scope_ctrl.memory);
+  EXPECT_OK_OR_RET(err);
+
+  scoped_ptr<uint8[]> raw_data(new uint8[2000]);
+  for (int i = 0; i < 10; ++i) {
+    // UpdateTriggerState
+    TriggerStateRegister trigger_state;
+    err = ReadDevice(device_delegate.get(), trigger_state.memory);
+    EXPECT_OK_OR_RET(err);
+
+    if (trigger_state.clet_bit.value()) {
+      err = device_delegate->ReadOscData(raw_data.get(), 2000);
+      EXPECT_OK_OR_RET(err);
+      cout << "Get Raw Data"
+          << " detail: " << base::HexEncode(raw_data.get(), 200) << endl;
+      return;
+    }
+    if (i == 10 - 1) {
+      EXPECT_TRUE(false) << "check timeout";
+    }
+    SleepMs(100);
   }
 }

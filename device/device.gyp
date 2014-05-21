@@ -8,8 +8,8 @@
       'target_name': 'device',
       'type': 'static_library',
       'dependencies': [
-        '../third_party/chromium/base/base_bin.gyp:base_bin',
-        '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/base_ex/base_ex.gyp:base_ex',
       ],
       'include_dirs': [
         '..',

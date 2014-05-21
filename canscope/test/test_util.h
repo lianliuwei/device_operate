@@ -9,9 +9,6 @@
 void SleepMS(int64 ms);
 void SleepDelta(base::TimeDelta delta);
 
-// parse config, fault will EXPECT_TRUE
-base::DictionaryValue* GetConfig(const char* config);
-
 class SpeedSense {
 public:
   explicit SpeedSense(base::TimeDelta delta);
@@ -46,4 +43,6 @@ private:
   int64 last_count_;
   int64 total_size_;
   int64 total_count_;
+
+  DISALLOW_COPY_AND_ASSIGN(SpeedSense);
 };

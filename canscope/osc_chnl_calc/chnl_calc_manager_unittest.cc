@@ -1,7 +1,7 @@
 #include "testing/gtest/include/gtest/gtest.h"
 #include "testing/gmock/include/gmock/gmock.h"
 
-#include "canscope/scoped_trace_event.h"
+#include "canscope/test/scoped_trace_event.h"
 #include "canscope/device/config_util.h"
 #include "canscope/test/test_process.h"
 #include "canscope/osc_chnl_calc/chnl_calc_manager.h"

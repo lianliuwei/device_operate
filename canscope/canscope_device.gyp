@@ -1,23 +1,22 @@
 {
   'variables': {
     'chromium_code': 1,
+    'BASE_PATH': '../third_party/chromium/',
   },
   'targets': [
     {
       'target_name': 'canscope_device',
       'type': 'static_library',
       'dependencies': [
-        '../third_party/chromium/base/base_bin.gyp:base_bin',
-        '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
-        '../third_party/chromium/base/base_bin.gyp:base_prefs_bin',
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/base_ex/base_ex.gyp:base_ex',
+        '<(BASE_PATH)/base/base_bin.gyp:base_prefs_bin',
         '../device/device.gyp:device',
       ],
       'include_dirs': [
         '..',
       ], 
       'sources': [
-        'scoped_trace_event.h',
-        'scoped_trace_event.cc',
         'device_errors.h',
         'device_errors.cc',
         'device_error_list.h',
@@ -180,6 +179,9 @@
          
         'device/test/scoped_open_device.h',
         'device/test/scoped_open_device.cc',
+        'device/test/device_util.h',
+        'device/test/device_util.cc',
+        
         'test/test_process.h',
         'test/test_process.cc',
       ],
@@ -188,18 +190,18 @@
         '..',
       ], 
       'dependencies': [
-        '../third_party/chromium/base/base_bin.gyp:base_bin',
-        '../third_party/chromium/base/base_bin.gyp:base_prefs_bin',
-        '../third_party/chromium/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
-        '../third_party/chromium/base_ex/base_ex.gyp:base_ex',
-        '../third_party/chromium/testing/gmock.gyp:gmock',
-        '../third_party/chromium/testing/gtest.gyp:gtest',
+        '<(BASE_PATH)/base/base_bin.gyp:base_bin',
+        '<(BASE_PATH)/base/base_bin.gyp:base_prefs_bin',
+        '<(BASE_PATH)/base/third_party/dynamic_annotations/dynamic_annotations.gyp:dynamic_annotations',
+        '<(BASE_PATH)/base_ex/base_ex.gyp:base_ex',
+        '<(BASE_PATH)/testing/gmock.gyp:gmock',
+        '<(BASE_PATH)/testing/gtest.gyp:gtest',
         '../common/common.gyp:common',
         '../device/device.gyp:device',
         'canscope_usb_port',
         'canscope_device',
         'device_simulate/device_simulate.gyp:simulate_device',
-        'canscope.gyp:test_support',
+        'canscope.gyp:canscope_test_support',
       ],
     },
     

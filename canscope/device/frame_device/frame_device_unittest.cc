@@ -12,12 +12,14 @@
 #include "canscope/device/register/soft_diff_register.h"
 #include "canscope/device/register/sja1000_register.h"
 #include "canscope/device/config_manager.h"
+#include "canscope/device/test/device_util.h"
 #include "canscope/test/test_process.h"
 
-using namespace canscope;
 using namespace std;
 using namespace base;
 using namespace common;
+using namespace canscope;
+using namespace canscope::device;
 
 namespace {
 
@@ -98,38 +100,6 @@ protected:
   EXPECT_EQ(canscope::device::OK, (err)) << canscope::device::ErrorToString((err)); \
   if((err) != canscope::device::OK) \
     return; \
-}
-
-using namespace canscope::device;
-
-Error WriteDevice(DeviceDelegate* device_delegate, 
-                  ::device::RegisterMemory& memory) {
-  return device_delegate->WriteDevice(
-      memory.start_addr(), memory.buffer(), memory.size());
-}
-
-Error ReadDevice(DeviceDelegate* device_delegate, 
-                 ::device::RegisterMemory& memory) {
-  return device_delegate->ReadDevice(
-      memory.start_addr(), memory.buffer(), memory.size());
-}
-
-Error WriteDeviceRange(DeviceDelegate* device_delegate, 
-                       ::device::RegisterMemory& memory, 
-                       int start_offset, 
-                       int size) {
-  DCHECK(start_offset + size <= memory.size());
-  return device_delegate->WriteDevice(
-      memory.start_addr() + start_offset, memory.PtrByRelative(start_offset), size);
-}
-
-Error ReadDeviceRange(DeviceDelegate* device_delegate, 
-                       ::device::RegisterMemory& memory, 
-                       int start_offset, 
-                       int size) {
-  DCHECK(start_offset + size <= memory.size());
-  return device_delegate->ReadDevice(
-      memory.start_addr() + start_offset, memory.PtrByRelative(start_offset), size);
 }
 
 TEST_F(FrameDeviceTest, Send) {
