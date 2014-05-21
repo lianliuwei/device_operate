@@ -1,17 +1,21 @@
 #include "canscope/app/canscope_chnl_calc.h"
 
+#include <iostream>
+
 #include "canscope/chnl/canscope_chnl_constants.h"
 #include "canscope/osc_chnl_calc/can_diff_calc_item.h"
 #include "canscope/osc_chnl_calc/chnl_calc_item.h"
 
+using namespace std;
 using namespace base;
 using namespace canscope;
 
 namespace {
 static const int kDefaultFreq = 60;
-static const int kMinFreq = 10;
+static const int kMaxFreq = 60;
+static const int kMinFreq = 5;
 static const int kFreqStep = 5;
-static const int kUIQueueMaxSize = 5;
+static const int kUIQueueMaxSize = 2;
 
 // pass ownership
 CalcGroup* BuildChnlCalcGroup() {
@@ -35,7 +39,8 @@ CANScopeChnlCalc::CANScopeChnlCalc(scoped_refptr<base::SingleThreadTaskRunner> r
     : run_thread_(run_thread)
     , raw_data_queue_(raw_data_queue)
     , running_(false)
-    , time_(kDefaultFreq) {
+    , time_(kDefaultFreq)
+    , speed_meter_(2000) {
   chnl_queue_ = new ChnlCalcResultQueue(false, false);
   ui_queue_ = new ChnlCalcResultQueue(true, false);
 }
@@ -86,6 +91,12 @@ void CANScopeChnlCalc::OnRawDataArrive() {
   bool ret = raw_data_reader_->GetResult(&raw_data, &seq);
   DCHECK(ret);
   chnl_calc_->RawDataCollected(raw_data);
+  
+//   speed_meter_.set_size(raw_data->size());
+//   if (speed_meter_.DeltaPass()) {
+//     cout << "raw speed: " << speed_meter_.FormatSpeedAndTotal() << endl;
+//   }
+
 }
 
 bool CANScopeChnlCalc::CalcForUI() {
@@ -105,14 +116,20 @@ void CANScopeChnlCalc::MayNotifyUI(scoped_refptr<ChnlCalcResult> result) {
   } else if (ui_queue_->bulk_num() == 0) {
     double freq = time_.freq();
     freq += kFreqStep;
+    if (freq > kMaxFreq) {
+      freq = kMaxFreq;
+    }
     time_.set_freq(freq);
   }
-
   ui_queue_->PushBulk(result);
   chnl_queue_->PushBulk(result);
 }
 
 void CANScopeChnlCalc::RecordResult(scoped_refptr<ChnlCalcResult> result) {
+  speed_meter_.set_size(result->raw_data()->size());
+  if (speed_meter_.DeltaPass()) {
+    cout << "Chnl Calc: " << speed_meter_.FormatSpeedAndTotal() << endl;
+  }
   chnl_queue_->PushBulk(result);
 }
 

@@ -5,6 +5,8 @@
 #include "canscope/device/osc_device/osc_data_collecter.h"
 #include "canscope/app/freq_time.h"
 
+#include "canscope/test/speed_meter.h"
+
 namespace canscope {
 
 typedef SequencedBulkQueue<scoped_refptr<ChnlCalcResult> > ChnlCalcResultQueue;
@@ -55,7 +57,8 @@ private:
   scoped_ptr<OscRawDataQueue::Reader> raw_data_reader_;
 
   FreqTime time_;
-
+  SpeedMeter speed_meter_;
+  
   DISALLOW_COPY_AND_ASSIGN(CANScopeChnlCalc);
 };
 
