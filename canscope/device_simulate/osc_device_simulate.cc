@@ -16,9 +16,9 @@ using namespace canscope;
 namespace {
 
 static const double kVRange = 3; // unit V
-static const double kHMoveUnit = 1900; // ns  each s wave move
-static const double kHSinSize = 500; // ns
-static const double LLHSize = 4000;
+static const double kHMoveUnit = 900; // ns  each s wave move
+static const double kHSinSize = 2000; // ns
+static const double kLLHSize = 4000;
 
 uint8 ToChnlValue(double v_range, double value) {
   double temp = (value + v_range/2) * 250 / v_range;
@@ -33,7 +33,7 @@ uint8 ToChnlValue(double v_range, double value) {
 }
 
 double LowHeight(double i) {
-  double v = sin(i * M_PI / 2);
+  double v = sin(i * M_PI * 2);
   return v > 0 ? 1.0 : -1.0;
 }
 
@@ -115,17 +115,17 @@ device::Error OscDeviceSimulate::ReadOscData(uint8* buffer, int size) {
   double wave_move = (Time::Now() - start_time_).InSeconds() * kHMoveUnit;
   double left_offset = time_offset.value();
   double screen_range = TimeBaseValue(time_base.value());
-  int produce_size = 2000;
+  int produce_size = 8000;
   for (int i = 0; i < produce_size; ++i) {
     {
-    double v_offset = offset_can_h.value();
+    double v_offset = -offset_can_h.value();
     double y_value = screen_range / chnl_size * i - wave_move + left_offset;
-    can_h[i] = (kVRange/2) * sin(y_value / kHSinSize * M_PI / 2) + v_offset;
+    can_h[i] = (kVRange/2) * sin(y_value / kHSinSize * M_PI * 2) + v_offset;
     }
     {
-    double v_offset = offset_can_l.value();
+    double v_offset = -offset_can_l.value();
     double y_value = screen_range / chnl_size * i - wave_move + left_offset;
-    can_l[i] = (kVRange/2) * LowHeight(y_value / kHMoveUnit) + v_offset;
+    can_l[i] = (kVRange/2) * LowHeight(y_value / kLLHSize) + v_offset;
     }
   }
   double l_v_range = Volt(range_can_l.value());
@@ -167,7 +167,8 @@ void OscDeviceSimulate::UpdateTriggerBase() {
 OscDeviceSimulate::OscDeviceSimulate(CANScopeDeviceRegisterGroup* group, 
                                      DeviceType device_type)
     : group_(group)
-    , device_type_(device_type) {
+    , device_type_(device_type)
+    , start_time_(Time::Now()) {
   group->SetCallback(group->trigger_state.memory, 
       Bind(&OscDeviceSimulate::OnTriggerState, Unretained(this)));
   Init(GetDefaultOscDeviceConfig());
