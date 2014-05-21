@@ -27,7 +27,7 @@ SkColor ChnlColor(ChnlTypeEnum chnl) {
 
 const int kVerticalDiv = 8;
 const int kHorizontalDiv = 10;
-const SkColor kHorizonColor = SkColorSetRGB(240, 240, 240);
+const SkColor kHorizonColor = SkColorSetRGB(0, 240, 240);
 }
 
 namespace canscope {

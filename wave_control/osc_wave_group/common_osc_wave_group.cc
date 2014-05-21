@@ -281,6 +281,7 @@ void CommonOscWaveGroup::OnOscWaveChanged(OscWave* osc_wave, int change_set) {
     NotifyTriggerMoved(TriggerIndex(record.trigger.get()));
   }
   if (IsSet(change_set, OscWave::kHorizontal)) {
+    record.horizontal->UpdateIcon();
     NotifyHorizontalChanged(HorizontalIndex(record.horizontal.get()));
   }
   if (IsSet(change_set, OscWave::kHorizontalOffset)) {
@@ -355,14 +356,6 @@ CommonOscWaveGroup::~CommonOscWaveGroup() {
   osc_waves_.clear();
 }
 
-gfx::Image& CommonOscWaveGroup::HorizontalIcon() {
-  if (horizontal_icon_.IsEmpty()) {
-    horizontal_icon_ = gfx::Image::CreateFrom1xBitmap(
-        CreateIndicateIcon(19, 15, false, SkColorSetARGB(255, 0, 255, 255)));
-  }
-  return horizontal_icon_;
-}
-
 // RefTriggerPart
 
 SkColor RefTriggerPart::color() {
@@ -403,13 +396,8 @@ OscWave* RefTriggerPart::trigger_wave() {
 
 
 void RefTriggerPart::UpdateIcon() {
-  OscWave* trigger = trigger_wave();
-  if (trigger == NULL) {
-    icon_ = gfx::Image();
-  } else {
-    icon_ = gfx::Image::CreateFrom1xBitmap(
-        CreateIndicateIcon(15, 19, true, trigger->color()));
-  }
+  icon_ = gfx::Image::CreateFrom1xBitmap(
+      CreateIndicateIcon(15, 19, true, color()));
 }
 
 RefTriggerPart::RefTriggerPart(OscWave* osc_wave, CommonOscWaveGroup* wave_group)
@@ -438,7 +426,7 @@ string16 RefHorizontalPart::text() {
 }
 
 const gfx::Image& RefHorizontalPart::icon() {
-  return wave_group_->HorizontalIcon();
+  return icon_;
 }
 
 WaveRange RefHorizontalPart::range() {
@@ -466,10 +454,16 @@ RefHorizontalPart::RefHorizontalPart(OscWave* osc_wave, CommonOscWaveGroup* wave
     , wave_group_(wave_group) {
   DCHECK(osc_wave);
   DCHECK(wave_group);
+  UpdateIcon();
 }
 
 RefHorizontalPart::~RefHorizontalPart() {
   wave_group_->OnHorizontalDelete(this);
+}
+
+void RefHorizontalPart::UpdateIcon() {
+  icon_ = gfx::Image::CreateFrom1xBitmap(
+    CreateIndicateIcon(19, 15, false, color()));
 }
 
 // RefVerticalPart
