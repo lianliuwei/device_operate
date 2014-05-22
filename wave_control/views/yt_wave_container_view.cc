@@ -138,7 +138,13 @@ void YTWaveContainerView::Layout() {
 YTWaveContainerView::YTWaveContainerView(YTWaveContainer* container, 
                                          WaveControlView* wave_control_view)
     : set_wave_bar_size_(false)
-    , wave_bar_size_(-1) {
+    , wave_bar_size_(-1)
+    , show_wave_bar_(true)
+    , show_horiz_offset_bar_(true) 
+    , show_trigger_bar_(true)
+    , wave_bar_(NULL)
+    , horiz_offset_bar_(NULL)
+    , trigger_bar_(NULL) {
   // create inner view
   yt_view_ = new YTWaveContainerInnerView(container);
   AddChildView(yt_view_);
