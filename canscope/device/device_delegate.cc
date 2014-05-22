@@ -9,9 +9,9 @@ namespace canscope {
 
 // TODO add device_simulate here
 DeviceDelegate* canscope::CreateDeviceDelegate() {
-  bool simulate = CommandLine::ForCurrentProcess()->HasSwitch("Simulate");
+  bool no_simulate = CommandLine::ForCurrentProcess()->HasSwitch("No-Simulate");
   
-  if (simulate) {
+  if (!no_simulate) {
     return new SimulateDeviceDelegate(true);
   } else {
     return new UsbPortDeviceDelegate();
