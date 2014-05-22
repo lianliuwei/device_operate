@@ -1,5 +1,6 @@
 #pragma once
 
+#include "base/timer.h"
 #include "ui/views/widget/widget_delegate.h"
 
 #include "canscope/ui/canscope_view.h"
@@ -25,6 +26,8 @@ private:
   virtual void DeleteDelegate() OVERRIDE;
 
   scoped_ptr<CANScopeView> contents_;
+
+  base::Timer timer_;
 
   DISALLOW_COPY_AND_ASSIGN(CANScopeWindow);
 };

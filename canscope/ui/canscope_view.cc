@@ -88,7 +88,7 @@ public:
 
 private:
   virtual void Init() OVERRIDE {
-    SetLayoutManager(new BoxLayout(BoxLayout::kVertical, 20, 20, 0));
+    SetLayoutManager(new BoxLayout(BoxLayout::kVertical, 20, 14, 0));
     Label* label = new Label();
     label->SetMultiLine(true);
     label->SetHorizontalAlignment(gfx::ALIGN_LEFT);
@@ -119,8 +119,7 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
     , osc_view_(NULL) 
     , timer_(true, true)
     , device_(device)
-    , speed_(new FPSSpeed)
-    , inited_(false) {
+    , speed_(new FPSSpeed) {
   DCHECK(device);
 
   set_background(Background::CreateSolidBackground(SkColorSetRGB(0, 0, 0)));
@@ -181,7 +180,7 @@ CANScopeView::~CANScopeView() {
 void CANScopeView::Layout() {
   gfx::Size b_size = button_group_->GetPreferredSize();
   gfx::Rect v_rect = GetLocalBounds();
-  b_size.Enlarge(26, 0);
+  b_size.Enlarge(48, 0);
   button_group_->SetBoundsRect(gfx::Rect(v_rect.origin(), b_size));
   
   LayoutFPS();
@@ -238,13 +237,11 @@ void CANScopeView::LayoutFPS() {
   fps_->SetBoundsRect(gfx::Rect(l_origin, l_size));
 }
 
-void CANScopeView::ViewHierarchyChanged(const ViewHierarchyChangedDetails& details) {
-  if (details.is_add && GetWidget() && !inited_) {
-    inited_ = true;
+void CANScopeView::InitShow() {
 
-    UsageBubble* bubble = new UsageBubble(usage_);
-    BubbleDelegateView::CreateBubble(bubble);
-    bubble->StartFade(true);    
-  }
+  UsageBubble* bubble = new UsageBubble(usage_);
+  BubbleDelegateView::CreateBubble(bubble);
+  bubble->StartFade(true);    
+
 }
 } // namespace canscope

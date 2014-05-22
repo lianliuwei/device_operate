@@ -22,6 +22,9 @@ public:
   CANScopeView(CANScopeDevice* device);
   virtual ~CANScopeView();
 
+  // call after first show
+  virtual void InitShow();
+
 private:
   // implement views::ButtonListener
   virtual void ButtonPressed(views::Button* sender, const ui::Event& event);
@@ -31,7 +34,6 @@ private:
 
   // override views::View
   virtual void Layout() OVERRIDE;
-  virtual void ViewHierarchyChanged(const ViewHierarchyChangedDetails& details) OVERRIDE;
 
   void UpdateButton();
   void UpdateFPS();
@@ -42,7 +44,6 @@ private:
   views::TextButton* debug_;
   views::TextButton* change_model_;
   views::ImageButton* usage_;
-  bool inited_;
 
   views::View* button_group_;
 
