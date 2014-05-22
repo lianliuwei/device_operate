@@ -23,19 +23,35 @@ void TestOscWave::MoveTrigger(double pos) {
 }
 
 void TestOscWave::ZoomInX() {
-  NOTREACHED();
+  WaveRange range = horiz_->range;
+  range.begin /= 2;
+  range.end /= 2;
+  horiz_->range = range;
+  horiz_->NotifyChanged(kHorizontal);
 }
 
 void TestOscWave::ZoomOutX() {
-  NOTREACHED();
+  WaveRange range = horiz_->range;
+  range.begin *= 2;
+  range.end *= 2;
+  horiz_->range = range;
+  horiz_->NotifyChanged(kHorizontal);
 }
 
 void TestOscWave::ZoomInY() {
-  NOTREACHED();
+  WaveRange range = vertical_->range;
+  range.begin /= 2;
+  range.end /= 2;
+  vertical_->range = range;
+  NotifyChanged(kVertical);
 }
 
 void TestOscWave::ZoomOutY() {
-  NOTREACHED();
+  WaveRange range = vertical_->range;
+  range.begin *= 2;
+  range.end *= 2;
+  vertical_->range = range;
+  NotifyChanged(kVertical);
 }
 
 bool TestOscWave::IsSameTrigger(OscWave* osc_wave) {
