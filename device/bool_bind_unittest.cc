@@ -12,6 +12,7 @@ TEST(BoolBindTest, TestBoolBind0) {
   bind0.set_value(false);
   EXPECT_EQ(bind0.value(), false);
   EXPECT_EQ(0x0, memory);
+
 }
 
 TEST(BoolBindTest, TestToggle) {

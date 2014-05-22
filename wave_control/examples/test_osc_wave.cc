@@ -274,8 +274,8 @@ std::vector<TestOscWave*> CreateWaves() {
   wave->color_ = SkColorSetRGB(0, 0, 125);
   Vertical* vertical = new Vertical();
   vertical->div = 8;
-  vertical->range.begin = 3000;
-  vertical->range.end = -3000;
+  vertical->range.begin = 30000000000000;
+  vertical->range.end = -30000000000000;
   vertical->windows_size = 8;
   vertical->offset = 0;
   vertical->color = wave->color_;
@@ -290,7 +290,7 @@ std::vector<TestOscWave*> CreateWaves() {
   wave_data->data_range_.end = 1500;
   wave_data->data_.reserve(200);
   for (int j = 0; j < 200; j++) {
-    wave_data->data_.push_back(sin(j*4*2*M_PI/50) * 500 - 500);
+    wave_data->data_.push_back(sin(j*4*2*M_PI/50) * 5000000000000 - 500);
   }
   wave->wave_data_.reset(wave_data);
   }

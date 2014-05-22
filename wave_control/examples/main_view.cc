@@ -72,10 +72,10 @@ DefaultSimpleAnaWave* CreateAnaWave() {
 
 WaveControl* CreateWaveControl() {
   TestWaveControl* wave_control = new TestWaveControl();
-   std::vector<TestOscWave*> waves  = CreateWaves();
-   for (size_t i = 0; i < waves.size(); ++i) {
-     wave_control->AddWave(waves[i]);
-   }
+  std::vector<TestOscWave*> waves  = CreateWaves();
+  for (size_t i = 0; i < waves.size(); ++i) {
+    wave_control->AddWave(waves[i]);
+  }
   wave_control->AddWave(CreateAnaWave());
   return wave_control;
 }
