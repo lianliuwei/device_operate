@@ -2,6 +2,7 @@
 
 #include "ui/views/view.h"
 #include "ui/views/controls/button/text_button.h"
+#include "ui/views/controls/button/image_button.h"
 #include "ui/views/controls/label.h"
 
 #include "canscope/ui/oscilloscope.h"
@@ -30,6 +31,7 @@ private:
 
   // override views::View
   virtual void Layout() OVERRIDE;
+  virtual void ViewHierarchyChanged(const ViewHierarchyChangedDetails& details) OVERRIDE;
 
   void UpdateButton();
   void UpdateFPS();
@@ -39,6 +41,8 @@ private:
   views::TextButton* stop_;
   views::TextButton* debug_;
   views::TextButton* change_model_;
+  views::ImageButton* usage_;
+  bool inited_;
 
   views::View* button_group_;
 

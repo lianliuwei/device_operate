@@ -61,6 +61,7 @@
         '<(BASE_PATH)/base/base_bin.gyp:base_bin',
         '<(BASE_PATH)/skia/skia_bin.gyp:skia_bin',
         '<(BASE_PATH)/ui/ui_bin.gyp:ui_bin',
+        '<(BASE_PATH)/ui/ui_bin.gyp:ui_resources_bin',
         '../wave_control/wave_control.gyp:wave_control',
         'canscope_device.gyp:canscope_device',
       ],

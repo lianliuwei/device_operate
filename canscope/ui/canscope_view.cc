@@ -3,6 +3,11 @@
 #include "base/stringprintf.h"
 #include "ui/gfx/rect.h"
 #include "ui/gfx/vector2d.h"
+#include "ui/views/bubble/bubble_delegate.h"
+#include "ui/views/layout/box_layout.h"
+#include "ui/base/resource/resource_bundle.h"
+
+#include "grit/ui_resources.h"
 
 #include "wave_control/views/wave_control_views_constants.h"
 #include "wave_control/views/fill_box_layout.h"
@@ -11,6 +16,7 @@
 #include "canscope/device/canscope_device_handle.h"
 #include "canscope/app/canscope_process.h"
 
+using namespace ui;
 using namespace base;
 using namespace views;
 
@@ -72,6 +78,33 @@ void ConfigButton(TextButton* button) {
   button->SetHoverColor(SkColorSetRGB(255, 255, 255));
 }
 
+class UsageBubble : public BubbleDelegateView {
+public:
+  UsageBubble(View* anchor)
+      : BubbleDelegateView(anchor, BubbleBorder::LEFT_TOP) {
+    set_shadow(BubbleBorder::BIG_SHADOW);
+    set_color(SK_ColorCYAN);
+  }
+
+private:
+  virtual void Init() OVERRIDE {
+    SetLayoutManager(new BoxLayout(BoxLayout::kVertical, 20, 20, 0));
+    Label* label = new Label();
+    label->SetMultiLine(true);
+    label->SetHorizontalAlignment(gfx::ALIGN_LEFT);
+    label->SetText(
+L"示波器使用方式\n\n\
+滚轮: 移动水平坐标\n\
+Shift+滚轮: 缩放垂直范围\n\
+Ctrl+滚轮: 缩放水平范围\n\
+拖动四周指示: 移动相关坐标\n\
+Shift+鼠标拖动波形: 移动波形其他容器");
+    AddChildView(label);
+  }
+
+  DISALLOW_COPY_AND_ASSIGN(UsageBubble);
+};
+  
 }
 
 namespace canscope {
@@ -86,7 +119,8 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
     , osc_view_(NULL) 
     , timer_(true, true)
     , device_(device)
-    , speed_(new FPSSpeed) {
+    , speed_(new FPSSpeed)
+    , inited_(false) {
   DCHECK(device);
 
   set_background(Background::CreateSolidBackground(SkColorSetRGB(0, 0, 0)));
@@ -95,19 +129,27 @@ CANScopeView::CANScopeView(CANScopeDevice* device)
   button_group_->SetLayoutManager(
       new FillBoxLayout(FillBoxLayout::kHorizontal, 1, 2, 4));
   AddChildView(button_group_);
+  usage_ = new ImageButton(this);
+  usage_->SetImage(Button::STATE_NORMAL, 
+      ResourceBundle::GetSharedInstance().GetImageSkiaNamed(IDR_APP_LIST_TOOLS_NORMAL));
+  usage_->SetImage(Button::STATE_HOVERED, 
+      ResourceBundle::GetSharedInstance().GetImageSkiaNamed(IDR_APP_LIST_TOOLS_HOVER));
+  usage_->SetImage(Button::STATE_PRESSED, 
+      ResourceBundle::GetSharedInstance().GetImageSkiaNamed(IDR_APP_LIST_TOOLS_PRESSED));
+  button_group_->AddChildView(usage_);
   start_ = new TextButton(this, L"Start");
   ConfigButton(start_);
   button_group_->AddChildView(start_);
   stop_ = new TextButton(this, L"Stop");
   button_group_->AddChildView(stop_);
   ConfigButton(stop_);
-  debug_ = new TextButton(this, L"Debug");
-  ConfigButton(debug_);
-  button_group_->AddChildView(debug_);
   change_model_ = new TextButton(this, L"Model");
   ConfigButton(change_model_);
   button_group_->AddChildView(change_model_);
-  
+  debug_ = new TextButton(this, L"Debug");
+  ConfigButton(debug_);
+  button_group_->AddChildView(debug_);
+
   fps_ = new Label(FPSText(0.0));
   fps_->SetBackgroundColor(SkColorSetRGB(0, 0, 0));
   fps_->SetEnabledColor(SkColorSetRGB(255, 0, 0));
@@ -163,6 +205,10 @@ void CANScopeView::ButtonPressed(views::Button* sender, const ui::Event& event) 
     model = model == Oscilloscope::kSeparate ? 
         Oscilloscope::kCombine : Oscilloscope::kSeparate;
     osc_->set_show_model(model);
+  } else if (sender == usage_) {
+    UsageBubble* bubble = new UsageBubble(sender);
+    BubbleDelegateView::CreateBubble(bubble);
+    bubble->StartFade(true);
   } else {
     NOTREACHED();
   }
@@ -192,4 +238,13 @@ void CANScopeView::LayoutFPS() {
   fps_->SetBoundsRect(gfx::Rect(l_origin, l_size));
 }
 
+void CANScopeView::ViewHierarchyChanged(const ViewHierarchyChangedDetails& details) {
+  if (details.is_add && GetWidget() && !inited_) {
+    inited_ = true;
+
+    UsageBubble* bubble = new UsageBubble(usage_);
+    BubbleDelegateView::CreateBubble(bubble);
+    bubble->StartFade(true);    
+  }
+}
 } // namespace canscope
