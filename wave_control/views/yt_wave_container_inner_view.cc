@@ -1,5 +1,6 @@
 #include "wave_control/views/yt_wave_container_inner_view.h"
 
+#include "base/bind.h"
 #include "base/debug/trace_event.h"
 #include "ui/views/widget/widget.h"
 
@@ -12,9 +13,11 @@
 #include "wave_control/views/handle_point_view.h"
 #include "wave_control/views/yt_wave_container_view.h"
 #include "wave_control/views/wave_drag_controller.h"
+#include "wave_control/views/delay_setter.h"
 
 using namespace ui;
 using namespace std;
+using namespace base;
 using namespace views;
 
 namespace {
@@ -27,6 +30,9 @@ static const int kMeasureLineViewID = 1;
 static const int kWaveMaxNum = 100;
 static const int kHorizSingleMeasureLineID = kWaveMaxNum + 1;
 static const int kVerticalSingleMeasureLineID = kWaveMaxNum + 2;
+
+// delay set
+static const int kDelaySetMs = 300;
 
 bool IsSet(int set, int test) {
   return (set & test) != 0;
@@ -52,9 +58,12 @@ public:
   virtual bool IsVisible(int ID);
 
 private:
+  void SetHorizOffset(int ID, int offset);
+  void OnDelaySet(bool real_set, int value);
+
   // implement HandleBarObserver
-  virtual void OnHandlePressed(int id, int offset, bool horiz) {}
-  virtual void OnHandleReleased(int id) {}
+  virtual void OnHandlePressed(int id, int offset, bool horiz);
+  virtual void OnHandleReleased(int id);
   virtual void OnHandleMove(int ID, int offset);
   virtual void OnHandleActive(int ID);
 
@@ -66,13 +75,18 @@ private:
   OscWaveGroup* wave_group_;
   YTWaveContainerInnerView* view_;
 
+  int drag_id_;
+  DelaySetter delay_;
+
   DISALLOW_COPY_AND_ASSIGN(HorizOffsetBar);
 };
 
 HorizOffsetBar::HorizOffsetBar(OscWaveGroup* wave_group, 
                                YTWaveContainerInnerView* view)
     : wave_group_(wave_group)
-    , view_(view) {
+    , view_(view) 
+    , delay_(kDelaySetMs)
+    , drag_id_(-1) {
   wave_group->AddHorizontalObserver(this);        
 }
 
@@ -97,6 +111,9 @@ const gfx::Image& HorizOffsetBar::GetIcon(int ID) {
 }
 
 int HorizOffsetBar::GetOffset(int ID) {
+  if (delay_.InSession() && drag_id_ == ID) {
+    return delay_.GetValue();
+  }
   OscWave* wave = wave_group_->horizontal_at(ID)->osc_wave();
   gfx::Transform transform = view_->OscWaveTransform(wave);
   return XInt(transform, 0);
@@ -106,7 +123,32 @@ bool HorizOffsetBar::IsVisible(int ID) {
   return wave_group_->horizontal_at(ID)->show();
 }
 
+
+void HorizOffsetBar::OnDelaySet(bool real_set, int value) {
+  if (!real_set) {
+    NotifyHandleMoved(drag_id_);
+    return;
+  }
+  SetHorizOffset(drag_id_, value);
+}
+
+void HorizOffsetBar::OnHandlePressed(int id, int offset, bool horiz) {
+  drag_id_ = id;
+  delay_.SetCallback(Bind(&HorizOffsetBar::OnDelaySet, Unretained(this)));
+  delay_.BeginSet(offset);
+}
+
+void HorizOffsetBar::OnHandleReleased(int id) {
+  delay_.EndSet(delay_.GetValue());
+  // fetch last real value.
+  NotifyHandleMoved(id);
+}
+
 void HorizOffsetBar::OnHandleMove(int ID, int offset) {
+  delay_.SetValue(offset);
+}
+
+void HorizOffsetBar::SetHorizOffset(int ID, int offset) {
   OscWave* wave = wave_group_->horizontal_at(ID)->osc_wave();
   gfx::Transform transform = view_->OscWaveTransform(wave);
   double logic_offset = ReverseXDouble(transform, offset);
@@ -140,9 +182,12 @@ public:
   virtual bool IsVisible(int ID);
 
 private:
+  void SetTriggerOffset(int ID, int offset);
+  void OnDelaySet(bool real_set, int value);
+
   // implement HandleBarObserver
-  virtual void OnHandlePressed(int id, int offset, bool horiz) {}
-  virtual void OnHandleReleased(int id) {}
+  virtual void OnHandlePressed(int id, int offset, bool horiz);
+  virtual void OnHandleReleased(int id);
   virtual void OnHandleMove(int ID, int offset);
   virtual void OnHandleActive(int ID);
 
@@ -156,6 +201,9 @@ private:
   OscWaveGroup* wave_group_;
   YTWaveContainerInnerView* view_;
 
+  int drag_id_;
+  DelaySetter delay_;
+
   DISALLOW_COPY_AND_ASSIGN(TriggerBar);
 };
 
@@ -163,7 +211,9 @@ private:
 TriggerBar::TriggerBar(OscWaveGroup* wave_group, 
                        YTWaveContainerInnerView* view)
     : wave_group_(wave_group)
-    , view_(view) {
+    , view_(view)
+    , delay_(kDelaySetMs)
+    , drag_id_(-1) {
   wave_group->AddTriggerObserver(this);
 }
 
@@ -197,6 +247,9 @@ bool TriggerBar::IsVisible(int ID) {
 }
 
 int TriggerBar::GetOffset(int ID) {
+  if (delay_.InSession() && drag_id_ == ID) {
+    return delay_.GetValue();
+  }
   TriggerPart* trigger = wave_group_->trigger_at(ID);
   OscWave* wave = trigger->trigger_wave();
   // the relate osc wave is no in this group
@@ -218,7 +271,31 @@ int TriggerBar::GetOffset(int ID) {
   return YInt(transform, offset);
 }
 
+void TriggerBar::OnDelaySet(bool real_set, int value) {
+  if (!real_set) {
+    NotifyHandleMoved(drag_id_);
+    return;
+  }
+  SetTriggerOffset(drag_id_, value);
+}
+
+void TriggerBar::OnHandlePressed(int id, int offset, bool horiz) {
+  drag_id_ = id;
+  delay_.SetCallback(Bind(&TriggerBar::OnDelaySet, Unretained(this)));
+  delay_.BeginSet(offset);
+}
+
+void TriggerBar::OnHandleReleased(int id) {
+  delay_.EndSet(delay_.GetValue());
+  // fetch last real value.
+  NotifyHandleMoved(id);
+}
+
 void TriggerBar::OnHandleMove(int ID, int offset) {
+  delay_.SetValue(offset);
+}
+
+void TriggerBar::SetTriggerOffset(int ID, int offset) {
   TriggerPart* trigger = wave_group_->trigger_at(ID);
   bool relate = trigger->IsRelate();
   OscWave* trigger_wave = trigger->trigger_wave();
@@ -294,10 +371,13 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN(OtherWaveVisitor);
   };
-  
+
+  void SetOscVerticalOffset(int ID, int offset);
+  void OnDelaySet(bool real_set, int value);
+
   // implement HandleBarObserver
-  virtual void OnHandlePressed(int id, int offset, bool horiz) {}
-  virtual void OnHandleReleased(int id) {}
+  virtual void OnHandlePressed(int id, int offset, bool horiz);
+  virtual void OnHandleReleased(int id);
   virtual void OnHandleMove(int ID, int offset);
   virtual void OnHandleActive(int ID);
 
@@ -313,6 +393,9 @@ private:
 
   OscWaveGroup* wave_group_;
   YTWaveContainerInnerView* view_;
+
+  int drag_id_;
+  DelaySetter delay_;
 
   std::vector<Wave*> other_wave_;
 
@@ -366,7 +449,9 @@ void WaveBar::OtherWaveVisitor::RemoveObserver(WaveBar* wave_bar) {
 
 WaveBar::WaveBar(OscWaveGroup* wave_group, YTWaveContainerInnerView* view)
     : wave_group_(wave_group)
-    , view_(view) {
+    , view_(view)
+    , delay_(kDelaySetMs)
+    , drag_id_(-1) {
   wave_group->AddVerticalObserver(this);
 }
 
@@ -413,8 +498,36 @@ bool WaveBar::IsVisible(int ID) {
   }
 }
 
+void WaveBar::OnDelaySet(bool real_set, int value) {
+  if (!real_set) {
+    NotifyHandleMoved(drag_id_);
+    return;
+  }
+  SetOscVerticalOffset(drag_id_, value);
+}
+
+void WaveBar::OnHandlePressed(int id, int offset, bool horiz) {
+  if (id < wave_group_->vertical_count()) {
+    drag_id_ = id;
+    delay_.SetCallback(Bind(&WaveBar::OnDelaySet, Unretained(this)));
+    delay_.BeginSet(offset);
+  }
+}
+
+void WaveBar::OnHandleReleased(int id) {
+  if (id < wave_group_->vertical_count()) {
+    delay_.EndSet(delay_.GetValue());
+    // fetch last real value.
+    NotifyHandleMoved(id);
+  }
+}
+
+
 int WaveBar::GetOffset(int ID) {
   if (ID < wave_group_->vertical_count()) {
+    if (delay_.InSession() && drag_id_ == ID) {
+      return delay_.GetValue();
+    }
     OscWave* wave = wave_group_->vertical_at(ID)->osc_wave();
     gfx::Transform transform = view_->OscWaveTransform(wave);
     return YInt(transform, 0);
@@ -425,13 +538,18 @@ int WaveBar::GetOffset(int ID) {
   }
 }
 
+void WaveBar::SetOscVerticalOffset(int ID, int offset) {
+  DCHECK(ID < wave_group_->vertical_count());
+  OscWave* wave = wave_group_->vertical_at(ID)->osc_wave();
+  gfx::Transform transform = view_->OscWaveTransform(wave);
+  double logic_offset = ReverseYDouble(transform, offset);
+  double old_offset = wave->vertical_offset();
+  wave->MoveToY(YTWaveContainerInnerView::ToOscOffset(old_offset, logic_offset));
+}
+
 void WaveBar::OnHandleMove(int ID, int offset) {
   if (ID < wave_group_->vertical_count()) {
-    OscWave* wave = wave_group_->vertical_at(ID)->osc_wave();
-    gfx::Transform transform = view_->OscWaveTransform(wave);
-    double logic_offset = ReverseYDouble(transform, offset);
-    double old_offset = wave->vertical_offset();
-    wave->MoveToY(YTWaveContainerInnerView::ToOscOffset(old_offset, logic_offset));
+    delay_.SetValue(offset);
   } else {
     int index = ID - wave_group_->vertical_count();
     OtherWaveVisitor visitor(other_wave_[index], view_);
@@ -794,9 +912,7 @@ void YTWaveContainerInnerView::SetGrid(int v_grid, int h_grid) {
                        v_grid, kVGridDiv, 
                        h_grid, kHGridDiv));
   // need check parent is there, may be call in creating, no add to parent yet
-  if (parent()) {
-    parent()->Layout();
-  }
+  parent()->Layout();
   SchedulePaint();
 }
 
