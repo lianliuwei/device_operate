@@ -1,5 +1,8 @@
 #pragma once
 
+#include "base/timer.h"
+#include "base/time.h"
+
 #include "wave_control/classify_wave_control.h"
 
 #include "canscope/device/osc_device/osc_device_handle.h"
@@ -42,6 +45,8 @@ private:
   void NotifyChnlAt(size_t chnl_index, int changed_set);
   void NotifyAllChnl(int changed_set);
 
+  void DelayCallReader();
+
   // implement ClassifyWaveControl
   virtual YTWaveContainer* CreateYTWaveContainer();
 
@@ -49,6 +54,7 @@ private:
   OscDeviceHandle* handle_;
   ChnlCalcResultQueue::Reader queue_reader_;
   scoped_refptr<ChnlCalcResultQueue> chnl_queue_;
+  base::Timer timer_;
 
   scoped_ptr<CANScopeChnlContainer> chnl_container_;
   

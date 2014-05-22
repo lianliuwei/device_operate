@@ -1,5 +1,7 @@
 #include "canscope/ui/oscilloscope.h"
 
+#include <iostream>
+
 #include "base/bind.h"
 
 #include "wave_control/yt_wave_container.h"
@@ -14,6 +16,8 @@ bool HasString(const vector<string>& strings, const char* key) {
   return find(strings.begin(), strings.end(), key) != strings.end();
 }
 
+static const int kMinCallReaderIntervalMs = 200;
+static const int kDelayCallReaderMs = 1;
 }
 
 namespace canscope {
@@ -25,10 +29,12 @@ Oscilloscope::Oscilloscope(OscDeviceHandle* handle,
     , queue_reader_(chnl_queue.get())
     , read_id_(0)
     , read_count_(0)
-    , show_model_(kSeparate) {
+    , show_model_(kSeparate)
+    , timer_(true, false) {
   DCHECK(handle);
   queue_reader_.set_have_data_callback(Bind(&Oscilloscope::QueueUpdate, Unretained(this)));
-  queue_reader_.CallbackOnReady();
+  timer_.Start(FROM_HERE, TimeDelta::FromMilliseconds(kDelayCallReaderMs), 
+      Bind(&Oscilloscope::DelayCallReader, Unretained(this)));
 }
 
 Oscilloscope::~Oscilloscope() {
@@ -41,15 +47,12 @@ void Oscilloscope::QueueUpdate() {
   bool ret = queue_reader_.GetResult(&calc_result_, &read_id_);
   if (ret) {
     ++read_count_;
-    // get next calc_result
-    queue_reader_.CallbackOnReady();
 
     if (chnl_container_.get() == NULL) {
       chnl_container_.reset(new CANScopeChnlContainer(calc_result_, handle_));
       last_diff_ = calc_result_->hardware_diff();
       raw_data_ = calc_result_->raw_data();
       UpdateControl();
-      return;
 
     } else {
       chnl_container_->UpdateResult(calc_result_);
@@ -60,6 +63,15 @@ void Oscilloscope::QueueUpdate() {
   } else {
     // TODO need exit handle
   }
+
+  // get next calc_result
+  // just delay one ms for ui event
+  timer_.Reset();
+}
+
+
+void Oscilloscope::DelayCallReader() {
+  queue_reader_.CallbackOnReady();
 }
 
 void Oscilloscope::HardwareDiffChanged(bool hard_diff) {
