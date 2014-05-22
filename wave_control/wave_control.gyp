@@ -89,6 +89,8 @@
         'views/handle.cc',
         'views/handle_bar.h',
         'views/handle_bar.cc',
+        'views/delay_setter.h',
+        'views/delay_setter.cc',
         'views/handle_bar_observer.h',
         'views/handle_bar_model.h',
         'views/handle_bar_model_observer.h',
