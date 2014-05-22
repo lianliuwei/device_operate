@@ -82,3 +82,34 @@ OscWaveView::~OscWaveView() {
 void OscWaveView::OnBoundsChanged(const gfx::Rect& previous_bounds) {
   UpdateTransform();
 }
+
+bool OscWaveView::OnMouseWheel(const ui::MouseWheelEvent& event) {
+  if (event.IsControlDown()) {
+    if (event.y_offset() > 0 ) {
+      osc_wave_->ZoomInX();
+    } else {
+      osc_wave_->ZoomOutX();
+    }
+  }
+  if (event.IsShiftDown()) {
+    if (event.y_offset() > 0 ) {
+      osc_wave_->ZoomInY();
+    } else {
+      osc_wave_->ZoomOutY();
+    }
+  }
+  if (!event.IsShiftDown() && !event.IsControlDown()) {
+    double offset = osc_wave_->horizontal_offset();
+    WaveRange range = osc_wave_->horizontal_range();
+    double div_value = (range.end - range.begin) / osc_wave_->horizontal_div();
+    int div = offset  / div_value;
+    if (event.y_offset() < 0) {
+      div -= 1;
+    } else {
+      div += 1;
+    }
+    osc_wave_->MoveToX(div * div_value);
+  }
+
+  return true;
+}

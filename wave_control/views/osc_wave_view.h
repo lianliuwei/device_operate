@@ -21,6 +21,7 @@ private:
 
   // override views::View
   virtual void OnBoundsChanged(const gfx::Rect& previous_bounds) OVERRIDE;
+  virtual bool OnMouseWheel(const ui::MouseWheelEvent& event) OVERRIDE;
 
   void UpdateTransform();
   void UpdateData();
