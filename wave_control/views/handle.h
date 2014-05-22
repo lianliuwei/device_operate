@@ -22,8 +22,11 @@ public:
   virtual void VisibilityChanged(View* starting_from, bool is_visible) OVERRIDE;
 
 private:
+  void HandleReleased();
+
   HandleBar* bar_;
   bool in_drag_;
+  bool press_called_;
   // The position of the mouse on the Handle axis relative to the top of this
   // view when the drag started.
   int mouse_offset_;

@@ -1,8 +1,11 @@
 #include "wave_control/views/handle.h"
 
+#include "base/bind.h"
+
 #include "ui/gfx/image/image.h"
 #include "wave_control/views/handle_bar.h"
 
+using namespace base;
 using namespace views;
 
 // model config is set by the handleBar
@@ -20,13 +23,19 @@ bool Handle::OnMousePressed(const ui::MouseEvent& event) {
     return false;
   }
   DCHECK(in_drag_ == false);
+  in_drag_ = true;
+  press_called_ = false;
+
   bool ret = TextButton::OnMousePressed(event);
   mouse_offset_ = bar_->IsHorizontal() ? event.x() : event.y();
   bar_->ActiveHandle(tag());
   int offset = bar_->IsHorizontal() ? x() : y();
-  bar_->OnHandlePressed(tag(), offset);
 
-  in_drag_ = true;
+  if (in_drag_) {
+    press_called_ = true;
+    bar_->OnHandlePressed(tag(), offset);
+  }
+
   return ret;
 }
 
@@ -66,11 +75,21 @@ void Handle::OnMouseCaptureLost() {
   bar_->OnHandleReleased(tag());
 }
 
+void Handle::HandleReleased() {
+  DCHECK(in_drag_);
+  in_drag_ = false;
+  bar_->OnHandleReleased(tag());
+}
+
 // HACK when after OnMoursePressed() the view may no be call OnMouseReleased()
 // or OnMouseCaptureLost() when View become invisible
 void Handle::VisibilityChanged(View* starting_from, bool is_visible) {
   if (!is_visible && in_drag_) {
-    in_drag_ = false;
-    bar_->OnHandleReleased(tag());
+    if (press_called_) {
+      MessageLoop::current()->PostTask(FROM_HERE, Bind(&Handle::HandleReleased, 
+        Unretained(this)));
+    } else {
+      in_drag_ = false;
+    }
   }
 }
