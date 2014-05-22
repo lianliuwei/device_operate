@@ -96,6 +96,7 @@
         'osc_chnl_calc',
         'chnl',
         'canscope_ui',
+        'canscope_device.gyp:fpga',
       ],
       'sources' : [
         'app/canscope_process.h',
