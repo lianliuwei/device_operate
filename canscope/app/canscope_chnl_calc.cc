@@ -14,7 +14,7 @@ namespace {
 static const int kDefaultFreq = 60;
 static const int kMaxFreq = 60;
 static const int kMinFreq = 5;
-static const int kFreqStep = 5;
+static const int kFreqStep = 2;
 static const int kUIQueueMaxSize = 2;
 
 // pass ownership
