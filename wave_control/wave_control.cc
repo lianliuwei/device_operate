@@ -57,3 +57,7 @@ void WaveControl::RemoveWaveContainerObserver(ui::ListModelObserver* observer) {
 void WaveControl::SetWaveControl(WaveContainer* container, WaveControl* control) {
   container->wave_control_ = control;
 }
+
+WaveControl::~WaveControl() {
+  DeleteAll();
+}

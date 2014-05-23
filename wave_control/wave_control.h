@@ -10,7 +10,7 @@ class WaveControlVisitor;
 class WaveControl : protected ui::ListModel<WaveContainer> {
 public:
   WaveControl() {}
-  virtual ~WaveControl() {}
+  virtual ~WaveControl();
 
   size_t WaveContainerAt(WaveContainer* container);
   bool HasWaveContainer(WaveContainer* container);

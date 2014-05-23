@@ -13,7 +13,7 @@ class WaveContainerVisitor;
 class WaveContainer : protected ui::ListModel<Wave> {
 public:
   WaveContainer();
-  virtual ~WaveContainer() {}
+  virtual ~WaveContainer();
 
   // parent
   WaveControl* wave_control();

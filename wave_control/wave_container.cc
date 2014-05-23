@@ -12,3 +12,7 @@ WaveContainer::WaveContainer()
     : wave_control_(NULL) { 
 
 }
+
+WaveContainer::~WaveContainer() {
+   DeleteAll();
+}
