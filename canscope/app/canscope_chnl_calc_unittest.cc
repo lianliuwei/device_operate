@@ -58,7 +58,7 @@ protected:
     sync_call.CallClosure(Bind(&CANScopeChnlCalcTest::InitDevice, Unretained(this)));
 
     chnl_calc_ = new CANScopeChnlCalc(
-        CommonThread::GetMessageLoopProxyForThread(CommonThread::FILE),
+        CommonThread::GetMessageLoopProxyForThread(CommonThread::CALC),
         osc_data_collecter_->RawDataQueue());
   }
 

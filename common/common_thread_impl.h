@@ -39,13 +39,8 @@ class COMMON_EXPORT CommonThreadImpl : public CommonThread,
   // The following are unique function names that makes it possible to tell
   // the thread id from the callstack alone in crash dumps.
   void UIThreadRun(base::MessageLoop* message_loop);
-  void DBThreadRun(base::MessageLoop* message_loop);
-  void WebKitThreadRun(base::MessageLoop* message_loop);
-  void FileThreadRun(base::MessageLoop* message_loop);
-  void FileUserBlockingThreadRun(base::MessageLoop* message_loop);
-  void ProcessLauncherThreadRun(base::MessageLoop* message_loop);
-  void CacheThreadRun(base::MessageLoop* message_loop);
-  void IOThreadRun(base::MessageLoop* message_loop);
+  void TaskThreadRun(base::MessageLoop* message_loop);
+  void CalcThreadRun(base::MessageLoop* message_loop);
   void DeviceThreadRun(base::MessageLoop* message_loop);
 
   static bool PostTaskHelper(

@@ -200,7 +200,7 @@ TEST_F(CANScopeDeviceTest, SetValueAndNotify) {
       .WillOnce(InvokeWithoutArgs(this, 
           &CANScopeDeviceTest::SetValueAndNotifyCheck));
 
-  CommonThread::PostTask(CommonThread::FILE, FROM_HERE, 
+  CommonThread::PostTask(CommonThread::CALC, FROM_HERE, 
       Bind(&CANScopeDeviceTest::SetValueFileThread, Unretained(this)));
   GetTestProcess()->MainMessageLoopRun();
 }

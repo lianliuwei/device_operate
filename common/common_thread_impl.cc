@@ -23,9 +23,8 @@ namespace {
 // Friendly names for the well-known threads.
 static const char* g_browser_thread_names[CommonThread::ID_COUNT] = {
   "",  // UI (name assembled in browser_main.cc).
-  //"DBThread",  // DB
-  //"WebKitThread",  // WEBKIT_DEPRECATED
-  "FileThread",  // FILE
+  "TaskThread",  // TASK
+  "CalcThread",  // CALC
   "DeviceThread",
   //"FileUserBlockingThread",  // FILE_USER_BLOCKING
   //"ProcessLauncherThread",  // PROCESS_LAUNCHER
@@ -125,48 +124,14 @@ NOINLINE void CommonThreadImpl::UIThreadRun(base::MessageLoop* message_loop) {
   CHECK_GT(line_number, 0);
 }
 
-NOINLINE void CommonThreadImpl::DBThreadRun(base::MessageLoop* message_loop) {
+NOINLINE void CommonThreadImpl::TaskThreadRun(base::MessageLoop* message_loop) {
   volatile int line_number = __LINE__;
   Thread::Run(message_loop);
   CHECK_GT(line_number, 0);
 }
 
-NOINLINE void CommonThreadImpl::WebKitThreadRun(
+NOINLINE void CommonThreadImpl::CalcThreadRun(
     base::MessageLoop* message_loop) {
-  volatile int line_number = __LINE__;
-  Thread::Run(message_loop);
-  CHECK_GT(line_number, 0);
-}
-
-NOINLINE void CommonThreadImpl::FileThreadRun(
-    base::MessageLoop* message_loop) {
-  volatile int line_number = __LINE__;
-  Thread::Run(message_loop);
-  CHECK_GT(line_number, 0);
-}
-
-NOINLINE void CommonThreadImpl::FileUserBlockingThreadRun(
-    base::MessageLoop* message_loop) {
-  volatile int line_number = __LINE__;
-  Thread::Run(message_loop);
-  CHECK_GT(line_number, 0);
-}
-
-NOINLINE void CommonThreadImpl::ProcessLauncherThreadRun(
-    base::MessageLoop* message_loop) {
-  volatile int line_number = __LINE__;
-  Thread::Run(message_loop);
-  CHECK_GT(line_number, 0);
-}
-
-NOINLINE void CommonThreadImpl::CacheThreadRun(
-    base::MessageLoop* message_loop) {
-  volatile int line_number = __LINE__;
-  Thread::Run(message_loop);
-  CHECK_GT(line_number, 0);
-}
-
-NOINLINE void CommonThreadImpl::IOThreadRun(base::MessageLoop* message_loop) {
   volatile int line_number = __LINE__;
   Thread::Run(message_loop);
   CHECK_GT(line_number, 0);
@@ -189,22 +154,13 @@ void CommonThreadImpl::Run(base::MessageLoop* message_loop) {
   switch (thread_id) {
     case CommonThread::UI:
       return UIThreadRun(message_loop);
-//     case CommonThread::DB:
-//       return DBThreadRun(message_loop);
-//     case CommonThread::WEBKIT_DEPRECATED:
-//       return WebKitThreadRun(message_loop);
-     case CommonThread::FILE:
-       return FileThreadRun(message_loop);
+     case CommonThread::TASK:
+       return TaskThreadRun(message_loop);
+     case CommonThread::CALC:
+       return CalcThreadRun(message_loop);
      case CommonThread::DEVICE:
        return DeviceThreadRun(message_loop);
-//     case CommonThread::FILE_USER_BLOCKING:
-//       return FileUserBlockingThreadRun(message_loop);
-//     case CommonThread::PROCESS_LAUNCHER:
-//       return ProcessLauncherThreadRun(message_loop);
-//     case CommonThread::CACHE:
-//       return CacheThreadRun(message_loop);
-//     case CommonThread::IO:
-//       return IOThreadRun(message_loop);
+
     case CommonThread::ID_COUNT:
       CHECK(false);  // This shouldn't actually be reached!
       break;

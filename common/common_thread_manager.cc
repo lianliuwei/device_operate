@@ -72,16 +72,6 @@ void CommonThreadManager::CreateThreads() {
     base::Thread::Options* options = &default_options;
 
     switch (thread_id) {
-      case CommonThread::FILE:
-#if defined(OS_WIN)
-        // On Windows, the FILE thread needs to be have a UI message loop
-        // which pumps messages in such a way that Google Update can
-        // communicate back to us.
-        options = &ui_message_loop_options;
-#else
-        options = &io_message_loop_options;
-#endif
-        break;
       case CommonThread::DEVICE:
         options = &io_message_loop_options;
         break;

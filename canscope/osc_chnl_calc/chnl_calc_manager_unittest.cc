@@ -203,7 +203,7 @@ void ChnlCalcManagerTest::ProduceOne() {
   ++count_;
   if (count_ == mock.expect_count())
     return;
-  CommonThread::PostTask(CommonThread::FILE, FROM_HERE, 
+  CommonThread::PostTask(CommonThread::CALC, FROM_HERE, 
       Bind(&ChnlCalcManagerTest::ProduceOne, Unretained(this)));
 }
 
@@ -217,7 +217,7 @@ TEST_F(ChnlCalcManagerTest, ProcessMany) {
       .WillRepeatedly(Invoke(&(this->mock), &(ChnlCalcObserverMock::QuitUIWhen)));
   EXPECT_CALL(mock, NotifyUI()).WillRepeatedly(Invoke(&TraceUIEvent));
 
-  CommonThread::PostTask(CommonThread::FILE, FROM_HERE, 
+  CommonThread::PostTask(CommonThread::CALC, FROM_HERE, 
       Bind(&ChnlCalcManagerTest::StartProduce, Unretained(this)));
 
   GetTestProcess()->MainMessageLoopRun();

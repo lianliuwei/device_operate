@@ -41,18 +41,18 @@ void CANScopeProcess::Init(common::CommonThread::ID id) {
 void CANScopeProcess::Init() {
   CommonThreadManager::Init();
 
-  registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_CREATED, 
+  registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_CREATED,
       NotificationService::AllSources());
-  registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_START_DESTROY, 
+  registrar_.Add(this, NOTIFICATION_DEVICE_MANAGER_START_DESTROY,
       NotificationService::AllSources());
 
   DevicesManager::Create(
       CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE), true, false, false);
 
-  device_finder_ = 
+  device_finder_ =
       new CANScopeDeviceFinder(CommonThread::GetMessageLoopProxyForThread(CommonThread::DEVICE), false);
   device_finder_->Start();
-  
+
 }
 
 void CANScopeProcess::CleanUp(common::CommonThread::ID id) {
@@ -72,8 +72,8 @@ void CANScopeProcess::Destroy() {
 
 }
 
-void CANScopeProcess::Observe(int type, 
-                              const NotificationSource& source, 
+void CANScopeProcess::Observe(int type,
+                              const NotificationSource& source,
                               const NotificationDetails& details) {
   if (type == NOTIFICATION_DEVICE_MANAGER_CREATED) {
     Source<CANScopeDevice> device_source(source);
@@ -104,7 +104,7 @@ void CANScopeProcess::CreateCalc() {
   DCHECK(device_ != NULL);
   scoped_refptr<OscRawDataQueue> raw_queue = device_->runner()->osc_data->RawDataQueue();
   chnl_calc_ = new CANScopeChnlCalc(
-      CommonThread::GetMessageLoopProxyForThread(CommonThread::FILE), raw_queue);
+      CommonThread::GetMessageLoopProxyForThread(CommonThread::CALC), raw_queue);
   chnl_calc_->Start();
 }
 

@@ -60,32 +60,14 @@ class COMMON_EXPORT CommonThread {
     // The main thread in the browser.
     UI,
 
-    //// This is the thread that interacts with the database.
-    //DB,
+    // This is the thread that run Task like Calibrate, AutoScale, the
+    // task may be block the thread.
+    TASK,
 
-    //// This is the "main" thread for WebKit within the browser process when
-    //// NOT in --single-process mode.
-    //// Deprecated: Do not design new code to use this thread; see
-    //// http://crbug.com/106839
-    //WEBKIT_DEPRECATED,
+    // This is the thread that run calc manager, can no be block.
+    CALC,
 
-    // This is the thread that interacts with the file system.
-    FILE,
-
-    //// Used for file system operations that block user interactions.
-    //// Responsiveness of this thread affect users.
-    //FILE_USER_BLOCKING,
-
-    //// Used to launch and terminate Chrome processes.
-    //PROCESS_LAUNCHER,
-
-    //// This is the thread to handle slow HTTP cache operations.
-    //CACHE,
-
-    //// This is the thread that processes IPC and network messages.
-    //IO,
-
-    // process device operate.
+    // process device operate. all device run in this thread
     DEVICE,
 
     // NOTE: do not add new threads here that are only used by a small number of
@@ -267,8 +249,8 @@ class COMMON_EXPORT CommonThread {
   //   ~Foo();
   struct DeleteOnUIThread : public DeleteOnThread<UI> { };
   //struct DeleteOnIOThread : public DeleteOnThread<IO> { };
-  struct DeleteOnFileThread : public DeleteOnThread<FILE> { };
-  //struct DeleteOnDBThread : public DeleteOnThread<DB> { };
+  struct DeleteOnFileThread : public DeleteOnThread<CALC> { };
+  struct DeleteOnTaskThread : public DeleteOnThread<TASK> { };
 
  private:
   friend class CommonThreadImpl;
