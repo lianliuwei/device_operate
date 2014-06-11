@@ -40,8 +40,10 @@ DataCollecter::LoopState OscDataCollecter::OnLoopRun() {
     }
   }
   // helper, if state machine just stop stop the loop.
-  if (next_state_ == STATE_NONE)
+  if (next_state_ == STATE_NONE) {
+    DCHECK(loop_state == DataCollecter::STOP);
     return STOP;
+  }
   return loop_state;
 }
 
@@ -81,7 +83,6 @@ void OscDataCollecter::DoPreCollect(LoopState* loop_state) {
   Error error = OK;
   error = StartScope();
   CHECK_DEVICE(error);
-  
   bool limit_time_ = GetLimitTime(&time_delta_);
   start_time_ = Time::Now();
   next_state_ = STATE_CHECK_COLLECT;
@@ -108,12 +109,13 @@ void OscDataCollecter::DoCheckCollect(LoopState* loop_state) {
       return;
     }
     if (i == kOscCollectUpdateStateCount - 1) {
-      DeviceOffine();
+      next_state_ = STATE_CHECK_COLLECT;
+      *loop_state = NEXT_LOOP;
       return;
     }
     SleepMs(kOscCollectUpdateStateInterval);
   }
-  *loop_state = NEXT_LOOP;
+  NOTREACHED();
 }
 
 void OscDataCollecter::DoCollect(LoopState* loop_state) {
@@ -136,7 +138,7 @@ void OscDataCollecter::DoCollect(LoopState* loop_state) {
   
   queue_->PushBulk(raw_data);
 
-  next_state_ = STATE_COLLECT;
+  next_state_ = STATE_PRE_COLLECT;
   *loop_state = !IsSingle() ? NEXT_LOOP : STOP;
 }
 
