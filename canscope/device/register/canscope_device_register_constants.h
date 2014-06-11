@@ -99,14 +99,14 @@ const uint32 kTrigSaddrOffset = 0x8;
 const uint32 kTrigEaddrOffset = 0xC;
 const int kTriggerStateSize = kTrigEaddrOffset + 0x4;
 // trigger2 register
-const uint32 kTrigger2Addr = kBaseAddr + 0x200;
+const uint32 kTrigger2Addr = kBaseAddr + 0x1A0;
 const uint32 kTrigSourceOffset = 0x0;
 const uint32 kCmpVolOffset = 0x4;
 const uint32 kTrigTypeOffset = 0x8;
 const uint32 kTrigTimeOffset = 0xC;
 const int kTrigger2Size = kTrigTimeOffset + 0x4;
 // scope ctrl register
-const uint32 kScopeCtrlAddr = kBaseAddr + 0x210;
+const uint32 kScopeCtrlAddr = kBaseAddr + 0x1B0;
 const uint32 kScopeCtrlOffset = 0x0;
 const int kScopeCtrlSize = kScopeCtrlOffset + 0x4;
 // fpga send register
