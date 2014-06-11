@@ -34,10 +34,10 @@ void CalcChnlData(OscChnlData* can_h, OscChnlData* can_l,
   int size = can_h->size();
   for (int i = 0; i < size; ++i) {
     uint8 raw_can_l = data[i * 2];
-    data_can_l[i] = DecodeRaw(raw_can_l, range_can_l) + offset_can_l;
+    data_can_l[i] = DecodeRaw(raw_can_l, range_can_l) - offset_can_l;
 
     uint8 raw_can_h = data[i * 2 + 1];
-    data_can_h[i] = DecodeRaw(raw_can_h, range_can_h) + offset_can_h;
+    data_can_h[i] = DecodeRaw(raw_can_h, range_can_h) - offset_can_h;
   }
 }
 
