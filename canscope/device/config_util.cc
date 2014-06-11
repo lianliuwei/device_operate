@@ -37,12 +37,12 @@ const char kDefaultCANScopeConfig [] =  {" \
   }, \
   \"FrameDevice\" : \
   { \
-    \"DeviceEnable\": true, \
+    \"DeviceEnable\": false, \
     \"AckEnable\": true, \
     \"SjaBtr\": 5184, \
     \"FrameStoragePercent\": 50.0, \
     \"BitSampleRate\": 5000, \
-    \"BitNum\": 180 \
+    \"BitNum\": 100 \
   } \
 } \
 "};

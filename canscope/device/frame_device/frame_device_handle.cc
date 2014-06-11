@@ -15,7 +15,7 @@ device::Error canscope::FrameDeviceHandle::FpgaSend(const FpgaFrameData& data,
   fpga_send.set_frame_data(data);
   fpga_send.send_num.set_value(send_num);
   // TODO need calc from data
-  fpga_send.bit_num.set_value(20*8);
+  fpga_send.bit_num.set_value(120);
   fpga_send.btr_div.set_value(properties_.BtrDiv());
   fpga_send.start_send.set_value(true);
 
