@@ -40,6 +40,7 @@ private:
   bool load_fpga_;
   bool check_thread_;
   
+  DISALLOW_COPY_AND_ASSIGN(SimulateDeviceDelegate);
 };
 
 } // namespace canscope

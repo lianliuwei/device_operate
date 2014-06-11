@@ -51,7 +51,6 @@ Error SimulateDeviceDelegate::CloseDevice() {
 }
 
 Error SimulateDeviceDelegate::DownloadFPGA(uint8* buffer, int size) {
-  CheckThread();
   CheckOpen();
   DCHECK(!load_fpga_) << "load fpga twice";
   group_.device_info.fpage_version.set_value(0x1234);
@@ -60,7 +59,6 @@ Error SimulateDeviceDelegate::DownloadFPGA(uint8* buffer, int size) {
 }
 
 Error SimulateDeviceDelegate::GetDeviceInfo(DeviceInfo* device_info) {
-  CheckThread();
   CheckOpen();
   DCHECK(device_info);
   ::device::MemoryContent content(group_.device_info.memory);
@@ -69,24 +67,26 @@ Error SimulateDeviceDelegate::GetDeviceInfo(DeviceInfo* device_info) {
 }
 
 Error SimulateDeviceDelegate::WriteDevice(uint32 addr, uint8* buffer, int size) {
-  CheckThread();
+  CheckOpen();
   CheckConfig();
   return group_.WriteDevice(addr, buffer, size);
 }
 
 Error SimulateDeviceDelegate::ReadDevice(uint32 addr, uint8* buffer, int size) {
-  CheckThread();
+  CheckOpen();
   CheckConfig();
   return group_.ReadDevice(addr, buffer, size);
 }
 
 device::Error SimulateDeviceDelegate::ReadOscData(uint8* buffer, int size) {
-  CheckThread();
+  CheckOpen();
+  CheckConfig();
   return osc_device_.ReadOscData(buffer, size);
 }
 
 device::Error SimulateDeviceDelegate::ReadFrameData(uint8* buffer, int size) {
-  CheckThread();
+  CheckOpen();
+  CheckConfig();
   return ERR_READ_DEVICE;
 }
 
