@@ -33,6 +33,8 @@ public:
 
   scoped_refptr<ChnlCalcResultQueue> GetChnlCalcResultQueue(CANScopeDevice* device);
 
+  void SendFrame();
+
 private:
   // implement CommonThreadDelegate
   virtual void Init(common::CommonThread::ID id);
@@ -56,6 +58,7 @@ private:
   // now only take care one device;
   CANScopeDevice* device_;
 
+  bool wait_for_exit_;
   common::NotificationRegistrar registrar_;
 
   DISALLOW_COPY_AND_ASSIGN(CANScopeProcess);
