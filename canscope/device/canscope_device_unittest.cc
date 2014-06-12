@@ -117,6 +117,7 @@ private:
   void CreateCANScopeDevice() {
     manager_ = CANScopeDevice::Create(MessageLoopProxy::current());
     manager_->Init(GetConfig(kCANScopeConfig));
+    manager_->NotifyCreated();
   }
 
   virtual void Observe(int type, 
@@ -254,4 +255,7 @@ TEST_F(CANScopeDeviceTest, SaveConfig) {
   JSONFileValueSerializer serializer(path);
   bool ret = serializer.Serialize(*(dict_value.get()));
   DCHECK(ret);
+
+  StartQuit();
+  GetTestProcess()->MainMessageLoopRun();
 }
