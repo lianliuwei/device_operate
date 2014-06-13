@@ -10,6 +10,7 @@
           'files': [
             'vld.ini',
             'bin/Win32/dbghelp.dll',
+            'bin/Win32/Microsoft.DTfW.DHL.manifest',
             'bin/Win32/vld_x86.dll',
           ],
         },
