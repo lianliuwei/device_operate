@@ -25,7 +25,6 @@ static const canscope::CalibrateInfo kDefaultCalibrateInfo[] = {
   {0x00004010, OP07/0.02, -0.510204082,},
 };
 
-
 // map to time_base
 static const uint32 kCOE[] = {
   0,
@@ -46,7 +45,7 @@ static const uint32 kCOE[] = {
   99999,
   199999,
   499999,
-  1999999,  
+  1999999,
 };
 
 }
@@ -66,7 +65,7 @@ bool GetDiffCtrl(DiffCtrl diff_ctrl) {
 }
 
 bool GetCoupling(Coupling coupling) {
-  return coupling == kDC;
+  return coupling == kAC;
 }
 
 uint32 SAMET(uint32 coe) {
@@ -92,7 +91,7 @@ uint32 CalibrateInfo::CH_OFFSET(double offset) {
       (Voffset(offset) + 2.67) * pow(2.0, 16) / 4.2 / 1.25);
 }
 
-OscDevice::OscDevice(DeviceDelegate* device_delegate, 
+OscDevice::OscDevice(DeviceDelegate* device_delegate,
                      ConfigManager* config_manager)
     : DeviceBase(config_manager)
     , device_delegate_(device_delegate) {}
@@ -117,7 +116,7 @@ ChnlConfig OscDevice::GetChnlConfig(Chnl chnl) {
     config.range = range_can_diff.value();
     config.offset = offset_can_diff.value();
     config.coupling = kDC; // no meaning
-  } 
+  }
   return config;
 }
 
@@ -192,9 +191,9 @@ void OscDevice::SetTrigger2() {
   trigger2_.trig_type.set_value(trigger_type.value());
   trigger2_.trig_mode.set_value(GetTrigMode(trigger_mode.value()));
   trigger2_.compare.set_value(compare.value());
-  trigger2_.trig_time.set_value((static_cast<uint32>(time_param.value())/10 - 1) 
+  trigger2_.trig_time.set_value((static_cast<uint32>(time_param.value())/10 - 1)
       & 0x3FFFFFFF);
-  
+
   if (!IsTriggerSourceChnl(trigger_source.value())) {
     return;
   }
@@ -232,6 +231,13 @@ void OscDevice::TriggerVolt(uint8* cmp_high, uint8* cmp_low) {
     *cmp_low = low;
 }
 
+device::Error OscDevice::WriteDeviceRange(::device::RegisterMemory& memory,
+                                          int start_offset, int size) {
+  DCHECK(start_offset + size <= memory.size());
+  return device_delegate_->WriteDevice(
+      memory.start_addr() + start_offset, memory.PtrByRelative(start_offset), size);
+}
+
 Error OscDevice::WriteDevice(RegisterMemory& memory) {
   return device_delegate_->WriteDevice(
     memory.start_addr(), memory.buffer(), memory.size());
@@ -240,6 +246,11 @@ Error OscDevice::WriteDevice(RegisterMemory& memory) {
 Error OscDevice::ReadDevice(RegisterMemory& memory) {
   return device_delegate_->ReadDevice(
     memory.start_addr(), memory.buffer(), memory.size());
+}
+
+device::Error OscDevice::WriteSoftDiff() {
+  return WriteDeviceRange(soft_diff_.memory, 
+    SoftDiffRegister::kChnlOffset, SoftDiffRegister::kChnlSize);
 }
 
 #define CHECK_DEVICE(error) \
@@ -264,7 +275,7 @@ void OscDevice::SetVoltRange(Chnl chnl) {
     err = WriteDevice(analog_switch_.memory);
     CHECK_DEVICE(err);
   }
-  err = WriteDevice(soft_diff_.memory);
+  err = WriteSoftDiff();
   CHECK_DEVICE(err);
   err = WriteDevice(trigger2_.memory);
 }
@@ -288,7 +299,7 @@ void OscDevice::SetDiffCtrl() {
   // just set diff_ctrl
   SetSoftDiff(CAN_DIFF);
   Error err;
-  err = WriteDevice(soft_diff_.memory);
+  err = WriteSoftDiff();
   CHECK_DEVICE(err);
 }
 
@@ -361,7 +372,7 @@ void OscDevice::SetAll() {
   Error err;
   err = WriteDevice(analog_ctrl_.memory);
   CHECK_DEVICE(err);
-  err = WriteDevice(soft_diff_.memory);
+  err = WriteSoftDiff();
   CHECK_DEVICE(err);
   err = WriteDevice(analog_switch_.memory);
   CHECK_DEVICE(err);

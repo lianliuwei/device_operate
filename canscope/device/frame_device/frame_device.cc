@@ -94,10 +94,12 @@ void FrameDevice::SetAll() {
   CHECK_DEVICE(err);
    err = WriteDevice(wave_storage_.memory);
    CHECK_DEVICE(err);
-   err = WriteDeviceRange(soft_diff_->memory, soft_diff_->FilDivOffset(), soft_diff_->FilDivSize());
+   err = WriteDeviceRange(soft_diff_->memory, 
+      SoftDiffRegister::kFilDivOffset, SoftDiffRegister::kFilDivSize);
    CHECK_DEVICE(err);
    // set sys final after config all.
-   err = WriteDeviceRange(soft_diff_->memory, soft_diff_->SysOffset(), soft_diff_->SysSize());
+   err = WriteDeviceRange(soft_diff_->memory, 
+      SoftDiffRegister::kSysOffset, SoftDiffRegister::kSysSize);
   CHECK_DEVICE(err);
 
 }

@@ -26,22 +26,18 @@ SoftDiffRegister::SoftDiffRegister()
 
 }
 
-int SoftDiffRegister::SysOffset() const {
-  return kSjaBtrOffset;
-}
-
-int SoftDiffRegister::SysSize() const {
-  return 4;
-}
-
-int SoftDiffRegister::FilDivOffset() const {
-  return kFilteringOffset;
-}
-
-int SoftDiffRegister::FilDivSize() const {
-  return 4;
-}
-
+// static 
+const int SoftDiffRegister::kSysOffset = kSjaBtrOffset;
+// static 
+const int SoftDiffRegister::kSysSize = 4;
+// static 
+const int SoftDiffRegister::kFilDivOffset = kFilteringOffset;
+// static 
+const int SoftDiffRegister::kFilDivSize = 4;
+// static 
+const int SoftDiffRegister::kChnlOffset = kChSensCanhOffset;
+// static
+const int SoftDiffRegister::kChnlSize = 0x14;
 
 
 } // namespace canscope

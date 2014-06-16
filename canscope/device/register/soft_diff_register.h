@@ -27,12 +27,16 @@ public:
   ~SoftDiffRegister() {}
 
   // sys range
-  int SysOffset() const;
-  int SysSize() const;
-  
+  static const int kSysOffset;
+  static const int kSysSize;
+
   // fil_div range
-  int FilDivOffset() const;
-  int FilDivSize() const;
+  static const int kFilDivOffset;
+  static const int kFilDivSize;
+
+  // chnl range
+  static const int kChnlOffset;
+  static const int kChnlSize;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(SoftDiffRegister);

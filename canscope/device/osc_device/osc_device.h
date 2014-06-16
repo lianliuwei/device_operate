@@ -82,8 +82,10 @@ private:
 
   void TriggerVolt(uint8* cmp_high, uint8* cmp_low);
 
+  device::Error WriteDeviceRange(::device::RegisterMemory& memory, int start_offset, int size);
   device::Error WriteDevice(::device::RegisterMemory& memory);
   device::Error ReadDevice(::device::RegisterMemory& memory);
+  device::Error WriteSoftDiff();
 
   AnalogCtrlRegister analog_ctrl_;
   SoftDiffRegister soft_diff_;
