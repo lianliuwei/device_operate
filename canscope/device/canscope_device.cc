@@ -67,15 +67,16 @@ CANScopeDevice::CANScopeDevice(
 }
 
 void CANScopeDevice::Init(base::Value* value) {
+  scoped_ptr<Value> config_value(value);
   // osc device
-  DictionaryValue* osc_device_value = GetSubDict(value, kOscDevice);
+  DictionaryValue* osc_device_value = TakeSubDict(value, kOscDevice);
   DCHECK(osc_device_value);
   osc_device_config_.Update(osc_device_value);
   osc_device_.InitFromConfig();
   osc_device_.Init();
 
   // frame device
-  DictionaryValue* frame_device_value = GetSubDict(value, kFrameDevice);
+  DictionaryValue* frame_device_value = TakeSubDict(value, kFrameDevice);
   DCHECK(frame_device_value);
   frame_device_config_.Update(frame_device_value);
   frame_device_.InitFromConfig();
@@ -83,14 +84,15 @@ void CANScopeDevice::Init(base::Value* value) {
 }
 
 void CANScopeDevice::LoadConfig(base::Value* value) {
+  scoped_ptr<Value> config_value(value);
   // osc device
-  DictionaryValue* osc_device_value = GetSubDict(value, kOscDevice);
+  DictionaryValue* osc_device_value = TakeSubDict(value, kOscDevice);
   DCHECK(osc_device_value);
   osc_device_config_.Update(osc_device_value);
   osc_device_.LoadFromConfig();
 
   // frame device
-  DictionaryValue* frame_device_value = GetSubDict(value, kFrameDevice);
+  DictionaryValue* frame_device_value = TakeSubDict(value, kFrameDevice);
   DCHECK(frame_device_value);
   frame_device_config_.Update(frame_device_value);
   frame_device_.InitFromConfig();

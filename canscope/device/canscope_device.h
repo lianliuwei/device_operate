@@ -32,14 +32,12 @@ public:
 
   // take ownership of value
   void Init(base::Value* value);
-
   // take ownership of value
   void LoadConfig(base::Value* value);
-
-  void SetAll();
-
   // pass out ownership value
   base::DictionaryValue* SaveConfig();
+
+  void SetAll();
 
   CANScopeDeviceRunner* runner() { return &runner_; }
 

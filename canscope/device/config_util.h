@@ -10,6 +10,7 @@ extern const char kDefaultCANScopeConfig[];
 
 base::DictionaryValue* GetConfig(const char* config);
 base::DictionaryValue* GetSubDict(base::Value* value, std::string key);
+base::DictionaryValue* TakeSubDict(base::Value* value, std::string key);
 
 base::DictionaryValue* GetDefaultConfig();
 base::DictionaryValue* GetDefaultOscDeviceConfig();

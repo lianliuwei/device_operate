@@ -79,12 +79,36 @@ base::DictionaryValue* GetSubDict(base::Value* value, std::string key) {
   return sub_dict;
 }
 
+base::DictionaryValue* TakeSubDict(base::Value* value, std::string key) {
+  if (!value) {
+    return NULL;
+  }
+  if (!value->IsType(Value::TYPE_DICTIONARY)) {
+    return NULL;
+  }
+  DictionaryValue* dict_value;
+  value->GetAsDictionary(&dict_value);
+
+  DictionaryValue* sub_dict;
+  bool ret = dict_value->GetDictionary(key, &sub_dict);
+  if (!ret) {
+    return NULL;
+  }
+  Value* temp;
+  dict_value->Remove(key, &temp);
+  // NOTE need this, or JSON optimize DictionaryValue will delete old dict_value
+  temp->GetAsDictionary(&sub_dict);
+  return sub_dict;
+}
+
 base::DictionaryValue* GetDefaultOscDeviceConfig() {
-  return GetSubDict(GetConfig(kDefaultCANScopeConfig), kOscDevice);
+  scoped_ptr<Value> config_value(GetConfig(kDefaultCANScopeConfig));
+  return TakeSubDict(config_value.get(), kOscDevice);
 }
 
 base::DictionaryValue* GetDefaultFrameDeviceConfig() {
-  return GetSubDict(GetConfig(kDefaultCANScopeConfig), kFrameDevice);
+  scoped_ptr<Value> config_value(GetConfig(kDefaultCANScopeConfig));
+  return TakeSubDict(config_value.get(), kFrameDevice);
 }
 
 base::DictionaryValue* GetDefaultConfig() {
