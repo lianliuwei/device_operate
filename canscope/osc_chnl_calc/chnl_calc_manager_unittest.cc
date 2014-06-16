@@ -177,7 +177,8 @@ TEST_F(ChnlCalcManagerTest, ProcessOne) {
 
   EXPECT_CALL(mock, CalcFinish()).Times(1).WillOnce(Invoke(&ActionQuitUI));
   EXPECT_CALL(mock, NotifyUI()).Times(1);
-  ConfigManager::Config config = { 1,  GetConfig(kOscConfig) };
+  scoped_ptr<base::Value> config_value(GetConfig(kOscConfig));
+  ConfigManager::Config config = { 1,  config_value.get() };
   OscRawDataHandle osc_raw_data = new OscRawData(DT_CS1202, 
       new OscRawDataDeviceConfig(config, false));
   chnl_calc_manager.RawDataCollected(osc_raw_data);
