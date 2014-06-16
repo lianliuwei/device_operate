@@ -128,7 +128,6 @@ private:
     if (manager_.get() == NULL) {
       return;
     }
-    manager_->Init(GetConfig(kCANScopeConfig));
   }
 
   virtual void Observe(int type,
